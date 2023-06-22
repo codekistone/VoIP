@@ -2,3 +2,6 @@
 Server
 Client
 **/.DS_Store
+/x64
+/.vs
+/.vscode
