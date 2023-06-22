@@ -5,9 +5,11 @@
 #include <vector>
 #include <thread>
 #include <string>
+#include <map>
 
 #define PACKET_SIZE 1024
-const int MAX_CLIENTS = 5;  // 최대 클라이언트 수
+const int MAX_CLIENTS = 10;  // 최대 클라이언트 수
+std::map<std::string, int> clientMap;
 
 void GetClientName(int clientSocket, char* displayName)
 {
@@ -25,6 +27,8 @@ void GetClientName(int clientSocket, char* displayName)
     strcat(displayName, ":");
     strcat(displayName, portStr.c_str());
     strcat(displayName, ")");
+
+    clientMap.insert({displayName, clientSocket});
 }
 
 void HandleClient(int clientSocket) {
@@ -53,15 +57,24 @@ void HandleClient(int clientSocket) {
 
         std::cout << "Received message from client" << displayName << ": " <<buffer << std::endl;
 
-        const char *response = "this is server.";
-
         // 클라이언트에게 응답 전송
-        if(send(clientSocket, response, strlen(response), 0) == -1) {
-            std::cerr << "Failed to send response" << displayName << std::endl;
-            break;
+        char* sendBuffer = new char[PACKET_SIZE];
+        strcpy(sendBuffer, displayName);
+        strcat(sendBuffer, ": ");
+        strcat(sendBuffer, buffer);
+        for (auto& iter : clientMap) {
+            send(iter.second, sendBuffer, PACKET_SIZE, 0);
         }
+
+        // const char *response = "this is server.";
+        // if(send(clientSocket, response, strlen(response), 0) == -1) {
+        // if(send(clientSocket, buffer, PACKET_SIZE, 0) == -1) {
+        //     std::cerr << "Failed to send response" << displayName << std::endl;
+        //     break;
+        // }
     }
 
+    clientMap.erase(displayName);
     close(clientSocket);
 }
 
@@ -92,7 +105,6 @@ int main() {
     }
 
     std::cout << "Waiting for client..." << std::endl;
-
     std::vector<std::thread> clientThread;
     while (true) {
         sockaddr_in clientAddress{};
@@ -104,7 +116,6 @@ int main() {
         }
 
         // 클라이언트와의 통신을 별도 스레드로 처리
-
         std::thread clientThread(HandleClient, clientSocket);
         clientThread.detach();
     }

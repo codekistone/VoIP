@@ -2,8 +2,31 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <thread>
 
 #define PACKET_SIZE 1024
+
+void proc_recv(int clientSocket) {
+
+    // 서버의 통신 로직을 구현합니다.
+    // 예: 메세지 송수신, 데이터 처리 등
+    char buffer[PACKET_SIZE];
+    while(true) {
+        memset(buffer, 0, sizeof(buffer));
+        ssize_t byteRead = recv(clientSocket, buffer, PACKET_SIZE, 0);
+        if (byteRead == -1) {
+            std::cerr << "Failed to receive response." << std::endl;
+            break;
+        }
+        if (byteRead == 0) {
+            std::cout << "Disconnected to server." << std::endl;
+            // break;
+            exit(0);
+        }
+
+        std::cout << "Received message from server: " << buffer << std::endl;
+    }
+}
 
 int main() {
     // 서버 정보
@@ -44,9 +67,11 @@ int main() {
     // 연결이 성공적으로 수행됨
     std::cout << "Connected to server!" << std::endl;
 
+    std::thread recvThread(proc_recv, clientSocket);
+
     // 서버의 통신 로직을 구현합니다.
     // 예: 메세지 송수신, 데이터 처리 등
-    char buffer[PACKET_SIZE];
+    // char buffer[PACKET_SIZE];
     while (true)
     {
         std::cout << "Enter message: ";
@@ -64,19 +89,20 @@ int main() {
             break;
         }
 
-        memset(buffer, 0, sizeof(buffer));
-        ssize_t byteRead = recv(clientSocket, buffer, PACKET_SIZE, 0);
-        if (byteRead == -1) {
-            std::cerr << "Failed to receive response." << std::endl;
-            break;
-        }
-        if (byteRead == 0) {
-            std::cout << "Disconnected to server." << std::endl;
-            break;
-        }
+        // memset(buffer, 0, sizeof(buffer));
+        // ssize_t byteRead = recv(clientSocket, buffer, PACKET_SIZE, 0);
+        // if (byteRead == -1) {
+        //     std::cerr << "Failed to receive response." << std::endl;
+        //     break;
+        // }
+        // if (byteRead == 0) {
+        //     std::cout << "Disconnected to server." << std::endl;
+        //     break;
+        // }
 
-        std::cout << "Received message from server: " << buffer << std::endl;
+        // std::cout << "Received message from server: " << buffer << std::endl;
     }
+    recvThread.join();
 
     // 연결 종료
     close(clientSocket);
