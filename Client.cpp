@@ -7,8 +7,15 @@
 
 int main() {
     // 서버 정보
-    std::string serverIP = "127.0.0.1";
-    int serverPort = 12345;
+    char serverIP[100];
+    int serverPort;
+    // std::string serverIP = "127.0.0.1";
+    // int serverPort = 12345;
+    std::cout << "Input serverIP: ";
+    std::cin >> serverIP;
+    std::cout << "input serverPort: ";
+    std::cin >> serverPort;
+    std::cin.ignore();
 
     // 소켓 생성
     int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -21,7 +28,7 @@ int main() {
     sockaddr_in serverAddress{};
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(serverPort);
-    if (inet_pton(AF_INET, serverIP.c_str(), &(serverAddress.sin_addr)) <= 0) {
+    if (inet_pton(AF_INET, serverIP, &(serverAddress.sin_addr)) <= 0) {
         std::cerr << "Invalid serverIP address." << std::endl;
         close(clientSocket);
         return 1;
