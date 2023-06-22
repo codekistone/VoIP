@@ -2,11 +2,31 @@
 #include <string>
 #include <winsock2.h>
 #include <WS2tcpip.h>
+#include <thread>
 using namespace std;
 
 #define PACKET_SIZE 1024
 
-void openSocket(char IP[], int PORT) { //IPÁÖ¼Ò,Æ÷Æ®¹øÈ£ Àü´Þ!
+void proc_recv(int clientSocket) {
+    char buf[PACKET_SIZE];
+    while(true) {
+        memset(buf, 0, sizeof(buf));
+        SSIZE_T byteRead = recv(clientSocket, buf, PACKET_SIZE, 0);
+        if (byteRead == -1) {
+            std::cerr << "Failed to receive response." << std::endl;
+            break;
+        }
+        if (byteRead == 0) {
+            std::cout << "Disconnected to server." << std::endl;
+            // break;
+            exit(0);
+        }
+
+        std::cout << "Received message from server: " << buf << std::endl;
+    }
+}
+
+void openSocket(char IP[], int PORT) { //IPï¿½Ö¼ï¿½,ï¿½ï¿½Æ®ï¿½ï¿½È£ ï¿½ï¿½ï¿½ï¿½!
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa)) {
 		cout << "WSA error";
@@ -25,14 +45,17 @@ void openSocket(char IP[], int PORT) { //IPÁÖ¼Ò,Æ÷Æ®¹øÈ£ Àü´Þ!
 
 	SOCKADDR_IN addr = {};
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(PORT); //Æ÷Æ®¹øÈ£
-	//addr.sin_addr.s_addr = inet_addr(IP); // IPÁÖ¼Ò
+	addr.sin_port = htons(PORT); //ï¿½ï¿½Æ®ï¿½ï¿½È£
+	//addr.sin_addr.s_addr = inet_addr(IP); // IPï¿½Ö¼ï¿½
 	inet_pton(AF_INET, IP, &(addr.sin_addr.s_addr));
 
 	while (connect(skt, (SOCKADDR*)&addr, sizeof(addr)));
 
 	cout << "Connected to server!" << endl;
-	char buf[PACKET_SIZE];
+	
+	thread recvThread(proc_recv, skt);
+
+	// char buf[PACKET_SIZE];
 
 	while (!WSAGetLastError()) {
 		cout << "Enter message: ";
@@ -48,33 +71,35 @@ void openSocket(char IP[], int PORT) { //IPÁÖ¼Ò,Æ÷Æ®¹øÈ£ Àü´Þ!
 			break;
 		}
 
-		memset(buf, 0, sizeof(buf));
-		SSIZE_T byteRead = recv(skt, buf, PACKET_SIZE, 0);
-		if (byteRead == -1) {
-			std::cerr << "Failed to receive response." << std::endl;
-			break;
-		}
-		if (byteRead == 0) {
-			std::cout << "Disconnected to server." << std::endl;
-			break;
-		}
+		//memset(buf, 0, sizeof(buf));
+		//SSIZE_T byteRead = recv(skt, buf, PACKET_SIZE, 0);
+		//if (byteRead == -1) {
+		//	std::cerr << "Failed to receive response." << std::endl;
+		//	break;
+		//}
+		//if (byteRead == 0) {
+		//	std::cout << "Disconnected to server." << std::endl;
+		//	break;
+		//}
 
-		std::cout << "Received message from server: " << buf << std::endl;
+		//std::cout << "Received message from server: " << buf << std::endl;
 	}
+	recvThread.join();
 
 	closesocket(skt);
 	WSACleanup();
 }
 
 int main() {
+	SetConsoleOutputCP(CP_UTF8);
 	char IP[100];
 	int PORT;
-	cout << "¾ÆÀÌÇÇÁÖ¼Ò ¼³Á¤ >> ";
-	cin >> IP; // ¾ÆÀÌÇÇ ÁÖ¼Ò
-	cout << "Æ÷Æ® ¼³Á¤ >> ";
-	cin >> PORT; // Æ÷Æ® ¹øÈ£
+	cout << "Input serverIP: ";
+	cin >> IP; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½
+	cout << "input serverPort: ";
+	cin >> PORT; // ï¿½ï¿½Æ® ï¿½ï¿½È£
 	cin.ignore();
 
-	openSocket(IP, PORT); //¼ÒÄÏ ¿ÀÇÂ!
+	openSocket(IP, PORT); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½!
 	return 0;
 }
