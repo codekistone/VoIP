@@ -4,14 +4,37 @@
 #include <unistd.h>
 #include <vector>
 #include <thread>
+#include <string>
 
 #define PACKET_SIZE 1024
 const int MAX_CLIENTS = 5;  // 최대 클라이언트 수
 
+void GetClientName(int clientSocket, char* displayName)
+{
+    struct sockaddr_in clientAddress;
+    socklen_t clientAddressLength = sizeof(clientAddress);
+    getpeername(clientSocket, (struct sockaddr *)&clientAddress, &clientAddressLength);
+
+    char clientIP[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(clientAddress.sin_addr), clientIP, INET_ADDRSTRLEN);
+    int clientPort = ntohs(clientAddress.sin_port);
+    std::string portStr = std::to_string(clientPort);
+
+    strcpy(displayName, "(");
+    strcat(displayName, clientIP);
+    strcat(displayName, ":");
+    strcat(displayName, portStr.c_str());
+    strcat(displayName, ")");
+}
+
 void HandleClient(int clientSocket) {
     // 클라이언트와의 통신 처리
     // 예: 메시지 송수신, 데이터 처리 등
-    std::cout << "Connected to client!" << std::endl;
+   
+    char *displayName = new char[30];
+    GetClientName(clientSocket, displayName);
+
+    std::cout << "Connected to client! " << displayName << std::endl;
 
     char buffer[PACKET_SIZE];
     while(true) {
@@ -20,21 +43,21 @@ void HandleClient(int clientSocket) {
         // 클라이언트로부터 메세지 수신
         ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesRead == -1) {
-            std::cerr << "Failed to receive message" << std::endl;
+            std::cerr << "Failed to receive message" << displayName <<std::endl;
             break;
         }
         if (bytesRead == 0) {
-            std::cout << "disconnected to client." << std::endl;
+            std::cout << "disconnected to client." << displayName << std::endl;
             break;
         }
 
-        std::cout << "Received message from client: " << buffer << std::endl;
+        std::cout << "Received message from client" << displayName << ": " <<buffer << std::endl;
 
-        const char *response = "From Server: Received message.";
+        const char *response = "this is server.";
 
         // 클라이언트에게 응답 전송
         if(send(clientSocket, response, strlen(response), 0) == -1) {
-            std::cerr << "Failed to send response" << std::endl;
+            std::cerr << "Failed to send response" << displayName << std::endl;
             break;
         }
     }
@@ -81,6 +104,7 @@ int main() {
         }
 
         // 클라이언트와의 통신을 별도 스레드로 처리
+
         std::thread clientThread(HandleClient, clientSocket);
         clientThread.detach();
     }

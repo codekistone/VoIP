@@ -42,12 +42,18 @@ int main() {
     char buffer[PACKET_SIZE];
     while (true)
     {
-        // std::cout << "Enter message";
-        std::string message = "this is client";
-        // std::getline(std::cin, message);
+        std::cout << "Enter message: ";
+        std::string message;
+        std::getline(std::cin, message);
 
-        if (send(clientSocket, message.c_str(), message.length(), 0) == -1) {
+        if (send(clientSocket, message.c_str(), message.length(), 0) == -1)
+        {
             std::cerr << "Fail to send message" << std::endl;
+            break;
+        }
+
+        if (message.empty()) {
+            std::cout << "Terminate connection" << std::endl;
             break;
         }
 
