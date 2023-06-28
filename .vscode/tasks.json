@@ -13,7 +13,11 @@
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}",
 				"-std=c++17",
-				"-stdlib=libc++"
+				"-stdlib=libc++",
+				"-I/opt/homebrew/Cellar/openssl@3/3.1.1_1/include",
+				"-L/opt/homebrew/Cellar/openssl@3/3.1.1_1/lib",
+				"-lssl",
+				"-lcrypto"
 			],
 			"options": {
 				"cwd": "${fileDirname}"
