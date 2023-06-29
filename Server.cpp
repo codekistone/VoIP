@@ -31,7 +31,7 @@ const int MAX_CLIENTS = 10;  // 최대 클라이언트 수
 #ifdef USE_SSL
     std::map<std::string, SSL*> clientMap;
 
-    void GetClientName(SSL* ssl, int clientSocket, char* displayName)
+    std::string GetClientName(SSL* ssl, int clientSocket)
     {
         struct sockaddr_in clientAddress;
         socklen_t clientAddressLength = sizeof(clientAddress);
@@ -40,20 +40,18 @@ const int MAX_CLIENTS = 10;  // 최대 클라이언트 수
         char clientIP[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &(clientAddress.sin_addr), clientIP, INET_ADDRSTRLEN);
         int clientPort = ntohs(clientAddress.sin_port);
+        
+        std::string ip(clientIP);
         std::string portStr = std::to_string(clientPort);
-
-        strcpy(displayName, "(");
-        strcat(displayName, clientIP);
-        strcat(displayName, ":");
-        strcat(displayName, portStr.c_str());
-        strcat(displayName, ")");
+        std::string displayName = "(" + ip + ":" + portStr + ")";
 
         clientMap.insert({displayName, ssl});
+        return displayName;
     }
 #else
     std::map<std::string, int> clientMap;
 
-    void GetClientName(int clientSocket, char* displayName)
+    std::string GetClientName(int clientSocket)
     {
         struct sockaddr_in clientAddress;
         socklen_t clientAddressLength = sizeof(clientAddress);
@@ -62,15 +60,13 @@ const int MAX_CLIENTS = 10;  // 최대 클라이언트 수
         char clientIP[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &(clientAddress.sin_addr), clientIP, INET_ADDRSTRLEN);
         int clientPort = ntohs(clientAddress.sin_port);
+        
+        std::string ip(clientIP);
         std::string portStr = std::to_string(clientPort);
-
-        strcpy(displayName, "(");
-        strcat(displayName, clientIP);
-        strcat(displayName, ":");
-        strcat(displayName, portStr.c_str());
-        strcat(displayName, ")");
+        std::string displayName = "(" + ip + ":" + portStr + ")";
 
         clientMap.insert({displayName, clientSocket});
+        return displayName;
     }
 #endif
 
@@ -89,13 +85,11 @@ void HandleClient(int clientSocket, SSL_CTX* sslContext) {
             return;
         }
     #endif
-   
-    char *displayName = new char[30];
 
     #ifdef USE_SSL
-        GetClientName(ssl, clientSocket, displayName);
+        std::string displayName = GetClientName(ssl, clientSocket);
     #else
-        GetClientName(clientSocket, displayName);
+        std::string displayName = GetClientName(clientSocket);
     #endif
 
     std::cout << "Connected to client! " << displayName << std::endl;
@@ -120,22 +114,13 @@ void HandleClient(int clientSocket, SSL_CTX* sslContext) {
             break;
         }
 
-        std::cout << "Received message from client" << displayName << ": " <<buffer << std::endl;
+        std::cout << "Received message from client" << displayName << ": " << buffer << std::endl;
 
         // 클라이언트에게 응답 전송
-        char* sendBuffer = new char[PACKET_SIZE];
-        strcpy(sendBuffer, displayName);
+        char sendBuffer[PACKET_SIZE];
+        strcpy(sendBuffer, (displayName + ": ").c_str());
         strcat(sendBuffer, ": ");
         strcat(sendBuffer, buffer);
-        // #ifdef USE_SSL
-        //     for (auto& iter : clientMap) {
-        //         SSL_write(iter.second, sendBuffer, PACKET_SIZE);
-        //     }
-        // #else
-        //     for (auto& iter : clientMap) { 
-        //         send(iter.second, sendBuffer, PACKET_SIZE, 0);
-        //     }
-        // #endif
     }
 
     clientMap.erase(displayName);
@@ -153,7 +138,7 @@ void HandleClient(int clientSocket, SSL_CTX* sslContext) {
 }
 
 int main() {
-    int serverPort = 443;
+    int serverPort = 5555;
 
     #ifdef USE_SSL
         // OpenSSL 초기화
@@ -163,7 +148,7 @@ int main() {
 
     #ifdef USE_SSL
         // 인증서 및 개인 키 로드
-        if (SSL_CTX_use_certificate_file(sslContext, "./key/cert.crt", SSL_FILETYPE_PEM) != 1) {
+        if (SSL_CTX_use_certificate_file(sslContext, "./key/certificate.crt", SSL_FILETYPE_PEM) != 1) {
             std::cerr << "Failed to load certificate file" << std::endl;
             return 1;
         }
