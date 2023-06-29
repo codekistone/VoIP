@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <winsock2.h>
 #include <WS2tcpip.h>
@@ -8,22 +8,22 @@ using namespace std;
 #define PACKET_SIZE 1024
 
 void proc_recv(int clientSocket) {
-    char buf[PACKET_SIZE];
-    while(true) {
-        memset(buf, 0, sizeof(buf));
-        SSIZE_T byteRead = recv(clientSocket, buf, PACKET_SIZE, 0);
-        if (byteRead == -1) {
-            std::cerr << "Failed to receive response." << std::endl;
-            break;
-        }
-        if (byteRead == 0) {
-            std::cout << "Disconnected to server." << std::endl;
-            // break;
-            exit(0);
-        }
+	char buf[PACKET_SIZE];
+	while (true) {
+		memset(buf, 0, sizeof(buf));
+		SSIZE_T byteRead = recv(clientSocket, buf, PACKET_SIZE, 0);
+		if (byteRead == -1) {
+			std::cerr << "Failed to receive response." << std::endl;
+			break;
+		}
+		if (byteRead == 0) {
+			std::cout << "Disconnected to server." << std::endl;
+			// break;
+			exit(0);
+		}
 
-        std::cout << "Received message from server: " << buf << std::endl;
-    }
+		std::cout << "Received message from server: " << buf << std::endl;
+	}
 }
 
 void openSocket(char IP[], int PORT) { //IP�ּ�,��Ʈ��ȣ ����!
@@ -52,7 +52,7 @@ void openSocket(char IP[], int PORT) { //IP�ּ�,��Ʈ��ȣ ����
 	while (connect(skt, (SOCKADDR*)&addr, sizeof(addr)));
 
 	cout << "Connected to server!" << endl;
-	
+
 	thread recvThread(proc_recv, skt);
 
 	// char buf[PACKET_SIZE];

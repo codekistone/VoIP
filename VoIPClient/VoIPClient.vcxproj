@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{32c8ff50-a33e-48ef-bd37-186cf2662ce3}</ProjectGuid>
-    <RootNamespace>VoIP</RootNamespace>
+    <ProjectGuid>{f1914def-1625-49fc-a4e4-26e757ce9b2b}</ProjectGuid>
+    <RootNamespace>VoIPClient</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -129,7 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="WinClient.cpp" />
+    <ClCompile Include="VoIPClient.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
