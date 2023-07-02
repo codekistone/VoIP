@@ -66,15 +66,31 @@ void SessionManager::proc_recv() {
 		
 		// listener test
 		std::string msg(buf);
-		if (msg.find("Login") != std::string::npos) {
+		if (msg.find("onLoginSuccess") != std::string::npos) {
 			accountListener->onLoginSuccess();
 			continue;
 		}
-		if (msg.find("startOutgoingCall") != std::string::npos) {
+		if (msg.find("onIncomingCall") != std::string::npos) {
+			callsListener->onIncomingCall("CONTACT_01");
+			continue;
+		}
+		if (msg.find("onSuccessfulOutgoingCall") != std::string::npos) {
 			callsListener->onSuccessfulOutgoingCall();
 			continue;
 		}
-		if (msg.find("disconnectCall") != std::string::npos) {
+		if (msg.find("onSuccessfulIncomingCall") != std::string::npos) {
+			callsListener->onSuccessfulIncomingCall();
+			continue;
+		}
+		if (msg.find("onFailedOutgoingCall") != std::string::npos) {
+			callsListener->onFailedOutgoingCall();
+			continue;
+		}
+		if (msg.find("onRejectedIncomingCall") != std::string::npos) {
+			callsListener->onRejectedIncomingCall();
+			continue;
+		}
+		if (msg.find("onDisconnected") != std::string::npos) {
 			callsListener->onDisconnected();
 			continue;
 		}

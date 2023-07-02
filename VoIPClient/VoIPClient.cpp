@@ -34,7 +34,7 @@ int main() {
 
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(300));
-		std::cout << "Enter message: ";
+		//std::cout << "Enter message: ";
 		std::string message;
 		getline(std::cin, message);
 
@@ -42,7 +42,14 @@ int main() {
 			callsManager->startOutgoingCall("CONTACT_01");
 			continue;
 		}
-
+		if (message == "5") {
+			callsManager->answerCall();
+			continue;
+		}
+		if (message == "6") {
+			callsManager->rejectCall();
+			continue;
+		}
 		if (message == "7") {
 			callsManager->disconnectCall();
 			continue;

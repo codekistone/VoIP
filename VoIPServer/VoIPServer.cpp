@@ -12,6 +12,48 @@
 WSADATA wsa;
 const int MAX_CLIENTS = 10;  // 최대 클라이언트 수
 std::map<std::string, int> clientMap;
+int clientNum = 1;
+
+void sendData(char* data, std::string from) {
+    std::string msg(data);
+    for (auto& iter : clientMap) {
+        if (msg.find("Login") != std::string::npos) {
+            if (iter.first == from) {
+                send(iter.second, "onLoginSuccess", strlen("onLoginSuccess"), 0);
+                continue;
+            }
+            continue;
+        }
+        else if (msg.find("startOutgoingCall") != std::string::npos) {
+            if (iter.first == from) {
+                continue;
+            }
+            send(iter.second, "onIncomingCall", strlen("onIncomingCall"), 0);
+            continue;
+        }
+        else if (msg.find("answerCall") != std::string::npos) {
+            if (iter.first == from) {
+                send(iter.second, "onSuccessfulIncomingCall", strlen("onSuccessfulIncomingCall"), 0);
+                continue;
+            }
+            send(iter.second, "onSuccessfulOutgoingCall", strlen("onSuccessfulOutgoingCall"), 0);
+            continue;
+        }
+        else if (msg.find("rejectCall") != std::string::npos) {
+            if (iter.first == from) {
+                send(iter.second, "onRejectedIncomingCall", strlen("onRejectedIncomingCall"), 0);
+                continue;
+            }
+            send(iter.second, "onFailedOutgoingCall", strlen("onFailedOutgoingCall"), 0);
+            continue;
+        }
+        else if (msg.find("disconnectCall") != std::string::npos) {
+            send(iter.second, "onDisconnected", strlen("onDisconnected"), 0);
+            continue;
+        }
+        send(iter.second, data, PACKET_SIZE, 0);
+    }
+}
 
 std::string GetClientName(int clientSocket)
 {
@@ -61,9 +103,7 @@ void HandleClient(int clientSocket) {
         char sendBuffer[PACKET_SIZE];
         strcpy_s(sendBuffer, PACKET_SIZE, (displayName + ": ").c_str());
         strcat_s(sendBuffer, sizeof(sendBuffer), buffer);
-        for (auto& iter : clientMap) {
-            send(iter.second, sendBuffer, PACKET_SIZE, 0);
-        }
+        sendData(sendBuffer, displayName);
     }
 
     clientMap.erase(displayName);

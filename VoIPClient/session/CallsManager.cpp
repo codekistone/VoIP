@@ -35,9 +35,25 @@ void CallsManager::startOutgoingCall(const char* to) {
 	call->setContactId(to);
 	call->setCallState(CallState::STATE_DIALING);
 
-	std::cout << "startOutgoingCall... (" << call->getContactId() << ")" << std::endl;
+	std::cout << "(STATE_DIALING) startOutgoingCall... (" << call->getContactId() << ")" << std::endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
 	sessionControl->sendData("startOutgoingCall");
+}
+
+void CallsManager::answerCall() {
+	if (call->getCallState() != CallState::STATE_RINGING) {
+		return;
+	}
+	std::cout << "answerCall" << std::endl;
+	sessionControl->sendData("answerCall");
+}
+
+void CallsManager::rejectCall() {
+	if (call->getCallState() != CallState::STATE_RINGING) {
+		return;
+	}
+	std::cout << "rejectCall" << std::endl;
+	sessionControl->sendData("rejectCall");
 }
 
 void CallsManager::disconnectCall() {
@@ -47,22 +63,44 @@ void CallsManager::disconnectCall() {
 }
 
 // Implement listener
-void CallsManager::onSuccessfulOutgoingCall() {
-	std::cout << "[Received] -> onSuccessfulOutgoingCall" << std::endl;
+void CallsManager::onIncomingCall(const char* from) {
+	if (call != NULL && call->getCallState() != CallState::STATE_IDLE) {
+		std::cout << "cannot establish NewCall!!" << std::endl;
+		return;
+	}
+	if (call == NULL) {
+		call = new Call(from);
+	}
+	call->setContactId(from);
+	call->setCallState(CallState::STATE_RINGING);
+	std::cout << "[Received] -> (STATE_RINGING) Calling from " << from << " (Answer/Reject)" << std::endl;
 }
 
-void CallsManager::startIncomingCall() {
-	std::cout << "[Received] -> startIncomingCall" << std::endl;
+void CallsManager::onSuccessfulOutgoingCall() {
+	call->setCallState(CallState::STATE_ACTIVE);
+	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulOutgoingCall " << std::endl;
 }
 
 void CallsManager::onSuccessfulIncomingCall() {
-	std::cout << "[Received] -> onSuccessfulIncomingCall" << std::endl;
+	call->setCallState(CallState::STATE_ACTIVE);
+	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulIncomingCall" << std::endl;
+}
+
+void CallsManager::onFailedOutgoingCall() {
+	call->setCallState(CallState::STATE_IDLE);
+	std::cout << "[Received] -> (STATE_IDLE) onFailedOutgoingCall" << std::endl;
+}
+
+void CallsManager::onRejectedIncomingCall() {
+	call->setCallState(CallState::STATE_IDLE);
+	std::cout << "[Received] -> (STATE_IDLE) onRejectedIncomingCall" << std::endl;
 }
 
 void CallsManager::onDisconnected() {
-	std::cout << "[Received] -> onDisconnected" << std::endl;
 	call->setCallState(CallState::STATE_DISCONNECTED);
+	std::cout << "[Received] -> (STATE_DISCONNECTED) onDisconnected" << std::endl;
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(300));
 	call->setCallState(CallState::STATE_IDLE);
+	std::cout << "[Received] -> (STATE_IDLE) Call CLEAR " << std::endl;
 }
