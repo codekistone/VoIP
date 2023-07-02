@@ -15,11 +15,9 @@ std::map<std::string, int> clientMap;
 
 std::string GetClientName(int clientSocket)
 {
-    std::cout << "GetClientName" << std::endl;
     struct sockaddr_in clientAddress;
     socklen_t clientAddressLength = sizeof(clientAddress);
 
-    std::cout << "getpeername" << std::endl;
     getpeername(clientSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
 
     char clientIP[INET_ADDRSTRLEN];
@@ -73,7 +71,7 @@ void HandleClient(int clientSocket) {
 }
 
 int main() {
-    int serverPort = 12345;
+    int serverPort = 5555;
 
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {

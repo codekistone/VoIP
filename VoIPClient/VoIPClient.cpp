@@ -1,105 +1,56 @@
 ﻿#include <iostream>
 #include <string>
-#include <winsock2.h>
-#include <WS2tcpip.h>
 #include <thread>
-using namespace std;
+#include <chrono>
 
-#define PACKET_SIZE 1024
-
-void proc_recv(int clientSocket) {
-	char buf[PACKET_SIZE];
-	while (true) {
-		memset(buf, 0, sizeof(buf));
-		SSIZE_T byteRead = recv(clientSocket, buf, PACKET_SIZE, 0);
-		if (byteRead == -1) {
-			std::cerr << "Failed to receive response." << std::endl;
-			break;
-		}
-		if (byteRead == 0) {
-			std::cout << "Disconnected to server." << std::endl;
-			// break;
-			exit(0);
-		}
-
-		std::cout << "Received message from server: " << buf << std::endl;
-	}
-}
-
-void openSocket(char IP[], int PORT) { //IP�ּ�,��Ʈ��ȣ ����!
-	WSADATA wsa;
-	if (WSAStartup(MAKEWORD(2, 2), &wsa)) {
-		cout << "WSA error";
-		WSACleanup();
-		return;
-	}
-
-	SOCKET skt;
-	skt = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (skt == INVALID_SOCKET) {
-		cout << "socket error";
-		closesocket(skt);
-		WSACleanup();
-		return;
-	}
-
-	SOCKADDR_IN addr = {};
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(PORT); //��Ʈ��ȣ
-	//addr.sin_addr.s_addr = inet_addr(IP); // IP�ּ�
-	inet_pton(AF_INET, IP, &(addr.sin_addr.s_addr));
-
-	while (connect(skt, (SOCKADDR*)&addr, sizeof(addr)));
-
-	cout << "Connected to server!" << endl;
-
-	thread recvThread(proc_recv, skt);
-
-	// char buf[PACKET_SIZE];
-
-	while (!WSAGetLastError()) {
-		cout << "Enter message: ";
-		string message;
-		getline(cin, message);
-
-		if (send(skt, message.c_str(), message.length(), 0) == -1) {
-			std::cerr << "Fail to send message" << std::endl;
-			break;
-		}
-		if (message.empty()) {
-			std::cout << "Terminate connection" << std::endl;
-			break;
-		}
-
-		//memset(buf, 0, sizeof(buf));
-		//SSIZE_T byteRead = recv(skt, buf, PACKET_SIZE, 0);
-		//if (byteRead == -1) {
-		//	std::cerr << "Failed to receive response." << std::endl;
-		//	break;
-		//}
-		//if (byteRead == 0) {
-		//	std::cout << "Disconnected to server." << std::endl;
-		//	break;
-		//}
-
-		//std::cout << "Received message from server: " << buf << std::endl;
-	}
-	recvThread.join();
-
-	closesocket(skt);
-	WSACleanup();
-}
+#include "session/CallsManager.h"
+#include "session/AccountManager.h"
+#include "session/SessionManager.h"
 
 int main() {
-	SetConsoleOutputCP(CP_UTF8);
-	char IP[100];
-	int PORT;
-	cout << "Input serverIP: ";
-	cin >> IP; // ������ �ּ�
-	cout << "input serverPort: ";
-	cin >> PORT; // ��Ʈ ��ȣ
-	cin.ignore();
+	std::string IP, PORT;
+	std::cout << "Input serverIP(127.0.0.1): ";
+	getline(std::cin, IP);
+	std::cout << "input serverPort(5555): ";
+	getline(std::cin, PORT);
+	int port = PORT.length() > 0 ? std::stoi(PORT) : 0;
 
-	openSocket(IP, PORT); //���� ����!
+	SessionManager* sessionManager = SessionManager::getInstance();
+	CallsManager* callsManager = CallsManager::getInstance();
+	AccountManager* accountManager = AccountManager::getInstance();
+	sessionManager->setCallsListener(callsManager);
+	sessionManager->setAccountListener(accountManager);
+
+	callsManager->setSessionControl(sessionManager);
+	accountManager->setSessionControl(sessionManager);
+
+	//sessionManager->init(IP.c_str(), port);
+
+	// TEST CODE
+	std::thread t(&SessionManager::init, sessionManager, IP.c_str(), port);
+
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(300));
+		std::cout << "Enter message: ";
+		std::string message;
+		getline(std::cin, message);
+
+		if (message == "1") {
+			callsManager->startOutgoingCall("CONTACT_01");
+			continue;
+		}
+
+		if (message == "7") {
+			callsManager->disconnectCall();
+			continue;
+		}
+
+		sessionManager->sendData(message.c_str());
+		if (message.empty()) {
+			break;
+		}
+	}
+	t.join();
+
 	return 0;
 }
