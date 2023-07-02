@@ -29,6 +29,9 @@ int main() {
 	// TEST CODE
 	std::thread t(&SessionManager::init, sessionManager, IP.c_str(), port);
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(300)); //TEST
+	accountManager->login();
+
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 		std::cout << "Enter message: ";

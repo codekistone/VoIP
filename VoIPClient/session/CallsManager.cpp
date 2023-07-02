@@ -25,7 +25,7 @@ void CallsManager::setSessionControl(SessionControl* control) {
 
 void CallsManager::startOutgoingCall(const char* to) {
 	if (call != NULL && call->getCallState() != CallState::STATE_IDLE) {
-		std::cout << "cannot establish new call!!" << std::endl;
+		std::cout << "cannot establish NewCall!!" << std::endl;
 		return;
 	}
 

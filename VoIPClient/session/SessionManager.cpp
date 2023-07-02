@@ -66,8 +66,12 @@ void SessionManager::proc_recv() {
 		
 		// listener test
 		std::string msg(buf);
+		if (msg.find("Login") != std::string::npos) {
+			accountListener->onLoginSuccess();
+			continue;
+		}
 		if (msg.find("startOutgoingCall") != std::string::npos) {
-			callsListener->startIncomingCall();
+			callsListener->onSuccessfulOutgoingCall();
 			continue;
 		}
 		if (msg.find("disconnectCall") != std::string::npos) {
