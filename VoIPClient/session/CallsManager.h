@@ -17,16 +17,16 @@ public:
 	static CallsManager* getInstance();
 
 	void setSessionControl(SessionControl* control);
-	void startOutgoingCall(const char* to);
+	void startOutgoingCall(std::string to);
 	void answerCall();
 	void rejectCall();
 	void disconnectCall();
 
 	// Listener
-	void onIncomingCall(const char* from) override;
-	void onSuccessfulOutgoingCall() override;
+	void onIncomingCall(std::string connId, std::string from) override;
+	void onSuccessfulOutgoingCall(std::string connId) override;
 	void onSuccessfulIncomingCall() override;
-	void onFailedOutgoingCall() override;
+	void onFailedOutgoingCall(std::string cause) override;
 	void onRejectedIncomingCall() override;
 	void onDisconnected() override;
 };

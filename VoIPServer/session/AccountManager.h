@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "AccountManagerListener.h"
 #include "SessionControl.h"
 
@@ -15,8 +17,7 @@ public:
 	static AccountManager* getInstance();
 
 	void setSessionControl(SessionControl* control);
-	void login();
 
 	// Listener
-	void onLoginSuccess(std::string contactId) override;
+	void handleLogin(std::string requester) override;
 };

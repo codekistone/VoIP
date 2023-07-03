@@ -1,5 +1,6 @@
 #pragma once
+
 class AccountManagerListener {
 public:
-	virtual void onLoginSuccess() = 0;
+	virtual void onLoginSuccess(std::string contactId) = 0;
 };

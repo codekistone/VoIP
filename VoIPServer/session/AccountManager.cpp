@@ -1,10 +1,9 @@
 #include <iostream>
-#include <thread>
-#include <chrono>
 
 #include "AccountManager.h"
 
 AccountManager* AccountManager::instance = nullptr;
+
 
 AccountManager::AccountManager() {
 	sessionControl = nullptr;
@@ -21,14 +20,7 @@ void AccountManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
 }
 
-void AccountManager::login() {
-	// do login
-	std::cout << "ACCOUNT :: doLogin" << std::endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
-	sessionControl->sendData("Login");
-}
-
 // Implement listener
-void AccountManager::onLoginSuccess(std::string contactId) {
-	std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;
+void AccountManager::handleLogin(std::string requester) {
+	sessionControl->sendData(("onLoginSuccess," + requester).c_str(), requester);
 }

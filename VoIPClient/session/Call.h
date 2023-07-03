@@ -1,15 +1,20 @@
 #pragma once
 
+#include <string>
+
 class Call {
 private:
 	int state;
-	const char* callerContactId;
+	std::string callId;
+	std::string callerContactId;
 	bool isConference;
 
 public:
-	Call(const char* callerContactId);
+	Call();
+	void setCallId(std::string id);
+	std::string getCallId();
 	void setCallState(int state);
 	int getCallState();
-	void setContactId(const char* contactId);
-	const char* getContactId();
+	void setContactId(std::string contactId);
+	std::string getContactId();
 };

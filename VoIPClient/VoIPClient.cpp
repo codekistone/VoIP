@@ -8,6 +8,7 @@
 #include "session/SessionManager.h"
 
 int main() {
+	// TEST CODE
 	std::string IP, PORT;
 	std::cout << "Input serverIP(127.0.0.1): ";
 	getline(std::cin, IP);
@@ -15,20 +16,20 @@ int main() {
 	getline(std::cin, PORT);
 	int port = PORT.length() > 0 ? std::stoi(PORT) : 0;
 
+	// UI Thread
 	SessionManager* sessionManager = SessionManager::getInstance();
-	CallsManager* callsManager = CallsManager::getInstance();
 	AccountManager* accountManager = AccountManager::getInstance();
-	sessionManager->setCallsListener(callsManager);
+	CallsManager* callsManager = CallsManager::getInstance();
 	sessionManager->setAccountListener(accountManager);
+	sessionManager->setCallsListener(callsManager);
 
-	callsManager->setSessionControl(sessionManager);
 	accountManager->setSessionControl(sessionManager);
+	callsManager->setSessionControl(sessionManager);
 
 	//sessionManager->init(IP.c_str(), port);
-
-	// TEST CODE
 	std::thread t(&SessionManager::init, sessionManager, IP.c_str(), port);
 
+	// TEST CODE
 	std::this_thread::sleep_for(std::chrono::milliseconds(300)); //TEST
 	accountManager->login();
 
@@ -39,7 +40,11 @@ int main() {
 		getline(std::cin, message);
 
 		if (message == "1") {
-			callsManager->startOutgoingCall("CONTACT_01");
+			std::cout << "Insert Contact Number: ";
+			int num;
+			std::cin >> num;
+			std::cin.ignore();
+			callsManager->startOutgoingCall(("CONTACT_" + std::to_string(num)).c_str());
 			continue;
 		}
 		if (message == "5") {

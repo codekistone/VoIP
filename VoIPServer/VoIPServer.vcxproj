@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -129,7 +129,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="session\AccountManager.cpp" />
+    <ClCompile Include="session\Connection.cpp" />
+    <ClCompile Include="session\SessionManager.cpp" />
+    <ClCompile Include="session\TelephonyManager.cpp" />
     <ClCompile Include="VoIPServer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="session\AccountManager.h" />
+    <ClInclude Include="session\AccountManagerListener.h" />
+    <ClInclude Include="session\Connection.h" />
+    <ClInclude Include="session\SessionControl.h" />
+    <ClInclude Include="session\SessionManager.h" />
+    <ClInclude Include="session\TelephonyManager.h" />
+    <ClInclude Include="session\TelephonyManagerListener.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

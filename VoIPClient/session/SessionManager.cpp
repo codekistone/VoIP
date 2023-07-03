@@ -1,17 +1,12 @@
-﻿#include "SessionManager.h"
-
-#include <iostream>
-#include <string>
+﻿#include <iostream>
 #include <thread>
+#include <sstream>
 #include <winsock2.h>
 #include <WS2tcpip.h>
 
-#define PACKET_SIZE 1024
+#include "SessionManager.h"
 
 SessionManager* SessionManager::instance = nullptr;
-std::thread sessionThread;
-std::thread recvThread;
-
 SOCKET clientSocket;
 
 SessionManager::SessionManager() {
@@ -44,7 +39,7 @@ void SessionManager::init(const char* ip, int port) {
 	if (port > 0) {
 		serverPort = port; // dynamic port
 	}
-	sessionThread = std::thread(&SessionManager::openSocket, instance);
+	std::thread sessionThread(&SessionManager::openSocket, instance);
 	sessionThread.join();
 }
 
@@ -67,15 +62,20 @@ void SessionManager::proc_recv() {
 		// listener test
 		std::string msg(buf);
 		if (msg.find("onLoginSuccess") != std::string::npos) {
-			accountListener->onLoginSuccess();
+			std::vector<std::string> tokens = split(msg, ',');
+			accountListener->onLoginSuccess(tokens.back());
 			continue;
 		}
 		if (msg.find("onIncomingCall") != std::string::npos) {
-			callsListener->onIncomingCall("CONTACT_01");
+			std::vector<std::string> tokens = split(msg, ',');
+			std::string from = tokens[tokens.size()-2];
+			std::string connId = tokens.back();
+			callsListener->onIncomingCall(connId, from);
 			continue;
 		}
 		if (msg.find("onSuccessfulOutgoingCall") != std::string::npos) {
-			callsListener->onSuccessfulOutgoingCall();
+			std::vector<std::string> tokens = split(msg, ',');
+			callsListener->onSuccessfulOutgoingCall(tokens.back());
 			continue;
 		}
 		if (msg.find("onSuccessfulIncomingCall") != std::string::npos) {
@@ -83,7 +83,8 @@ void SessionManager::proc_recv() {
 			continue;
 		}
 		if (msg.find("onFailedOutgoingCall") != std::string::npos) {
-			callsListener->onFailedOutgoingCall();
+			std::vector<std::string> tokens = split(msg, ',');
+			callsListener->onFailedOutgoingCall(tokens.back());
 			continue;
 		}
 		if (msg.find("onRejectedIncomingCall") != std::string::npos) {
@@ -130,23 +131,6 @@ void SessionManager::openSocket() {
 	std::cout << "Connected to server!" << std::endl;
 
 	std::thread recvThread(&SessionManager::proc_recv, instance);
-
-	/*while (!WSAGetLastError()) {
-		std::cout << "Enter message: ";
-		std::string message;
-		getline(std::cin, message);
-
-		if (message.empty()) {
-			std::cout << "Terminate connection" << std::endl;
-			shutdown(clientSocket, SD_SEND);
-			break;
-		}
-
-		if (sendData(message.c_str()) == -1) {
-			std::cerr << "Fail to send message" << std::endl;
-			break;
-		}
-	}*/
 	recvThread.join();
 
 	closesocket(clientSocket);
@@ -160,4 +144,14 @@ int SessionManager::sendData(const char* data) {
 		return 0;
 	}
 	return send(clientSocket, data, strlen(data), 0);
+}
+
+std::vector<std::string> SessionManager::split(const std::string& str, char delimiter) {
+	std::vector<std::string> tokens;
+	std::istringstream ss(str);
+	std::string token;
+	while (std::getline(ss, token, delimiter)) {
+		tokens.push_back(token);
+	}
+	return tokens;
 }
