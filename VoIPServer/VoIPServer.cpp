@@ -10,11 +10,10 @@
 #pragma comment (lib, "../json/jsoncpp_static.lib")
 
 static void testDatabase() {
-    DatabaseManager* contactDb = ContactDb::getInstance();
-    DatabaseManager* conferenceDb = ConferenceDb::getInstance();
-
     //------------------------------------------------
-    // Add new contact data to databae 
+    DatabaseManager* contactDb = ContactDb::getInstance();    
+    
+    // Add new contact data to database
     Json::Value newContact;
     newContact["cid"] = "bruno.yoo@gmail.com";
     newContact["email"] = "bruno.yoo@gmail.com";
@@ -23,15 +22,27 @@ static void testDatabase() {
     newContact["myContactList"][1]["cid"] = "superman@lge.com";
     contactDb->update("bruno.yoo@gmail.com", newContact);
 
-    //------------------------------------------------
-    // Get data from contacts database
+    // Get data from conference database
     Json::Value bruno = contactDb->get("bruno.yoo@gmail.com");
     for (int i = 0; i < bruno["myContactList"].size(); i++) {
         cout << bruno["myContactList"][i] << endl;
     }
+    //------------------------------------------------
+    DatabaseManager* conferenceDb = ConferenceDb::getInstance();
+
+    // Add new conference data to database
+    Json::Value conference;
+    conference["rid"] = "C_00000111";
+    conference["dateAndTime"] = "1234562737";
+    conference["duration"] = "3600000";
+    conference["participants"][0]["cid"] = "kistone@lge.com";
+    conference["participants"][1]["cid"] = "superman@lge.com";
+    conferenceDb->update("C_00000111", conference);
 }
 
 int main() {
+
+    //testDatabase();
 
     SessionManager* sessionManager = SessionManager::getInstance();
     AccountManager* accountManager = AccountManager::getInstance();

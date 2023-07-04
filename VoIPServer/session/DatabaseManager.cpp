@@ -1,12 +1,22 @@
 #include "DatabaseManager.h"
 #include <iostream>
 
+string dbName;
+string dbItemId;
+static char readBuffer[DB_MAX_BUFFER_SIZE] = { 0, };
+
 DatabaseManager::DatabaseManager(string databaseName)
 {	
 	dbName = databaseName;
 	dbItemId = DB_CONTACT_ITEM_ID;
 	if (dbName == DB_CONFERENCE) {
 		dbItemId = DB_CONFERENCE_ITEM_ID;
+	}
+	if (readFromFile() == false) {
+		// Database file does not exist, create default database file.
+		Json::Value defaultData;
+		defaultData[dbName] = Json::arrayValue;
+		writeToFile(defaultData);		
 	}
 }
 
@@ -28,8 +38,6 @@ void DatabaseManager::printJson(Json::Value jsonData)
 
 Json::Value DatabaseManager::readFromFile()
 {
-	const int BufferLength = DB_MAX_BUFFER_SIZE;
-	char readBuffer[BufferLength] = { 0, };
 	string fileName = dbName + ".db";
 	// Read data from file
 	FILE* fp = nullptr;
@@ -37,7 +45,7 @@ Json::Value DatabaseManager::readFromFile()
 	if (fp == nullptr) {
 		return false;
 	}
-	size_t fileSize = fread(readBuffer, 1, BufferLength, fp);
+	size_t fileSize = fread(readBuffer, 1, DB_MAX_BUFFER_SIZE, fp);
 	fclose(fp);
 	// Parse readbuffer as JSON
 	std::string config_doc = readBuffer;

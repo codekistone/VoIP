@@ -3,7 +3,6 @@
 using namespace std;
 
 #pragma once
-
 #define DB_MAX_BUFFER_SIZE		40960
 #define DB_CONTACT				"contacts"
 #define DB_CONFERENCE			"conferences"
@@ -12,8 +11,6 @@ using namespace std;
 
 class DatabaseManager {
 private:
-	string dbName;
-	string dbItemId;
 	//-----------------------------------------
 	// Internel methods	
 	Json::Value readFromFile();
