@@ -2,10 +2,10 @@
     "msgId":103,
     "payload" : [
         {
-            "id" : "john.mayer@gmail.com",
+            "cid" : "john.mayer@gmail.com",
             "myContactList" : [
-                {"id":"tom.cruise@gmail.com"},      
-                {"id":"jane.poster@gmail.com"}
+                {"cid":"tom.cruise@gmail.com"},      
+                {"cid":"jane.poster@gmail.com"}
             ]
         }    
     ]

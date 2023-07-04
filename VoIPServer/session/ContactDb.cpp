@@ -7,7 +7,7 @@ ContactDb* ContactDb::instance = nullptr;
 ContactDb* ContactDb::getInstance()
 {
 	if (instance == nullptr) {
-		instance = new ContactDb("contacts");
+		instance = new ContactDb(DB_CONTACT);
 	}
 	return instance;
 }

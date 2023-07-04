@@ -4,33 +4,33 @@
         {
             "contacts" : [
                 {
-                    "id":"tom.cruise@gmail.com",
+                    "cid":"tom.cruise@gmail.com",
                     "email":"tom.cruise@gmail.com", 
                     "name": "Tome Cruise", 
                     "ipAddress" : "192.168.100.1", 
                     "myContactList" : [
-                        {"id":"john.mayer@gmail.com"},      
-                        {"id":"jane.poster@gmail.com"}
+                        {"cid":"john.mayer@gmail.com"},      
+                        {"cid":"jane.poster@gmail.com"}
                     ]
                 },     
                 {
-                    "id":"john.mayer@gmail.com",
+                    "cid":"john.mayer@gmail.com",
                     "email":"john.mayer@gmail.com", 
                     "name": "John Mayer", 
                     "ipAddress" : "192.168.100.2", 
                     "myContactList" : [
-                        {"id":"tom.cruise@gmail.com"},      
-                        {"id":"jane.poster@gmail.com"}
+                        {"cid":"tom.cruise@gmail.com"},      
+                        {"cid":"jane.poster@gmail.com"}
                     ]
                 },
                 {
-                    "id":"jane.poster@gmail.com",
+                    "cid":"jane.poster@gmail.com",
                     "email":"jane.poster@gmail.com", 
                     "name": "Jane Poster", 
                     "ipAddress" : "192.168.100.2", 
                     "myContactList" : [
-                        {"id":"tom.cruise@gmail.com"},      
-                        {"id":"john.mayer@gmail.com"}
+                        {"cid":"tom.cruise@gmail.com"},      
+                        {"cid":"john.mayer@gmail.com"}
                     ]
                 }
             ]

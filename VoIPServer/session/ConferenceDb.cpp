@@ -7,7 +7,7 @@ ConferenceDb* ConferenceDb::instance = nullptr;
 ConferenceDb* ConferenceDb::getInstance()
 {
 	if (instance == nullptr) {
-		instance = new ConferenceDb("conferences");
+		instance = new ConferenceDb(DB_CONFERENCE);
 	}
 	return instance;
 }

@@ -4,18 +4,22 @@ using namespace std;
 
 #pragma once
 
-#define DB_ITEM_ID				"id"
 #define DB_MAX_BUFFER_SIZE		40960
+#define DB_CONTACT				"contacts"
+#define DB_CONFERENCE			"conferences"
+#define DB_CONTACT_ITEM_ID		"cid"
+#define DB_CONFERENCE_ITEM_ID	"rid"
 
 class DatabaseManager {
 private:
-	string DB_NAME;
+	string dbName;
+	string dbItemId;
 	//-----------------------------------------
 	// Internel methods	
 	Json::Value readFromFile();
 	bool writeToFile(const Json::Value jsonData);
 public:	
-	DatabaseManager(string dbName); // Constructor	
+	DatabaseManager(string databaseName); // Constructor	
 	//-----------------------------------------
 	// Database operations
 	Json::Value get(string id);

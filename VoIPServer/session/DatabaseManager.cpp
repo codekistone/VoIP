@@ -1,10 +1,13 @@
 #include "DatabaseManager.h"
 #include <iostream>
 
-DatabaseManager::DatabaseManager(string dbName)
+DatabaseManager::DatabaseManager(string databaseName)
 {	
-	DB_NAME = dbName;
-	Json::Value root = readFromFile();
+	dbName = databaseName;
+	dbItemId = DB_CONTACT_ITEM_ID;
+	if (dbName == DB_CONFERENCE) {
+		dbItemId = DB_CONFERENCE_ITEM_ID;
+	}
 }
 
 void DatabaseManager::printDatabase()
@@ -27,7 +30,7 @@ Json::Value DatabaseManager::readFromFile()
 {
 	const int BufferLength = DB_MAX_BUFFER_SIZE;
 	char readBuffer[BufferLength] = { 0, };
-	string fileName = DB_NAME + ".db";
+	string fileName = dbName + ".db";
 	// Read data from file
 	FILE* fp = nullptr;
 	fopen_s(&fp, &*fileName.begin(), "rb");
@@ -49,7 +52,7 @@ Json::Value DatabaseManager::readFromFile()
 
 bool DatabaseManager::writeToFile(const Json::Value jsonData)
 {
-	string fileName = DB_NAME + ".db";
+	string fileName = dbName + ".db";
 	Json::StyledWriter writer;
 	std::string outputConfig = writer.write(jsonData);
 	// Write data to FILE
@@ -67,9 +70,9 @@ Json::Value DatabaseManager::get(string id)
 {
 	try {
 		Json::Value database = readFromFile();
-		Json::Value datas = database[DB_NAME];
+		Json::Value datas = database[dbName];
 		for (int i = 0; i < datas.size(); i++) {
-			if (datas[i][DB_NAME] == id) {
+			if (datas[i][dbItemId] == id) {
 				cout << "get() : " << datas[i] << endl;
 				return datas[i];
 			}
@@ -85,10 +88,10 @@ bool DatabaseManager::remove(string id)
 {
 	try {
 		Json::Value database = readFromFile();
-		Json::Value datas = database[DB_NAME];
+		Json::Value datas = database[dbName];
 		int index = -1;
 		for (int i = 0; i < datas.size(); i++) {
-			if (datas[i][DB_ITEM_ID] == id) {
+			if (datas[i][dbItemId] == id) {
 				index = i;
 				break;
 			}
@@ -99,7 +102,7 @@ bool DatabaseManager::remove(string id)
 		}
 		cout << "remove()/id[" << id << "]/data:" << datas[index] << endl;
 		datas.removeIndex(index, NULL);
-		database[DB_NAME] = datas;
+		database[dbName] = datas;
 		writeToFile(database);
 		return true;
 	}
@@ -113,15 +116,15 @@ bool DatabaseManager::update(string id, Json::Value data)
 {
 	try {
 		Json::Value database = readFromFile();
-		Json::Value datas = database[DB_NAME];
+		Json::Value datas = database[dbName];
 		int searchIdx = -1;
 		for (int i = 0; i < datas.size(); i++) {
-			if (datas[i][DB_ITEM_ID] == id) {
+			if (datas[i][dbItemId] == id) {
 				searchIdx = i;
 				break;
 			}
 		}
-		data[DB_ITEM_ID] = id;
+		data[dbItemId] = id;
 		if (searchIdx == -1) {
 			cout << "update()/New/Id[" << id << "]/data:" << data << endl;
 			datas.append(data);
@@ -130,7 +133,7 @@ bool DatabaseManager::update(string id, Json::Value data)
 			cout << "update()/Update/Id[" << id << "]/data:" << data << endl;
 			datas[searchIdx] = data;
 		}
-		database[DB_NAME] = datas;
+		database[dbName] = datas;
 		writeToFile(database);
 		return true;
 	}
@@ -144,10 +147,10 @@ bool DatabaseManager::update(string id, string key, string value)
 {
 	try {
 		Json::Value database = readFromFile();
-		Json::Value datas = database[DB_NAME];
+		Json::Value datas = database[dbName];
 		int index = -1, subindex = -1;
 		for (int i = 0; i < datas.size(); i++) {
-			if (datas[i][DB_ITEM_ID] == id) {
+			if (datas[i][dbItemId] == id) {
 				index = i;
 				break;
 			}
@@ -163,7 +166,7 @@ bool DatabaseManager::update(string id, string key, string value)
 			cout << "update()/Update/Id[" << id << "]/Key[" << key << "]/Value[" + value << "]" << endl;
 		}
 		datas[index][key] = value;
-		database[DB_NAME] = datas;
+		database[dbName] = datas;
 		writeToFile(database);
 		return true;
 	}
@@ -177,10 +180,10 @@ bool DatabaseManager::updateSub(string id, string key, Json::Value value)
 {
 	try {
 		Json::Value database = readFromFile();
-		Json::Value datas = database[DB_NAME];
+		Json::Value datas = database[dbName];
 		int index = -1, subindex = -1;
 		for (int i = 0; i < datas.size(); i++) {
-			if (datas[i][DB_ITEM_ID] == id) {
+			if (datas[i][dbItemId] == id) {
 				index = i;
 				break;
 			}
@@ -204,7 +207,7 @@ bool DatabaseManager::updateSub(string id, string key, Json::Value value)
 			cout << "updateSub()/Update/Id[" << id << "]/Key[" << key << "]/Value[" << value << "]" << endl;
 			datas[index][key][subIndex] = value;
 		}
-		database[DB_NAME] = datas;
+		database[dbName] = datas;
 		writeToFile(database);
 		return true;
 	}
