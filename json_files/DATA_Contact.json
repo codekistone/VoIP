@@ -1,0 +1,9 @@
+{
+    "id":"john.mayer@gmail.com",
+    "email":"john.mayer@gmail.com", 
+    "name": "John Mayer", 
+    "myContactList" : [
+        {"id":"tom.cruise@gmail.com"},      
+        {"id":"jane.poster@gmail.com"}
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "id":"john.mayer@gmail.com",
+    "email":"john.mayer@gmail.com", 
+    "name": "John Mayer", 
+    "password":"abcde", 
+    "passwordQuestion": 1, 
+    "passwordAnswer" : "work", 
+    "ipAddress" : "192.168.100.2", 
+    "myContactList" : [
+        {"id":"tom.cruise@gmail.com"},      
+        {"id":"jane.poster@gmail.com"}
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "id":"C_00000001",
+    "dateAndTime":"1688454555", 
+    "duration" : "3600000", 
+    "participants" : [
+        {"id":"tom.cruise@gmail.com"},  
+        {"id":"john.mayer@gmail.com"},      
+        {"id":"jane.poster@gmail.com"}
+    ]
+}
