@@ -1,10 +1,10 @@
 #pragma once
 
-#include "AccountManagerListener.h"
+#include "IAccountManager.h"
 #include "SessionControl.h"
 #include "../../json/json.h"
 
-class AccountManager : public AccountManagerListener {
+class AccountManager : public IAccountManager {
 private:
 	static AccountManager* instance;
 
@@ -14,10 +14,11 @@ private:
 
 public:
 	static AccountManager* getInstance();
+	static void releaseInstance();
 
-	void setSessionControl(SessionControl* control);
 	void login();
 
 	// Listener
+	void setSessionControl(SessionControl* control) override;
 	void onLoginSuccess(std::string contactId) override;
 };

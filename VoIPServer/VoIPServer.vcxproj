@@ -140,7 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="session\AccountManager.h" />
-    <ClInclude Include="session\AccountManagerListener.h" />
+    <ClInclude Include="session\IAccountManager.h" />
     <ClInclude Include="session\ConferenceDb.h" />
     <ClInclude Include="session\Connection.h" />
     <ClInclude Include="session\ContactDb.h" />
@@ -148,7 +148,7 @@
     <ClInclude Include="session\SessionControl.h" />
     <ClInclude Include="session\SessionManager.h" />
     <ClInclude Include="session\TelephonyManager.h" />
-    <ClInclude Include="session\TelephonyManagerListener.h" />
+    <ClInclude Include="session\ITelephonyManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

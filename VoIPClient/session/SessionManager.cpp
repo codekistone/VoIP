@@ -5,6 +5,8 @@
 #include <WS2tcpip.h>
 
 #include "SessionManager.h"
+#include "CallsManager.h"
+#include "AccountManager.h"
 
 SessionManager* SessionManager::instance = nullptr;
 SOCKET clientSocket;
@@ -13,8 +15,8 @@ SessionManager::SessionManager() {
 	strcpy_s(serverIP, sizeof(serverIP), "127.0.0.1");
 	serverPort = 5555;
 
-	callsListener = nullptr;
-	accountListener = nullptr;
+	callsManager = CallsManager::getInstance();
+	accountManager = AccountManager::getInstance();
 }
 
 SessionManager* SessionManager::getInstance() {
@@ -24,12 +26,12 @@ SessionManager* SessionManager::getInstance() {
 	return instance;
 }
 
-void SessionManager::setCallsListener(CallsManagerListener* listener) {
-	callsListener = listener;
-}
-
-void SessionManager::setAccountListener(AccountManagerListener* listener) {
-	accountListener = listener;
+void SessionManager::releaseInstance() {
+	if (instance != nullptr) {
+		instance->release();
+		delete instance;
+		instance = nullptr;
+	}
 }
 
 void SessionManager::init(const char* ip, int port) {
@@ -39,8 +41,21 @@ void SessionManager::init(const char* ip, int port) {
 	if (port > 0) {
 		serverPort = port; // dynamic port
 	}
+
+	callsManager->setSessionControl(this);
+	accountManager->setSessionControl(this);
+
 	std::thread sessionThread(&SessionManager::openSocket, instance);
 	sessionThread.join();
+}
+
+void SessionManager::release() {
+	std::cout << "SessionManager release" << std::endl;
+	// TODO thread 정리
+	shutdown(clientSocket, SD_SEND);
+
+	callsManager->setSessionControl(nullptr);
+	accountManager->setSessionControl(nullptr);
 }
 
 // socket Receive function
@@ -63,36 +78,36 @@ void SessionManager::proc_recv() {
 		std::string msg(buf);
 		if (msg.find("onLoginSuccess") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
-			accountListener->onLoginSuccess(tokens.back());
+			accountManager->onLoginSuccess(tokens.back());
 			continue;
 		}
-		if (msg.find("onIncomingCall") != std::string::npos) {
+		else if (msg.find("onIncomingCall") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
 			std::string from = tokens[tokens.size()-2];
 			std::string connId = tokens.back();
-			callsListener->onIncomingCall(connId, from);
+			callsManager->onIncomingCall(connId, from);
 			continue;
 		}
-		if (msg.find("onSuccessfulOutgoingCall") != std::string::npos) {
+		else if (msg.find("onSuccessfulOutgoingCall") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
-			callsListener->onSuccessfulOutgoingCall(tokens.back());
+			callsManager->onSuccessfulOutgoingCall(tokens.back());
 			continue;
 		}
-		if (msg.find("onSuccessfulIncomingCall") != std::string::npos) {
-			callsListener->onSuccessfulIncomingCall();
+		else if (msg.find("onSuccessfulIncomingCall") != std::string::npos) {
+			callsManager->onSuccessfulIncomingCall();
 			continue;
 		}
-		if (msg.find("onFailedOutgoingCall") != std::string::npos) {
+		else if (msg.find("onFailedOutgoingCall") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
-			callsListener->onFailedOutgoingCall(tokens.back());
+			callsManager->onFailedOutgoingCall(tokens.back());
 			continue;
 		}
-		if (msg.find("onRejectedIncomingCall") != std::string::npos) {
-			callsListener->onRejectedIncomingCall();
+		else if (msg.find("onRejectedIncomingCall") != std::string::npos) {
+			callsManager->onRejectedIncomingCall();
 			continue;
 		}
-		if (msg.find("onDisconnected") != std::string::npos) {
-			callsListener->onDisconnected();
+		else if (msg.find("onDisconnected") != std::string::npos) {
+			callsManager->onDisconnected();
 			continue;
 		}
 

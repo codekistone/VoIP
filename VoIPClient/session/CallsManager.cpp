@@ -19,11 +19,20 @@ CallsManager* CallsManager::getInstance() {
 	return instance;
 }
 
-void CallsManager::setSessionControl(SessionControl* control) {
-	sessionControl = control;
+void CallsManager::releaseInstance() {
+	if (instance != nullptr) {
+		instance->setSessionControl(nullptr);
+		delete instance;
+		instance = nullptr;
+		std::cout << "CallsManager::releaseInstance" << std::endl;
+	}
 }
 
 void CallsManager::startOutgoingCall(std::string to) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	if (call != NULL && call->getCallState() != CallState::STATE_IDLE) {
 		std::cout << "cannot establish NewCall!!" << std::endl;
 		return;
@@ -42,6 +51,10 @@ void CallsManager::startOutgoingCall(std::string to) {
 }
 
 void CallsManager::answerCall() {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	if (call->getCallState() != CallState::STATE_RINGING) {
 		return;
 	}
@@ -50,6 +63,10 @@ void CallsManager::answerCall() {
 }
 
 void CallsManager::rejectCall() {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	if (call->getCallState() != CallState::STATE_RINGING) {
 		return;
 	}
@@ -58,13 +75,25 @@ void CallsManager::rejectCall() {
 }
 
 void CallsManager::disconnectCall() {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	std::cout << "disconnectCall... (" << call->getContactId() << ")" << std::endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
 	sessionControl->sendData(("disconnectCall," + call->getCallId()).c_str());
 }
 
-// Implement listener
+// Implement interface
+void CallsManager::setSessionControl(SessionControl* control) {
+	sessionControl = control;
+}
+
 void CallsManager::onIncomingCall(std::string connId, std::string from) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	if (call != NULL && call->getCallState() != CallState::STATE_IDLE) {
 		sessionControl->sendData(("rejectCall,busy," + connId).c_str());
 		return;

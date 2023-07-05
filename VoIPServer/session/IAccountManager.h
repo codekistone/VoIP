@@ -1,9 +1,11 @@
 #pragma once
 
+#include "SessionControl.h"
 #include "../../json/json.h"
 
-class AccountManagerListener {
+class IAccountManager {
 public:
+	virtual void setSessionControl(SessionControl* control) = 0;
 	virtual void handleLogin_(std::string requester) = 0;
 
     // JSON based callback methods

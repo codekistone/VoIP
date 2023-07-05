@@ -4,7 +4,6 @@
 
 AccountManager* AccountManager::instance = nullptr;
 
-
 AccountManager::AccountManager() {
 	sessionControl = nullptr;
 	contactDb = ContactDb::getInstance();
@@ -17,42 +16,51 @@ AccountManager* AccountManager::getInstance() {
 	return instance;
 }
 
+void AccountManager::releaseInstance() {
+	if (instance != nullptr) {
+		instance->setSessionControl(nullptr);
+		delete instance;
+		instance = nullptr;
+		std::cout << "AccountManager::releaseInstance" << std::endl;
+	}
+}
+
+// Implement listener
 void AccountManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
 }
 
-// Implement listener
 void AccountManager::handleLogin_(std::string requester) {
 	sessionControl->sendData(("onLoginSuccess," + requester).c_str(), requester);
 }
 
 void AccountManager::handleRegisterContact(Json::Value data)
 {
-	cout << "handleRegisterContact() " << data << endl;
+	std::cout << "handleRegisterContact() " << data << std::endl;
 }
 
 void AccountManager::handleLogin(Json::Value data)
 {
-	cout << "handleLogin() " << data << endl;
+	std::cout << "handleLogin() " << data << std::endl;
 }
 
 void AccountManager::handleLogout(Json::Value data)
 {
-	cout << "handleLogout() " << data << endl;
+	std::cout << "handleLogout() " << data << std::endl;
 }
 
 void AccountManager::handleUpdateMyContactList(Json::Value data)
 {
-	cout << "handleUpdateMyContactList() " << data << endl;
+	std::cout << "handleUpdateMyContactList() " << data << std::endl;
 }
 
 void AccountManager::handleResetPassword(Json::Value data)
 {
-	cout << "handleResetPassword() " << data << endl;
+	std::cout << "handleResetPassword() " << data << std::endl;
 }
 
 void AccountManager::handleGetAllContact()
 {
-	cout << "handleGetAllContact() " << endl;
+	std::cout << "handleGetAllContact() " << std::endl;
 }
 

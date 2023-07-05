@@ -1,15 +1,21 @@
 #include <iostream>
 #include <sstream>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
 
 #include "SessionManager.h"
+#include "TelephonyManager.h"
+#include "AccountManager.h"
 
 SessionManager* SessionManager::instance = nullptr;
+SOCKET serverSocket;
+bool isRunning = true;
 
 SessionManager::SessionManager() {
 	contactNum = 0;
 
-	telephonyListener = nullptr;
-	accountListener = nullptr;
+	telephonyManager = TelephonyManager::getInstance();
+	accountManager = AccountManager::getInstance();
 }
 
 SessionManager* SessionManager::getInstance() {
@@ -19,17 +25,32 @@ SessionManager* SessionManager::getInstance() {
 	return instance;
 }
 
+void SessionManager::releaseInstance() {
+	if (instance != nullptr) {
+		instance->release();
+		delete instance;
+		instance = nullptr;
+	}
+}
+
 void SessionManager::init() {
+	telephonyManager->setSessionControl(this);
+	accountManager->setSessionControl(this);
+
 	std::thread sessionThread(&SessionManager::openSocket, instance);
 	sessionThread.join();
 }
 
-void SessionManager::setTelephonyListener(TelephonyManagerListener* listener) {
-	telephonyListener = listener;
-}
+void SessionManager::release() {
+	std::cout << "SessionManager release" << std::endl;
+	for (const auto& client : clientMap) {
+		shutdown(client.second, SD_SEND);
+	}
+	isRunning = false;
+	closesocket(serverSocket);
 
-void SessionManager::setAccountListener(AccountManagerListener* listener) {
-	accountListener = listener;
+	telephonyManager->setSessionControl(nullptr);
+	accountManager->setSessionControl(nullptr);
 }
 
 void SessionManager::openSocket() {
@@ -39,7 +60,7 @@ void SessionManager::openSocket() {
 		return;
 	}
 
-	SOCKET serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (serverSocket == -1) {
 		std::cerr << "Failed to create socket." << std::endl;
 		return;
@@ -63,7 +84,7 @@ void SessionManager::openSocket() {
 	}
 
 	std::cout << "Waiting for client..." << std::endl;
-	while (true) {
+	while (isRunning) {
 		SOCKADDR_IN clientAddress{};
 		int clientAddressLengh = sizeof(clientAddress);
 		SOCKET clientSocket = accept(serverSocket, (SOCKADDR*)&clientAddress, &clientAddressLengh);
@@ -106,13 +127,12 @@ void SessionManager::HandleClient(int clientSocket) {
 			break;
 		}
 
-
 		// listener test
 		std::string msg(buffer);
 		if (msg.find("Login") != std::string::npos) {
 			contactId = ("CONTACT_" + std::to_string(contactNum++));
 			clientMap.insert({ contactId, clientSocket });
-			accountListener->handleLogin_(contactId.c_str());
+			accountManager->handleLogin_(contactId.c_str());
 		}
 		else if (msg.find("startOutgoingCall") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
@@ -121,20 +141,20 @@ void SessionManager::HandleClient(int clientSocket) {
 				sendData("onFailedOutgoingCall,unreachable", contactId);
 				continue;
 			}
-			telephonyListener->handleOutgoingCall(contactId, to);
+			telephonyManager->handleOutgoingCall(contactId, to);
 		}
 		else if (msg.find("answerCall") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
-			telephonyListener->handleAnswer(tokens.back(), contactId);
+			telephonyManager->handleAnswer(tokens.back(), contactId);
 		}
 		else if (msg.find("rejectCall") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
 			std::string cause = tokens[tokens.size() - 2];
-			telephonyListener->handleReject(tokens.back(), cause, contactId);
+			telephonyManager->handleReject(tokens.back(), cause, contactId);
 		}
 		else if (msg.find("disconnectCall") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
-			telephonyListener->handleDisconnect(tokens.back());
+			telephonyManager->handleDisconnect(tokens.back());
 		}
 
 		std::cout << "Received message from client" << displayName << ": " << buffer << std::endl;
@@ -149,22 +169,22 @@ void SessionManager::HandleClient(int clientSocket) {
 			Json::Value payloads = jsonData["payload"];
 			switch (msgId) {
 			case 101: // 101 : REGISTER_CONTACT 
-				accountListener->handleRegisterContact(payloads);
+				accountManager->handleRegisterContact(payloads);
 				break;
 			case 102: // 102 : LOGIN
-				accountListener->handleLogin(payloads);
+				accountManager->handleLogin(payloads);
 				break;
 			case 103: // 103 : LOGOUT
-				accountListener->handleLogout(payloads);
+				accountManager->handleLogout(payloads);
 				break;
 			case 104: // 104 : UPDATE_MY_CONTACTLIST
-				accountListener->handleUpdateMyContactList(payloads);
+				accountManager->handleUpdateMyContactList(payloads);
 				break;
 			case 105: // 105 : RESET_PASSWORD
-				accountListener->handleResetPassword(payloads);
+				accountManager->handleResetPassword(payloads);
 				break;
 			case 106: // 106 : GET_ALL_CONTACT
-				accountListener->handleGetAllContact();
+				accountManager->handleGetAllContact();
 				break;
 			default:
 				break;

@@ -2,11 +2,11 @@
 
 #include <string>
 
-#include "AccountManagerListener.h"
+#include "IAccountManager.h"
 #include "SessionControl.h"
 #include "ContactDb.h"
 
-class AccountManager : public AccountManagerListener {
+class AccountManager : public IAccountManager {
 private:
 	static AccountManager* instance;
 
@@ -17,10 +17,10 @@ private:
 
 public:
 	static AccountManager* getInstance();
-
-	void setSessionControl(SessionControl* control);
+	static void releaseInstance();
 
 	// Listener
+	void setSessionControl(SessionControl* control) override;
 	void handleLogin_(std::string requester) override;
 
     // JSON based callback methods

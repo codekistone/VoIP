@@ -53,57 +53,51 @@ int main() {
 
 	// UI Thread
 	SessionManager* sessionManager = SessionManager::getInstance();
-	AccountManager* accountManager = AccountManager::getInstance();
-	CallsManager* callsManager = CallsManager::getInstance();
-	sessionManager->setAccountListener(accountManager);
-	sessionManager->setCallsListener(callsManager);
-
-	accountManager->setSessionControl(sessionManager);
-	callsManager->setSessionControl(sessionManager);
-
 	//sessionManager->init(IP.c_str(), port);
 	std::thread t(&SessionManager::init, sessionManager, IP.c_str(), port);
 
 	// TEST CODE
 	std::this_thread::sleep_for(std::chrono::milliseconds(300)); //TEST
-	accountManager->login();
+	AccountManager::getInstance()->login();
 
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 		//std::cout << "Enter message: ";
 		std::string message;
 		getline(std::cin, message);
-
-		if (message == "1") {
+		
+		if (message.empty() || message == "0") {
+			// Exit
+			SessionManager::releaseInstance();
+			break;
+		}
+		else if (message == "1") {
 			std::cout << "Insert Contact Number: ";
 			int num;
 			std::cin >> num;
 			std::cin.ignore();
-			callsManager->startOutgoingCall(("CONTACT_" + std::to_string(num)).c_str());
-			continue;
+			CallsManager::getInstance()->startOutgoingCall(("CONTACT_" + std::to_string(num)).c_str());
 		}
-		if (message == "5") {
-			callsManager->answerCall();
-			continue;
+		else if (message == "5") {
+			CallsManager::getInstance()->answerCall();
 		}
-		if (message == "6") {
-			callsManager->rejectCall();
-			continue;
+		else if (message == "6") {
+			CallsManager::getInstance()->rejectCall();
 		}
-		if (message == "7") {
-			callsManager->disconnectCall();
-			continue;
+		else if (message == "7") {
+			CallsManager::getInstance()->disconnectCall();
 		}
-
-		sessionManager->sendData(message.c_str());
+		else {
+			sessionManager->sendData(message.c_str());
+		}
 
 		jsonCommandParser(message);
-
-		if (message.empty()) {
-			break;
-		}
 	}
 	t.join();
+
+	CallsManager::releaseInstance();
+	AccountManager::releaseInstance();
+	std::cout << "Exit Main Thread" << std::endl;
 
 	return 0;
 }

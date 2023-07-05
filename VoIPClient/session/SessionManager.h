@@ -1,13 +1,13 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "SessionControl.h"
-#include "CallsManagerListener.h"
-#include "AccountManagerListener.h"
+#include "ICallsManager.h"
+#include "IAccountManager.h"
 
-#define PACKET_SIZE 1024
+constexpr auto PACKET_SIZE = 1024;
 
 class SessionManager : public SessionControl {
 private:
@@ -16,21 +16,21 @@ private:
 	char serverIP[20];
 	int serverPort;
 
-	CallsManagerListener* callsListener;
-	AccountManagerListener* accountListener;
+	ICallsManager* callsManager;
+	IAccountManager* accountManager;
 	
 	SessionManager();
 
 public:
 	static SessionManager* getInstance();
+	static void releaseInstance();
 
-	void setCallsListener(CallsManagerListener* listener);
-	void setAccountListener(AccountManagerListener* listener);
 	void init(const char* ip, int port);
+	void release();
 	void openSocket();
 	void proc_recv();
 	std::vector<std::string> split(const std::string&, char);
 
-	// interface
+	// listener
 	int sendData(const char* message) override;
 };

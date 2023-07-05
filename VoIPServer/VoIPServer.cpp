@@ -3,7 +3,6 @@
 #include "session/SessionManager.h"
 #include "session/TelephonyManager.h"
 #include "session/AccountManager.h"
-
 #include "session/DatabaseManager.h"
 #include "session/ContactDb.h"
 #include "session/ConferenceDb.h"
@@ -44,17 +43,26 @@ int main() {
 
     //testDatabase();
 
+    // UI Thread
     SessionManager* sessionManager = SessionManager::getInstance();
-    AccountManager* accountManager = AccountManager::getInstance();
-    TelephonyManager* telephonyManager = TelephonyManager::getInstance();
-    sessionManager->setAccountListener(accountManager);
-    sessionManager->setTelephonyListener(telephonyManager);
-
-    accountManager->setSessionControl(sessionManager);
-    telephonyManager->setSessionControl(sessionManager);
-
+    //sessionManager->init();
     std::thread t(&SessionManager::init, sessionManager);
+
+    // TEST CODE
+    while (true) {
+        std::string message;
+        getline(std::cin, message);
+
+        if (message.empty()) {
+            SessionManager::releaseInstance();
+            break;
+        }
+    }
     t.join();
+
+    TelephonyManager::releaseInstance();
+    AccountManager::releaseInstance();
+    std::cout << "Exit Main Thread" << std::endl;
 
     return 0;
 }

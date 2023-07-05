@@ -3,6 +3,7 @@
 
 Call::Call() {
 	state = CallState::STATE_IDLE;
+	isConference = false;
 }
 
 void Call::setCallId(std::string id) {

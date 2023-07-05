@@ -17,8 +17,13 @@ AccountManager* AccountManager::getInstance() {
 	return instance;
 }
 
-void AccountManager::setSessionControl(SessionControl* control) {
-	sessionControl = control;
+void AccountManager::releaseInstance() {
+	if (instance != nullptr) {
+		instance->setSessionControl(nullptr);
+		delete instance;
+		instance = nullptr;
+		std::cout << "AccountManager::releaseInstance" << std::endl;
+	}
 }
 
 void AccountManager::login() {
@@ -28,7 +33,11 @@ void AccountManager::login() {
 	sessionControl->sendData("Login");
 }
 
-// Implement listener
+// Implement interface
+void AccountManager::setSessionControl(SessionControl* control) {
+	sessionControl = control;
+}
+
 void AccountManager::onLoginSuccess(std::string contactId) {
 	std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;
 }

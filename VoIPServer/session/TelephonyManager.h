@@ -3,10 +3,10 @@
 #include <map>
 
 #include "SessionControl.h"
-#include "TelephonyManagerListener.h"
+#include "ITelephonyManager.h"
 #include "Connection.h"
 
-class TelephonyManager : public TelephonyManagerListener {
+class TelephonyManager : public ITelephonyManager {
 private:
 	static TelephonyManager* instance;
 
@@ -18,10 +18,10 @@ private:
 
 public:
 	static TelephonyManager* getInstance();
-
-	void setSessionControl(SessionControl* control);
+	static void releaseInstance();
 
 	// Listener
+	void setSessionControl(SessionControl* control) override;
 	void handleOutgoingCall(std::string from, std::string to) override;
 	void handleAnswer(std::string connId, std::string from) override;
 	void handleReject(std::string connId, std::string cause, std::string from) override;

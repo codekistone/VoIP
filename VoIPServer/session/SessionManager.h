@@ -4,41 +4,39 @@
 #include <string>
 #include <vector>
 #include <thread>
-#include <WinSock2.h>
-#include <WS2tcpip.h>
 
 #include "SessionControl.h"
-#include "TelephonyManagerListener.h"
-#include "AccountManagerListener.h"
+#include "ITelephonyManager.h"
+#include "IAccountManager.h"
 #include "../../json/json.h"
 
-#define PACKET_SIZE 1024
+constexpr auto PACKET_SIZE = 1024;
 
 class SessionManager : public SessionControl {
 private:
 	static SessionManager* instance;
 
 	int serverPort = 5555;
-	const int MAX_CLIENTS = 10;  // ÃÖ´ë Å¬¶óÀÌ¾ðÆ® ¼ö
+	const int MAX_CLIENTS = 10;  // ï¿½Ö´ï¿½ Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ® ï¿½ï¿½
 	std::map<std::string, int> clientMap;
 	std::vector<std::thread> clientThread;
 
 	int contactNum; // For TEST
 
-	TelephonyManagerListener* telephonyListener;
-	AccountManagerListener* accountListener;
+	ITelephonyManager* telephonyManager;
+	IAccountManager* accountManager;
 
 	SessionManager();
 
 public:
 	static SessionManager* getInstance();
+	static void releaseInstance();
 
 	void init();
+	void release();
 	void openSocket();
 	void HandleClient(int clientSocket);
 	std::string GetClientName(int clientSocket);
-	void setTelephonyListener(TelephonyManagerListener* listener);
-	void setAccountListener(AccountManagerListener* listener);
 	std::vector<std::string> split(const std::string& str, char delimiter);
 
 	// interface

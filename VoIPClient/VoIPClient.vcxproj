@@ -137,10 +137,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="session\AccountManager.h" />
-    <ClInclude Include="session\AccountManagerListener.h" />
+    <ClInclude Include="session\IAccountManager.h" />
     <ClInclude Include="session\Call.h" />
     <ClInclude Include="session\CallsManager.h" />
-    <ClInclude Include="session\CallsManagerListener.h" />
+    <ClInclude Include="session\ICallsManager.h" />
     <ClInclude Include="session\Constants.h" />
     <ClInclude Include="session\SessionManager.h" />
     <ClInclude Include="session\SessionControl.h" />

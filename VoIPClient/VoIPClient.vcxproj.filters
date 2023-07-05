@@ -35,7 +35,7 @@
     <ClInclude Include="session\SessionManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="session\CallsManagerListener.h">
+    <ClInclude Include="session\ICallsManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="session\CallsManager.h">
@@ -44,7 +44,7 @@
     <ClInclude Include="session\AccountManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="session\AccountManagerListener.h">
+    <ClInclude Include="session\IAccountManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="session\SessionControl.h">

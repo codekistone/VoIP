@@ -17,12 +17,25 @@ TelephonyManager* TelephonyManager::getInstance() {
 	return instance;
 }
 
+void TelephonyManager::releaseInstance() {
+	if (instance != nullptr) {
+		instance->setSessionControl(nullptr);
+		delete instance;
+		instance = nullptr;
+		std::cout << "TelephonyManager::releaseInstance" << std::endl;
+	}
+}
+
+// Implement listener
 void TelephonyManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
 }
 
-// Implement listener
 void TelephonyManager::handleOutgoingCall(std::string from, std::string to) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	std::string connId("CONNECTION_" + std::to_string(connNum++));
 	Connection conn(connId);
 	conn.setParticipant(from);
@@ -34,6 +47,10 @@ void TelephonyManager::handleOutgoingCall(std::string from, std::string to) {
 }
 
 void TelephonyManager::handleAnswer(std::string connId, std::string from) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	Connection conn = connectionMap[connId];
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
@@ -46,6 +63,10 @@ void TelephonyManager::handleAnswer(std::string connId, std::string from) {
 }
 
 void TelephonyManager::handleReject(std::string connId, std::string cause, std::string from) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	Connection conn = connectionMap[connId];
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
@@ -61,6 +82,10 @@ void TelephonyManager::handleReject(std::string connId, std::string cause, std::
 }
 
 void TelephonyManager::handleDisconnect(std::string connId) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
 	Connection conn = connectionMap[connId];
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
