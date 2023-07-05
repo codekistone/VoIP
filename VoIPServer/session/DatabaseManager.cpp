@@ -79,16 +79,38 @@ Json::Value DatabaseManager::get(string id)
 	try {
 		Json::Value database = readFromFile();
 		Json::Value datas = database[dbName];
-		for (int i = 0; i < datas.size(); i++) {
+		for (int i = 0; i < (int)datas.size(); i++) {
 			if (datas[i][dbItemId] == id) {
-				cout << "get() : " << datas[i] << endl;
+				cout << "get()/OK/id[" << id << "]:" << datas[i] << endl;
 				return datas[i];
 			}
 		}
 	}
 	catch (std::exception ex) {
-		cout << "get()/Exception : " << ex.what() << endl;
+		cout << "get()/Exception/id[" << id << "]:" << ex.what() << endl;
+		return NULL;
 	}
+	cout << "get()/Not found/id[" << id << "]:" << endl;
+	return NULL;
+}
+
+Json::Value DatabaseManager::get(string id, string key)
+{
+	try {
+		Json::Value database = readFromFile();
+		Json::Value datas = database[dbName];
+		for (int i = 0; i < (int)datas.size(); i++) {
+			if (datas[i][dbItemId] == id) {
+				cout << "get()/OK/id[" << id << "]/key[" + key + "] : " << datas[i][key] << endl;
+				return datas[i][key];
+			}
+		}
+	}
+	catch (std::exception ex) {
+		cout << "get()/Exception : " << ex.what() << endl;
+		return NULL;
+	}
+	cout << "get()/Not found/id[" << id << "]" << endl;
 	return NULL;
 }
 
@@ -98,7 +120,36 @@ bool DatabaseManager::remove(string id)
 		Json::Value database = readFromFile();
 		Json::Value datas = database[dbName];
 		int index = -1;
-		for (int i = 0; i < datas.size(); i++) {
+		for (int i = 0; i < (int)datas.size(); i++) {
+			if (datas[i][dbItemId] == id) {
+				index = i;
+				break;
+			}
+		}
+		if (index == -1) {
+			cout << "remove()/Not found/id[" << id << "]" << endl;
+			return false;
+		}
+		cout << "remove()/id[" << id << "]:" << datas[index] << endl;
+		datas.removeIndex(index, NULL);
+		database[dbName] = datas;
+		writeToFile(database);
+		return true;
+	}
+	catch (std::exception ex) {
+		cout << "remove()/Exception:" << ex.what() << endl;
+		return false;
+	}
+	return false;
+}
+
+bool DatabaseManager::remove(string id, string key)
+{
+	try {
+		Json::Value database = readFromFile();
+		Json::Value datas = database[dbName];
+		int index = -1;
+		for (int i = 0; i < (int)datas.size(); i++) {
 			if (datas[i][dbItemId] == id) {
 				index = i;
 				break;
@@ -108,8 +159,61 @@ bool DatabaseManager::remove(string id)
 			cout << "remove()/Not found/Id[" << id << "]" << endl;
 			return false;
 		}
-		cout << "remove()/id[" << id << "]/data:" << datas[index] << endl;
-		datas.removeIndex(index, NULL);
+		if (datas[index][key].isArray()) {
+			datas[index][key].clear();
+		}
+		else {
+			datas[index].removeMember(key);
+		}		
+		database[dbName] = datas;
+		writeToFile(database);
+		return true;
+	}
+	catch (std::exception ex) {
+		cout << "remove()/Exception : " << ex.what() << endl;
+	}
+	return false;
+}
+
+bool DatabaseManager::remove(string id, string key, Json::Value value)
+{
+	try {
+		Json::Value database = readFromFile();
+		Json::Value datas = database[dbName];
+		int index = -1;
+		for (int i = 0; i < (int)datas.size(); i++) {
+			if (datas[i][dbItemId] == id) {
+				index = i;
+				break;
+			}
+		}
+		if (index == -1) {
+			cout << "remove()/Not found/Id[" << id << "]/key[" << key << "]" << endl;
+			return false;
+		}
+		if (datas[index][key].isArray()) {
+			int removeIndex = -1;
+			for (int j = 0; j < (int)datas[index][key].size(); j++) {
+				if (datas[index][key][j] == value ) {
+					removeIndex = j;
+					break;
+				}
+			}
+			if (removeIndex == -1) {
+				cout << "remove()/Not found/Id[" << id << "]/key[" << key << "/Value[" << value << "]" << endl;
+				return false;
+			} 			
+			datas[index][key].removeIndex(removeIndex, NULL);
+		} else {
+			if (datas[index][key] == value) {
+				datas[index].removeMember(key);
+			}
+			else {
+				cout << "remove()/Not found/Id[" << id << "]/key[" << key << "/Value[" << value << "]" << endl;
+				return false;
+			}
+		}
+		cout << "remove()/OK/Id[" << id << "]/Value[" << value << "]" << endl;
 		database[dbName] = datas;
 		writeToFile(database);
 		return true;
@@ -126,7 +230,7 @@ bool DatabaseManager::update(string id, Json::Value data)
 		Json::Value database = readFromFile();
 		Json::Value datas = database[dbName];
 		int searchIdx = -1;
-		for (int i = 0; i < datas.size(); i++) {
+		for (int i = 0; i < (int)datas.size(); i++) {
 			if (datas[i][dbItemId] == id) {
 				searchIdx = i;
 				break;
@@ -151,13 +255,13 @@ bool DatabaseManager::update(string id, Json::Value data)
 	return false;
 }
 
-bool DatabaseManager::update(string id, string key, string value)
+bool DatabaseManager::update(string id, string key, Json::Value value)
 {
 	try {
 		Json::Value database = readFromFile();
 		Json::Value datas = database[dbName];
 		int index = -1, subindex = -1;
-		for (int i = 0; i < datas.size(); i++) {
+		for (int i = 0; i < (int)datas.size(); i++) {
 			if (datas[i][dbItemId] == id) {
 				index = i;
 				break;
@@ -166,14 +270,18 @@ bool DatabaseManager::update(string id, string key, string value)
 		if (index == -1) {
 			cout << "update()/Not found/Id[" << id << "]" << endl;
 			return false; // Failed to find contact to update
+		}		
+		if (datas[index][key].isArray()) {
+			for (int j = 0; j < (int)datas[index][key].size(); j++) {
+				if (datas[index][key][j] == value) {
+					return false; // Same sub data exists
+				}
+			}
+			datas[index][key].append(value);
+		} else {
+			datas[index][key] = value;
+			cout << "update()/OK/Id[" << id << "]/Key[" << key << "]/Value[" << value << "]" << endl;
 		}
-		if (datas[index][key].empty()) {
-			cout << "update()/Add/Id[" << id << "]/Key[" << key << "]/Value[" + value << "]" << endl;
-		}
-		else {
-			cout << "update()/Update/Id[" << id << "]/Key[" << key << "]/Value[" + value << "]" << endl;
-		}
-		datas[index][key] = value;
 		database[dbName] = datas;
 		writeToFile(database);
 		return true;
@@ -184,43 +292,3 @@ bool DatabaseManager::update(string id, string key, string value)
 	return false;
 }
 
-bool DatabaseManager::updateSub(string id, string key, Json::Value value)
-{
-	try {
-		Json::Value database = readFromFile();
-		Json::Value datas = database[dbName];
-		int index = -1, subindex = -1;
-		for (int i = 0; i < datas.size(); i++) {
-			if (datas[i][dbItemId] == id) {
-				index = i;
-				break;
-			}
-		}
-		if (index == -1) {
-			cout << "updateSub()/Not found/Id[" << id << "]" << endl;
-			return false; // Failed to find contact to update
-		}
-		int subIndex = -1;
-		for (int j = 0; j < datas[index][key].size(); j++) {
-			if (datas[index][key][j] == value) {
-				subIndex = j;
-				break;
-			}
-		}
-		if (subIndex == -1) {
-			cout << "updateSub()/Append/Id[" << id << "]/Key[" << key << "]/Value[" << value << "]" << endl;
-			datas[index][key].append(value);
-		}
-		else {
-			cout << "updateSub()/Update/Id[" << id << "]/Key[" << key << "]/Value[" << value << "]" << endl;
-			datas[index][key][subIndex] = value;
-		}
-		database[dbName] = datas;
-		writeToFile(database);
-		return true;
-	}
-	catch (std::exception ex) {
-		cout << "updateSub()/Exception : " << ex.what() << endl;
-	}
-	return false;
-}

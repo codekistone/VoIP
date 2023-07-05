@@ -19,13 +19,17 @@ public:
 	DatabaseManager(string databaseName); // Constructor	
 	//-----------------------------------------
 	// Database operations
-	Json::Value get(string id);
+	Json::Value get(string id); 
+	Json::Value get(string id, string key);  
+
 	bool remove(string id);
+	bool remove(string id, string key);
+	bool remove(string id, string key, Json::Value value);
+
 	bool update(string id, Json::Value data);
-	bool update(string id, string key, string value);
-	bool updateSub(string id, string key, Json::Value value);
+	bool update(string id, string key, Json::Value value);
 	//-----------------------------------------
-	// Test code for database
+	// Test code for database	
 	void printDatabase();
 	static void printJson(Json::Value jsonData);
 };

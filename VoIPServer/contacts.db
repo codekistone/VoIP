@@ -9,8 +9,8 @@
             "passwordAnswer" : "we", 
             "ipAddress" : "192.168.100.1", 
             "myContactList" : [
-                {"cid":"john.mayer@gmail.com"},      
-                {"cid":"jane.poster@gmail.com"}
+                "john.mayer@gmail.com",      
+                "jane.poster@gmail.com"
             ]
         },     
         {
@@ -22,8 +22,8 @@
             "passwordAnswer" : "work", 
             "ipAddress" : "192.168.100.2", 
             "myContactList" : [
-                {"cid":"tom.cruise@gmail.com"},      
-                {"cid":"jane.poster@gmail.com"}
+                "tom.cruise@gmail.com",      
+                "jane.poster@gmail.com"
             ]
         },
         {
@@ -35,8 +35,8 @@
             "passwordAnswer" : "pen", 
             "ipAddress" : "192.168.100.2", 
             "myContactList" : [
-                {"cid":"tom.cruise@gmail.com"},      
-                {"cid":"john.mayer@gmail.com"}
+                "tom.cruise@gmail.com",      
+                "john.mayer@gmail.com"
             ]
         }
     ]
