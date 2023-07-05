@@ -1,16 +1,15 @@
 #include "DatabaseManager.h"
 #include <iostream>
 
-string dbName;
-string dbItemId;
+
 static char readBuffer[DB_MAX_BUFFER_SIZE] = { 0, };
 
 DatabaseManager::DatabaseManager(string databaseName)
 {	
 	dbName = databaseName;
-	dbItemId = DB_CONTACT_ITEM_ID;
+	dbUid = DB_CONTACT_ITEM_ID;
 	if (dbName == DB_CONFERENCE) {
-		dbItemId = DB_CONFERENCE_ITEM_ID;
+		dbUid = DB_CONFERENCE_ITEM_ID;
 	}
 	if (readFromFile() == false) {
 		// Database file does not exist, create default database file.
@@ -74,13 +73,49 @@ bool DatabaseManager::writeToFile(const Json::Value jsonData)
 	return true;
 }
 
+string DatabaseManager::search(string key, string word) 
+{
+	try {
+		Json::Value database = readFromFile();
+		Json::Value datas = database[dbName];
+		for (int i = 0; i < (int)datas.size(); i++) {
+			string source = datas[i][key].asString();
+			if (source.find(word) != std::string::npos) {
+				cout << "search()/OK/Key[" + key + "]/Word[" + word + "]/Id:" << datas[i][dbUid].asString() << endl;
+				return datas[i][dbUid].asString();
+			}
+		}
+	}
+	catch (std::exception ex) {
+		cout << "search()/Exception/Key[" + key + "]/Word[" + word + "]:" << ex.what() << endl;
+		return "";
+	}
+	return "";
+}
+
+Json::Value DatabaseManager::get()
+{
+	try {
+		Json::Value database = readFromFile();
+		Json::Value datas = database[dbName];
+		cout << "get()/OK[" << datas << "]" << endl;
+		return datas;
+	}
+	catch (std::exception ex) {
+		cout << "get()/Exception : " << ex.what() << endl;
+		return NULL;
+	}
+	cout << "get()/Not found" << endl;
+	return NULL;
+}
+
 Json::Value DatabaseManager::get(string id)
 {
 	try {
 		Json::Value database = readFromFile();
 		Json::Value datas = database[dbName];
 		for (int i = 0; i < (int)datas.size(); i++) {
-			if (datas[i][dbItemId] == id) {
+			if (datas[i][dbUid] == id) {
 				cout << "get()/OK/id[" << id << "]:" << datas[i] << endl;
 				return datas[i];
 			}
@@ -100,7 +135,7 @@ Json::Value DatabaseManager::get(string id, string key)
 		Json::Value database = readFromFile();
 		Json::Value datas = database[dbName];
 		for (int i = 0; i < (int)datas.size(); i++) {
-			if (datas[i][dbItemId] == id) {
+			if (datas[i][dbUid] == id) {
 				cout << "get()/OK/id[" << id << "]/key[" + key + "] : " << datas[i][key] << endl;
 				return datas[i][key];
 			}
@@ -121,7 +156,7 @@ bool DatabaseManager::remove(string id)
 		Json::Value datas = database[dbName];
 		int index = -1;
 		for (int i = 0; i < (int)datas.size(); i++) {
-			if (datas[i][dbItemId] == id) {
+			if (datas[i][dbUid] == id) {
 				index = i;
 				break;
 			}
@@ -150,7 +185,7 @@ bool DatabaseManager::remove(string id, string key)
 		Json::Value datas = database[dbName];
 		int index = -1;
 		for (int i = 0; i < (int)datas.size(); i++) {
-			if (datas[i][dbItemId] == id) {
+			if (datas[i][dbUid] == id) {
 				index = i;
 				break;
 			}
@@ -182,7 +217,7 @@ bool DatabaseManager::remove(string id, string key, Json::Value value)
 		Json::Value datas = database[dbName];
 		int index = -1;
 		for (int i = 0; i < (int)datas.size(); i++) {
-			if (datas[i][dbItemId] == id) {
+			if (datas[i][dbUid] == id) {
 				index = i;
 				break;
 			}
@@ -231,12 +266,12 @@ bool DatabaseManager::update(string id, Json::Value data)
 		Json::Value datas = database[dbName];
 		int searchIdx = -1;
 		for (int i = 0; i < (int)datas.size(); i++) {
-			if (datas[i][dbItemId] == id) {
+			if (datas[i][dbUid] == id) {
 				searchIdx = i;
 				break;
 			}
 		}
-		data[dbItemId] = id;
+		data[dbUid] = id;
 		if (searchIdx == -1) {
 			cout << "update()/New/Id[" << id << "]/data:" << data << endl;
 			datas.append(data);
@@ -262,7 +297,7 @@ bool DatabaseManager::update(string id, string key, Json::Value value)
 		Json::Value datas = database[dbName];
 		int index = -1, subindex = -1;
 		for (int i = 0; i < (int)datas.size(); i++) {
-			if (datas[i][dbItemId] == id) {
+			if (datas[i][dbUid] == id) {
 				index = i;
 				break;
 			}

@@ -13,12 +13,17 @@ class DatabaseManager {
 private:
 	//-----------------------------------------
 	// Internel methods	
+	string dbName;
+	string dbUid;
 	Json::Value readFromFile();
 	bool writeToFile(const Json::Value jsonData);
 public:	
 	DatabaseManager(string databaseName); // Constructor	
 	//-----------------------------------------
 	// Database operations
+	string search(string key, string word); 
+
+	Json::Value get();
 	Json::Value get(string id); 
 	Json::Value get(string id, string key);  
 

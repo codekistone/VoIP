@@ -111,7 +111,8 @@ void SessionManager::HandleClient(int clientSocket) {
 
 	std::cout << "Connected to client! " << displayName << std::endl;
 
-	std::string contactId;
+	std::string contactId = GetClientName(clientSocket);
+	clientMap.insert({ contactId, clientSocket });
 	char buffer[PACKET_SIZE];
 	while (true) {
 		memset(buffer, 0, sizeof(buffer));
@@ -130,8 +131,8 @@ void SessionManager::HandleClient(int clientSocket) {
 		// listener test
 		std::string msg(buffer);
 		if (msg.find("Login") != std::string::npos) {
-			contactId = ("CONTACT_" + std::to_string(contactNum++));
-			clientMap.insert({ contactId, clientSocket });
+			//contactId = ("CONTACT_" + std::to_string(contactNum++));
+			//clientMap.insert({ contactId, clientSocket });
 			accountManager->handleLogin_(contactId.c_str());
 		}
 		else if (msg.find("startOutgoingCall") != std::string::npos) {
@@ -168,11 +169,19 @@ void SessionManager::HandleClient(int clientSocket) {
 			int msgId = std::stoi(jsonData["msgId"].asString());
 			Json::Value payloads = jsonData["payload"];
 			switch (msgId) {
-			case 101: // 101 : REGISTER_CONTACT 
-				accountManager->handleRegisterContact(payloads);
+			case 101: // 101 : REGISTER_CONTACT 		
+				accountManager->handleRegisterContact(payloads, contactId);
 				break;
-			case 102: // 102 : LOGIN
-				accountManager->handleLogin(payloads);
+			case 102: // 102 : LOGIN		
+				{
+					string cid = accountManager->handleLogin(payloads, contactId);
+					if (!cid.empty()) {		
+					    // Replace client map(IP Address:Port) to valid contactId after logged in				
+						clientMap.erase(contactId);
+						contactId = cid;
+						clientMap.insert({ cid, clientSocket });
+					}
+				}
 				break;
 			case 103: // 103 : LOGOUT
 				accountManager->handleLogout(payloads);

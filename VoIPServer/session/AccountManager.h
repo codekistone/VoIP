@@ -24,8 +24,8 @@ public:
 	void handleLogin_(std::string requester) override;
 
     // JSON based callback methods
-	void handleRegisterContact(Json::Value data) override;
-	void handleLogin(Json::Value data) override;
+	void handleRegisterContact(Json::Value data, string from) override;
+	string handleLogin(Json::Value data, string from) override;
 	void handleLogout(Json::Value data) override;
 	void handleUpdateMyContactList(Json::Value data) override;
 	void handleResetPassword(Json::Value data) override;

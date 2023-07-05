@@ -4,6 +4,16 @@
 
 AccountManager* AccountManager::instance = nullptr;
 
+// TODO : Should move utility method to somewhere else
+std::string makeMessage(int msgId, Json::Value payload) {
+	Json::FastWriter fastWriter;
+	Json::Value root;
+	root["msgId"] = msgId;
+	root["payload"] = payload;
+	std::string jsonString = fastWriter.write(root);
+	return jsonString;
+}
+
 AccountManager::AccountManager() {
 	sessionControl = nullptr;
 	contactDb = ContactDb::getInstance();
