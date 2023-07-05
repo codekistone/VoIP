@@ -1,6 +1,6 @@
 {
     "msgId":102,
-    "payload" : [
+    "payload" : 
         {
             "result" : 1, 
             "myContactData" : {
@@ -13,5 +13,5 @@
                 ]
             }
         }    
-    ]
+    
 }

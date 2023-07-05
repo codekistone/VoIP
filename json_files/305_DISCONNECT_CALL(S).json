@@ -1,8 +1,7 @@
 {
     "msgId":305, 
-    "payload" : [
+    "payload" : 
         {
             "result" : 1
         }
-    ]
 }

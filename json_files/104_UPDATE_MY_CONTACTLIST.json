@@ -1,6 +1,6 @@
 {
     "msgId":104,
-    "payload" : [
+    "payload" : 
         {
             "cid" : "john.mayer@gmail.com",
             "myContactList" : [
@@ -8,5 +8,4 @@
                 "jane.poster@gmail.com"
             ]
         }    
-    ]
 }

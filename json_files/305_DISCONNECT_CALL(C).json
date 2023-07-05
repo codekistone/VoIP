@@ -1,8 +1,7 @@
 {
     "msgId":305, 
-    "payload" : [
+    "payload" : 
         {
             "rid" : "C_00000010"
         }
-    ]
 }

@@ -1,8 +1,8 @@
 {
     "msgId":301,     
-    "payload" : [
+    "payload" : 
         {
-            "cid" : "tom.cruise@gmail.com"
+            "id" : "tom.cruise@gmail.com"
         }
-    ]
+    
 }

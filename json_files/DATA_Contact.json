@@ -1,9 +1,0 @@
-{
-    "cid":"john.mayer@gmail.com",
-    "email":"john.mayer@gmail.com", 
-    "name": "John Mayer", 
-    "myContactList" : [
-        {"cid":"tom.cruise@gmail.com"},      
-        {"cid":"jane.poster@gmail.com"}
-    ]
-}
