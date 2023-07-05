@@ -58,7 +58,50 @@ int main() {
 
 	// TEST CODE
 	std::this_thread::sleep_for(std::chrono::milliseconds(300)); //TEST
-	AccountManager::getInstance()->login();
+	
+	//**** Account Test ****
+	//Register
+	std::string id, email, pw, name, pwdAnswer, pwdQuestion, newpw;
+	std::cout << "id : ";
+	getline(std::cin, id);
+	std::cout << "email : ";
+	getline(std::cin, email);
+	std::cout << "pw : ";
+	getline(std::cin, pw);
+	std::cout << "name : ";
+	getline(std::cin, name);
+	std::cout << "pwdQuestion : ";
+	getline(std::cin, pwdQuestion);
+	std::cout << "pwdAnswer : ";
+	getline(std::cin, pwdAnswer);
+	AccountManager::getInstance()->registerAccount(id, email, pw, name, std::stoi(pwdQuestion), pwdAnswer);
+
+	//resetpw
+	std::cout << std::endl << "Processing reset pw test ..." << std::endl;
+	std::cout << "newPassword : " << std::endl;
+	getline(std::cin, newpw);
+	AccountManager::getInstance()->resetPassword(id, newpw, std::stoi(pwdQuestion), pwdAnswer);
+
+	//login
+	std::string inputID, inputPW;
+	std::cout << std::endl << "Processing login test ..." << std::endl;
+	std::cout << "id : " << std::endl;
+	getline(std::cin, inputID);
+	std::cout << "pw : " << std::endl;
+	getline(std::cin, inputPW);
+	AccountManager::getInstance()->login(inputID, inputPW);
+
+	//updateMyContactList
+	//std::cout << "Processing updateMyContactList test ..." << std::endl;
+	//AccountManager::getInstance()->updateMyContactList(nullptr);
+
+	//getAllContact
+	std::cout << std::endl << "Processing getAllContact test ..." << std::endl;
+	AccountManager::getInstance()->getAllContact(id);
+
+	//**** Account TestEnd ****
+
+	AccountManager::getInstance()->login_();
 
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(300));

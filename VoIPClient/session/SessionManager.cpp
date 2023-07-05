@@ -60,6 +60,11 @@ void SessionManager::release() {
 
 // socket Receive function
 void SessionManager::proc_recv() {
+
+	Json::Value root;
+	Json::Reader reader;
+	
+
 	char buf[PACKET_SIZE];
 	while (true) {
 		memset(buf, 0, sizeof(buf));
@@ -75,7 +80,29 @@ void SessionManager::proc_recv() {
 		}
 		
 		// listener test
+		
 		std::string msg(buf);
+		/*
+		if (!reader.parse(msg, root)) {
+			std::cout << "Json parsing fail" << std::endl;
+			break;
+		}
+		int msgId = root["msgId"].asInt();
+
+		switch (msgId)
+		{
+			case 101 : accountManager->handleRegisterContact(root["payload"]);
+				break;
+			case 102 : accountManager->handleLogin(root["payload"]);
+				break;
+			case 105: accountManager->handleResetPassword(root["payload"]);
+				break;
+			case 106: accountManager->handleGetAllContact(root["payload"]);
+				break;
+			default:
+			break;
+		}*/
+
 		if (msg.find("onLoginSuccess") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
 			accountManager->onLoginSuccess(tokens.back());
