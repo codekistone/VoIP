@@ -61,6 +61,7 @@ int main() {
 	
 	//**** Account Test ****
 	//Register
+	/*
 	std::string id, email, pw, name, pwdAnswer, pwdQuestion, newpw;
 	std::cout << "id : ";
 	getline(std::cin, id);
@@ -100,7 +101,7 @@ int main() {
 	AccountManager::getInstance()->getAllContact(id);
 
 	//**** Account TestEnd ****
-
+	*/
 	AccountManager::getInstance()->login_();
 
 	while (true) {

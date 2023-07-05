@@ -82,26 +82,38 @@ void SessionManager::proc_recv() {
 		// listener test
 		
 		std::string msg(buf);
-		/*
-		if (!reader.parse(msg, root)) {
-			std::cout << "Json parsing fail" << std::endl;
-			break;
-		}
-		int msgId = root["msgId"].asInt();
-
-		switch (msgId)
-		{
-			case 101 : accountManager->handleRegisterContact(root["payload"]);
+	
+		//-------------------------------------------------------------
+		// JSON payload parser
+		Json::Reader jsonReader;
+		Json::Value jsonData;
+		if (jsonReader.parse(msg, jsonData) == true) {
+			// received data parsed as JSON data			
+			int msgId = std::stoi(jsonData["msgId"].asString());
+			Json::Value payloads = jsonData["payload"];
+			std::cout << msgId << ":" << payloads << std::endl;
+			switch (msgId) {
+			case 101: // 101 : REGISTER_CONTACT 
+				accountManager->handleRegisterContact(payloads);
 				break;
-			case 102 : accountManager->handleLogin(root["payload"]);
+			case 102: // 102 : LOGIN
+				accountManager->handleLogin(payloads);
 				break;
-			case 105: accountManager->handleResetPassword(root["payload"]);
+			case 103: // 103 : LOGOUT
 				break;
-			case 106: accountManager->handleGetAllContact(root["payload"]);
+			case 104: // 104 : UPDATE_MY_CONTACTLIST
+				break;
+			case 105: // 105 : RESET_PASSWORD
+				accountManager->handleResetPassword(payloads);
+				break;
+			case 106: // 106 : GET_ALL_CONTACT
+				accountManager->handleGetAllContact(payloads);
 				break;
 			default:
-			break;
-		}*/
+				
+				break;
+			}
+		}
 
 		if (msg.find("onLoginSuccess") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
