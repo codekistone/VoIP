@@ -1,3 +1,4 @@
+#pragma once
 
 namespace CallState {
 	constexpr int STATE_DIALING = 1;

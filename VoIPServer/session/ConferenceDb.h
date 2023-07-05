@@ -1,7 +1,6 @@
+#pragma once
 
 #include "DatabaseManager.h"
-
-#pragma once
 
 class ConferenceDb : public DatabaseManager {
 private:

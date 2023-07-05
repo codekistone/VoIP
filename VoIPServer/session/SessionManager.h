@@ -8,7 +8,6 @@
 #include "SessionControl.h"
 #include "ITelephonyManager.h"
 #include "IAccountManager.h"
-#include "../../json/json.h"
 
 constexpr auto PACKET_SIZE = 1024;
 
@@ -17,7 +16,7 @@ private:
 	static SessionManager* instance;
 
 	int serverPort = 5555;
-	const int MAX_CLIENTS = 10;  // �ִ� Ŭ���̾�Ʈ ��
+	const int MAX_CLIENTS = 10;  // 최대참여자 수
 	std::map<std::string, int> clientMap;
 	std::vector<std::thread> clientThread;
 
@@ -37,7 +36,6 @@ public:
 	void openSocket();
 	void HandleClient(int clientSocket);
 	std::string GetClientName(int clientSocket);
-	std::vector<std::string> split(const std::string& str, char delimiter);
 
 	// interface
 	void sendData(const char* message, std::string to) override;

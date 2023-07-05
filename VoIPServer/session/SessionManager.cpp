@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
@@ -93,19 +92,19 @@ void SessionManager::openSocket() {
 			continue;
 		}
 
-		// Å¬¶óÀÌ¾ğÆ®¿ÍÀÇ Åë½ÅÀ» º°µµ ½º·¹µå·Î Ã³¸®
+		// í´ë¼ì´ì–¸íŠ¸ì™€ì˜ í†µì‹ ì„ ë³„ë„ ìŠ¤ë ˆë“œë¡œ ì²˜ë¦¬
 		std::thread clientThread(&SessionManager::HandleClient, instance, clientSocket);
 		clientThread.detach();
 	}
 
-	// ¼­¹ö ¼ÒÄÏ ´İ±â
+	// ì„œë²„ ì†Œì¼“ ë‹«ê¸°
 	closesocket(serverSocket);
 	WSACleanup();
 }
 
 void SessionManager::HandleClient(int clientSocket) {
-	// Å¬¶óÀÌ¾ğÆ®¿ÍÀÇ Åë½Å Ã³¸®
-	// ¿¹: ¸Ş½ÃÁö ¼Û¼ö½Å, µ¥ÀÌÅÍ Ã³¸® µî
+	// í´ë¼ì´ì–¸íŠ¸ì™€ì˜ í†µì‹  ì²˜ë¦¬
+	// ì˜ˆ: ë©”ì‹œì§€ ì†¡ìˆ˜ì‹ , ë°ì´í„° ì²˜ë¦¬ ë“±
 
 	std::string displayName = GetClientName(clientSocket);
 
@@ -114,10 +113,11 @@ void SessionManager::HandleClient(int clientSocket) {
 	std::string contactId = GetClientName(clientSocket);
 	clientMap.insert({ contactId, clientSocket });
 	char buffer[PACKET_SIZE];
+	Json::Reader jsonReader;
 	while (true) {
 		memset(buffer, 0, sizeof(buffer));
 
-		// Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ¸Ş¼¼Áö ¼ö½Å
+		// í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ë©”ì„¸ì§€ ìˆ˜ì‹ 
 		SSIZE_T bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
 		if (bytesRead == -1) {
 			std::cerr << "Failed to receive message" << displayName << std::endl;
@@ -125,44 +125,22 @@ void SessionManager::HandleClient(int clientSocket) {
 		}
 		if (bytesRead == 0) {
 			std::cout << "disconnected to client." << displayName << std::endl;
+			telephonyManager->releaseConnection(contactId);
 			break;
 		}
 
 		// listener test
 		std::string msg(buffer);
+		std::string msgStr;
 		if (msg.find("Login") != std::string::npos) {
-			//contactId = ("CONTACT_" + std::to_string(contactNum++));
-			//clientMap.insert({ contactId, clientSocket });
+			msgStr = "LOGIN";
+			contactId = ("CONTACT_" + std::to_string(contactNum++));
+			clientMap.insert({ contactId, clientSocket });
 			accountManager->handleLogin_(contactId.c_str());
 		}
-		else if (msg.find("startOutgoingCall") != std::string::npos) {
-			std::vector<std::string> tokens = split(msg, ',');
-			std::string to(tokens.back());
-			if (clientMap.count(to) == 0) {
-				sendData("onFailedOutgoingCall,unreachable", contactId);
-				continue;
-			}
-			telephonyManager->handleOutgoingCall(contactId, to);
-		}
-		else if (msg.find("answerCall") != std::string::npos) {
-			std::vector<std::string> tokens = split(msg, ',');
-			telephonyManager->handleAnswer(tokens.back(), contactId);
-		}
-		else if (msg.find("rejectCall") != std::string::npos) {
-			std::vector<std::string> tokens = split(msg, ',');
-			std::string cause = tokens[tokens.size() - 2];
-			telephonyManager->handleReject(tokens.back(), cause, contactId);
-		}
-		else if (msg.find("disconnectCall") != std::string::npos) {
-			std::vector<std::string> tokens = split(msg, ',');
-			telephonyManager->handleDisconnect(tokens.back());
-		}
-
-		std::cout << "Received message from client" << displayName << ": " << buffer << std::endl;
 
 		//-------------------------------------------------------------
 		// JSON payload parser
-		Json::Reader jsonReader;
 		Json::Value jsonData;
 		if (jsonReader.parse(msg, jsonData) == true) {
 			// received data parsed as JSON data			
@@ -199,10 +177,33 @@ void SessionManager::HandleClient(int clientSocket) {
 			case 106: // 106 : GET_ALL_CONTACT
 				accountManager->handleGetAllContact(contactId);
 				break;
+			case 301: // 301 : OUTGOING_CALL
+				{
+					msgStr = "OUTGOING_CALL";
+					payloads["from"] = contactId;
+					std::string to(payloads["to"].asString());
+					if (clientMap.count(to) == 0) {
+						telephonyManager->handleOutgoingCallNoUser(payloads);
+						break;
+					}
+					telephonyManager->handleOutgoingCall(payloads);
+					break;
+				}
+			case 302: // 302 : INCOMING_CALL_RESPONSE
+				msgStr = "INCOMING_CALL_RESPONSE";
+				payloads["from"] = contactId;
+				telephonyManager->handleIncomingCallResponse(payloads);
+				break;
+			case 305: // 305 : DISCONNECT_CALL
+				msgStr = "DISCONNECT_CALL";
+				telephonyManager->handleDisconnect(payloads);
+				break;
 			default:
 				break;
 			}
 		}
+
+		std::cout << "Received message from client" << displayName << ": [" << msgStr << "] " << buffer << std::endl;
 	}
 	clientMap.erase(contactId);
 	closesocket(clientSocket);
@@ -229,14 +230,4 @@ std::string SessionManager::GetClientName(int clientSocket)
 
 void SessionManager::sendData(const char* data, std::string to) {
 	send(clientMap[to], data, strlen(data), 0);
-}
-
-std::vector<std::string> SessionManager::split(const std::string& str, char delimiter) {
-	std::vector<std::string> tokens;
-	std::istringstream ss(str);
-	std::string token;
-	while (std::getline(ss, token, delimiter)) {
-		tokens.push_back(token);
-	}
-	return tokens;
 }

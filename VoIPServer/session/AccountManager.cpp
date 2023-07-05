@@ -35,7 +35,7 @@ void AccountManager::releaseInstance() {
 	}
 }
 
-// Implement listener
+// Implement interface
 void AccountManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
 }

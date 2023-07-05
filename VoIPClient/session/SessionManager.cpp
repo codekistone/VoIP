@@ -66,6 +66,7 @@ void SessionManager::proc_recv() {
 	
 
 	char buf[PACKET_SIZE];
+	Json::Reader jsonReader;
 	while (true) {
 		memset(buf, 0, sizeof(buf));
 		SSIZE_T bytesRead = recv(clientSocket, buf, PACKET_SIZE, 0);
@@ -78,14 +79,13 @@ void SessionManager::proc_recv() {
 			std::cout << "Disconnected to server." << std::endl;
 			break;
 		}
-		
+
 		// listener test
 		
 		std::string msg(buf);
 	
 		//-------------------------------------------------------------
 		// JSON payload parser
-		Json::Reader jsonReader;
 		Json::Value jsonData;
 		if (jsonReader.parse(msg, jsonData) == true) {
 			// received data parsed as JSON data			
@@ -115,42 +115,43 @@ void SessionManager::proc_recv() {
 			}
 		}
 
+		std::string msgStr;
 		if (msg.find("onLoginSuccess") != std::string::npos) {
+			msgStr = "onLoginSuccess";
 			std::vector<std::string> tokens = split(msg, ',');
 			accountManager->onLoginSuccess(tokens.back());
-			continue;
-		}
-		else if (msg.find("onIncomingCall") != std::string::npos) {
-			std::vector<std::string> tokens = split(msg, ',');
-			std::string from = tokens[tokens.size()-2];
-			std::string connId = tokens.back();
-			callsManager->onIncomingCall(connId, from);
-			continue;
-		}
-		else if (msg.find("onSuccessfulOutgoingCall") != std::string::npos) {
-			std::vector<std::string> tokens = split(msg, ',');
-			callsManager->onSuccessfulOutgoingCall(tokens.back());
-			continue;
-		}
-		else if (msg.find("onSuccessfulIncomingCall") != std::string::npos) {
-			callsManager->onSuccessfulIncomingCall();
-			continue;
-		}
-		else if (msg.find("onFailedOutgoingCall") != std::string::npos) {
-			std::vector<std::string> tokens = split(msg, ',');
-			callsManager->onFailedOutgoingCall(tokens.back());
-			continue;
-		}
-		else if (msg.find("onRejectedIncomingCall") != std::string::npos) {
-			callsManager->onRejectedIncomingCall();
-			continue;
-		}
-		else if (msg.find("onDisconnected") != std::string::npos) {
-			callsManager->onDisconnected();
-			continue;
 		}
 
-		std::cout << "Received message from server: " << buf << std::endl;
+		//-------------------------------------------------------------
+		// JSON payload parser
+		Json::Value jsonData;
+		if (jsonReader.parse(msg, jsonData) == true) {
+			// received data parsed as JSON data			
+			int msgId = std::stoi(jsonData["msgId"].asString());
+			Json::Value payloads = jsonData["payload"];
+			switch (msgId) {
+			case 301: // 301 : OUTGOING_CALL_RESULT
+				msgStr = "OUTGOING_CALL_RESULT";
+				callsManager->onOutgoingCallResult(payloads);
+				break;
+			case 302: // 302 : INCOMING_CALL
+				msgStr = "INCOMING_CALL";
+				callsManager->onIncomingCall(payloads);
+				break;
+			case 303: // 303 : INCOMING_CALL_RESULT
+				msgStr = "INCOMING_CALL_RESULT";
+				callsManager->onIncomingCallResult(payloads);
+				break;
+			case 305: // 305 : DISCONNECT_CALL
+				msgStr = "DISCONNECT_CALL";
+				callsManager->onDisconnected(payloads);
+				break;
+			default:
+				break;
+			}
+		}
+
+		std::cout << "Received message from server: [" << msgStr << "] " << buf << std::endl;
 	}
 }
 

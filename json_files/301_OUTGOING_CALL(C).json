@@ -2,7 +2,8 @@
     "msgId":301,     
     "payload" : 
         {
-            "id" : "tom.cruise@gmail.com"
+            "from" : "",
+            "to" : "tom.cruise@gmail.com"
         }
     
 }

@@ -1,0 +1,11 @@
+{
+    "msgId":303, 
+    "payload" : 
+        {
+            "rid" : "C_00000010",
+            "result" : 1,
+
+            
+            "__result" : "1:success, 2:fail"
+        }
+}

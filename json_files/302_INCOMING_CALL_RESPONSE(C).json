@@ -1,13 +1,12 @@
 {
-    "msgId":301, 
+    "msgId":302, 
     "payload" : 
-        {
+        {            
             "rid" : "C_00000010",
             "result" : 1,
             "cause" : 1,
 
-
-            "__result" : "1:success, 2:fail",
+            "__result" : "1:answer, 2:reject",
             "__cause" : "1:rejected, 2:busy, 3:unreachable"
-        }    
+        }
 }
