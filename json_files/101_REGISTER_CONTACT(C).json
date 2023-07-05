@@ -1,6 +1,6 @@
 {
     "msgId":101,
-    "payload" : [
+    "payload" : 
         {
             "cid":"tom@gmail.com",
             "email":"tom@gmail.com", 
@@ -8,6 +8,5 @@
             "password" : "123456", 
             "password_question" : 1, 
             "password_answer" : "maverick"
-        }    
-    ]
+        }        
 }

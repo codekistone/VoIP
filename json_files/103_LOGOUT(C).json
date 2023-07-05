@@ -1,8 +1,7 @@
 {
     "msgId":103,
-    "payload" : [
+    "payload" : 
         {
-            "cid" : "john.mayer@gmail.com" 
-        }    
-    ]
+            "id" : "john.mayer@gmail.com" 
+        }        
 }

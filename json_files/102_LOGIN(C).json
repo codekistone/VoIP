@@ -1,9 +1,8 @@
 {
     "msgId":102,
-    "payload" : [
+    "payload" : 
         {
             "email" : "tom@gmail.com", 
             "password" : "123456"
         }    
-    ]
 }

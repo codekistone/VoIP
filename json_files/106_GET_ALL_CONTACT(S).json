@@ -1,39 +1,36 @@
 {
     "msgId":106,
-    "payload" : [
+    "payload" : 
+    [
         {
-            "contacts" : [
-                {
-                    "cid":"tom.cruise@gmail.com",
-                    "email":"tom.cruise@gmail.com", 
-                    "name": "Tome Cruise", 
-                    "ipAddress" : "192.168.100.1", 
-                    "myContactList" : [
-                        {"cid":"john.mayer@gmail.com"},      
-                        {"cid":"jane.poster@gmail.com"}
-                    ]
-                },     
-                {
-                    "cid":"john.mayer@gmail.com",
-                    "email":"john.mayer@gmail.com", 
-                    "name": "John Mayer", 
-                    "ipAddress" : "192.168.100.2", 
-                    "myContactList" : [
-                        {"cid":"tom.cruise@gmail.com"},      
-                        {"cid":"jane.poster@gmail.com"}
-                    ]
-                },
-                {
-                    "cid":"jane.poster@gmail.com",
-                    "email":"jane.poster@gmail.com", 
-                    "name": "Jane Poster", 
-                    "ipAddress" : "192.168.100.2", 
-                    "myContactList" : [
-                        {"cid":"tom.cruise@gmail.com"},      
-                        {"cid":"john.mayer@gmail.com"}
-                    ]
-                }
+            "cid":"tom.cruise@gmail.com",
+            "email":"tom.cruise@gmail.com", 
+            "name": "Tome Cruise", 
+            "ipAddress" : "192.168.100.1", 
+            "myContactList" : [
+                "john.mayer@gmail.com",      
+                "jane.poster@gmail.com"
             ]
-        }    
+        },     
+        {
+            "cid":"john.mayer@gmail.com",
+            "email":"john.mayer@gmail.com", 
+            "name": "John Mayer", 
+            "ipAddress" : "192.168.100.2", 
+            "myContactList" : [
+                "tom.cruise@gmail.com",      
+                "jane.poster@gmail.com"
+            ]
+        },
+        {
+            "cid":"jane.poster@gmail.com",
+            "email":"jane.poster@gmail.com", 
+            "name": "Jane Poster", 
+            "ipAddress" : "192.168.100.2", 
+            "myContactList" : [
+                "tom.cruise@gmail.com",      
+                "john.mayer@gmail.com"
+            ]
+        }
     ]
 }

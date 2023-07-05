@@ -8,6 +8,7 @@
             "passwordQuestion": 1, 
             "passwordAnswer" : "we", 
             "ipAddress" : "192.168.100.1", 
+            "login" : false, 
             "myContactList" : [
                 "john.mayer@gmail.com",      
                 "jane.poster@gmail.com"
@@ -21,6 +22,7 @@
             "passwordQuestion": 1, 
             "passwordAnswer" : "work", 
             "ipAddress" : "192.168.100.2", 
+            "login" : false, 
             "myContactList" : [
                 "tom.cruise@gmail.com",      
                 "jane.poster@gmail.com"
@@ -34,6 +36,7 @@
             "passwordQuestion": 1, 
             "passwordAnswer" : "pen", 
             "ipAddress" : "192.168.100.2", 
+            "login" : false, 
             "myContactList" : [
                 "tom.cruise@gmail.com",      
                 "john.mayer@gmail.com"
