@@ -25,9 +25,9 @@ public:
 
     // JSON based callback methods
 	void handleRegisterContact(Json::Value data, string from) override;
-	string handleLogin(Json::Value data, string from) override;
-	void handleLogout(Json::Value data) override;
-	void handleUpdateMyContactList(Json::Value data) override;
-	void handleResetPassword(Json::Value data) override;
-	void handleGetAllContact() override;
+	string handleLogin(Json::Value data, string ipAddress, string from) override;
+	bool handleLogout(Json::Value data) override;
+	void handleUpdateMyContactList(Json::Value data, string from) override;
+	void handleResetPassword(Json::Value data, string from) override;
+	void handleGetAllContact(string from) override;
 };

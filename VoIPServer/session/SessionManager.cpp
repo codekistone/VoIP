@@ -174,7 +174,8 @@ void SessionManager::HandleClient(int clientSocket) {
 				break;
 			case 102: // 102 : LOGIN		
 				{
-					string cid = accountManager->handleLogin(payloads, contactId);
+					string ipAddress = GetClientName(clientSocket);
+					string cid = accountManager->handleLogin(payloads, ipAddress, contactId);
 					if (!cid.empty()) {		
 					    // Replace client map(IP Address:Port) to valid contactId after logged in				
 						clientMap.erase(contactId);
@@ -184,16 +185,19 @@ void SessionManager::HandleClient(int clientSocket) {
 				}
 				break;
 			case 103: // 103 : LOGOUT
-				accountManager->handleLogout(payloads);
+				if (accountManager->handleLogout(payloads)) {
+					clientMap.erase(contactId);
+					contactId = GetClientName(clientSocket);
+				}
 				break;
 			case 104: // 104 : UPDATE_MY_CONTACTLIST
-				accountManager->handleUpdateMyContactList(payloads);
+				accountManager->handleUpdateMyContactList(payloads, contactId);
 				break;
 			case 105: // 105 : RESET_PASSWORD
-				accountManager->handleResetPassword(payloads);
+				accountManager->handleResetPassword(payloads, contactId);
 				break;
 			case 106: // 106 : GET_ALL_CONTACT
-				accountManager->handleGetAllContact();
+				accountManager->handleGetAllContact(contactId);
 				break;
 			default:
 				break;
@@ -219,7 +223,8 @@ std::string SessionManager::GetClientName(int clientSocket)
 	std::string portStr = std::to_string(clientPort);
 	std::string displayName = "(" + ip + ":" + portStr + ")";
 
-	return displayName;
+	//return displayName;
+	return ip;
 }
 
 void SessionManager::sendData(const char* data, std::string to) {

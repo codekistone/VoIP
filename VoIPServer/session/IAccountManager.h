@@ -10,9 +10,9 @@ public:
 
     // JSON based callback methods
 	virtual void handleRegisterContact(Json::Value data, std::string from) = 0;
-	virtual std::string handleLogin(Json::Value data, std::string from) = 0;
-	virtual void handleLogout(Json::Value data) = 0;
-	virtual void handleUpdateMyContactList(Json::Value data) = 0;
-	virtual void handleResetPassword(Json::Value data) = 0;
-	virtual void handleGetAllContact() = 0;
+	virtual std::string handleLogin(Json::Value data, std::string ipAddress, std::string from) = 0;
+	virtual bool handleLogout(Json::Value data) = 0;
+	virtual void handleUpdateMyContactList(Json::Value data, std::string from) = 0;
+	virtual void handleResetPassword(Json::Value data, std::string from) = 0;
+	virtual void handleGetAllContact(std::string from) = 0;
 };
