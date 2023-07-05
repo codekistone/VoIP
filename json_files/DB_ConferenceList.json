@@ -5,9 +5,9 @@
             "dateAndTime":"1688454555", 
             "duration" : "3600000", 
             "participants" : [
-                {"cid":"tom.cruise@gmail.com"},  
-                {"cid":"john.mayer@gmail.com"},      
-                {"cid":"jane.poster@gmail.com"}
+                "tom.cruise@gmail.com",  
+                "john.mayer@gmail.com",      
+                "jane.poster@gmail.com"
             ]
         },
         {
@@ -15,8 +15,8 @@
             "dateAndTime":"1688540955", 
             "duration" : "3600000", 
             "participants" : [
-                {"cid":"tom.cruise@gmail.com"},  
-                {"cid":"john.mayer@gmail.com"}
+                "tom.cruise@gmail.com",  
+                "john.mayer@gmail.com"
             ]
         },
         {
@@ -24,8 +24,8 @@
             "dateAndTime":"1688627355", 
             "duration" : "3600000", 
             "participants" : [
-                {"cid":"tom.cruise@gmail.com"},   
-                {"cid":"jane.poster@gmail.com"}
+                "tom.cruise@gmail.com",   
+                "jane.poster@gmail.com"
             ]
         }
     ]
