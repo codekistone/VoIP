@@ -4,8 +4,8 @@
         {
             "cid" : "john.mayer@gmail.com",
             "myContactList" : [
-                {"cid":"tom.cruise@gmail.com"},      
-                {"cid":"jane.poster@gmail.com"}
+                "tom.cruise@gmail.com",      
+                "jane.poster@gmail.com"
             ]
         }    
     ]
