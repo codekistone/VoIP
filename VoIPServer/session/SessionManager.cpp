@@ -112,7 +112,7 @@ void SessionManager::HandleClient(int clientSocket) {
 		if (msg.find("Login") != std::string::npos) {
 			contactId = ("CONTACT_" + std::to_string(contactNum++));
 			clientMap.insert({ contactId, clientSocket });
-			accountListener->handleLogin(contactId.c_str());
+			accountListener->handleLogin_(contactId.c_str());
 		}
 		else if (msg.find("startOutgoingCall") != std::string::npos) {
 			std::vector<std::string> tokens = split(msg, ',');
@@ -138,8 +138,39 @@ void SessionManager::HandleClient(int clientSocket) {
 		}
 
 		std::cout << "Received message from client" << displayName << ": " << buffer << std::endl;
-	}
 
+		//-------------------------------------------------------------
+		// JSON payload parser
+		Json::Reader jsonReader;
+		Json::Value jsonData;
+		if (jsonReader.parse(msg, jsonData) == true) {
+			// received data parsed as JSON data			
+			int msgId = std::stoi(jsonData["msgId"].asString());
+			Json::Value payloads = jsonData["payload"];
+			switch (msgId) {
+			case 101: // 101 : REGISTER_CONTACT 
+				accountListener->handleRegisterContact(payloads);
+				break;
+			case 102: // 102 : LOGIN
+				accountListener->handleLogin(payloads);
+				break;
+			case 103: // 103 : LOGOUT
+				accountListener->handleLogout(payloads);
+				break;
+			case 104: // 104 : UPDATE_MY_CONTACTLIST
+				accountListener->handleUpdateMyContactList(payloads);
+				break;
+			case 105: // 105 : RESET_PASSWORD
+				accountListener->handleResetPassword(payloads);
+				break;
+			case 106: // 106 : GET_ALL_CONTACT
+				accountListener->handleGetAllContact();
+				break;
+			default:
+				break;
+			}
+		}
+	}
 	clientMap.erase(contactId);
 	closesocket(clientSocket);
 }

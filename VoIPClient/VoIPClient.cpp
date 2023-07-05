@@ -8,6 +8,40 @@
 #include "session/SessionManager.h"
 #pragma comment (lib, "../json/jsoncpp_static.lib")
 
+void jsonCommandParser( std::string message ) {
+	try {
+		if (message != "j") {
+			return;
+		}
+		SessionManager* sessionManager = SessionManager::getInstance();
+		std::cout << "** ENTER JSON TEXT Data : " << std::endl;
+		std::string line;
+		std::string lines;
+		while (getline(std::cin, line)) {
+			if (line.empty()) {
+				break;
+			}
+			lines += line + "\n";
+		}
+		Json::Value jsonData;
+		Json::Reader reader;
+		bool result = reader.parse(lines, jsonData);
+		if (result == false) {
+			std::cout << "Json : PARSE FAILED" << std::endl;
+			return;
+		}
+		Json::FastWriter fastWriter;
+		std::string jsonDataString = fastWriter.write(jsonData);
+		int retValue = sessionManager->sendData(jsonDataString.c_str());
+		if (retValue > 0) {
+			std::cout << "SENT (msgId : " << jsonData["msgId"] << ")" << std::endl;
+		}		
+	}
+	catch (std::exception e) {
+		std::cout << e.what() << std::endl;
+	}
+}
+
 int main() {
 	// TEST CODE
 	std::string IP, PORT;
@@ -62,6 +96,9 @@ int main() {
 		}
 
 		sessionManager->sendData(message.c_str());
+
+		jsonCommandParser(message);
+
 		if (message.empty()) {
 			break;
 		}

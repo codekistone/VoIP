@@ -2,6 +2,7 @@
 
 #include "AccountManagerListener.h"
 #include "SessionControl.h"
+#include "../../json/json.h"
 
 class AccountManager : public AccountManagerListener {
 private:
