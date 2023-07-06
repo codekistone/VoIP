@@ -1,6 +1,12 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <string>
+//MD5
+#include <openssl/md5.h>
+#include <openssl/evp.h>
+#include <iomanip>
+
 #include "AccountManager.h"
 
 AccountManager* AccountManager::instance = nullptr;
@@ -32,6 +38,35 @@ void AccountManager::login_() {
 	sessionControl->sendData("Login");
 }
 
+std::string AccountManager::md5(std::string& data) {
+	EVP_MD_CTX* mdctx;
+	const EVP_MD* md;
+	unsigned char md_value[EVP_MAX_MD_SIZE];
+	unsigned int md_len;
+
+	mdctx = EVP_MD_CTX_new();
+	md = EVP_md5();
+	EVP_DigestInit_ex(mdctx, md, nullptr);
+
+	EVP_DigestUpdate(mdctx, data.c_str(), data.length());
+
+	EVP_DigestFinal_ex(mdctx, md_value, &md_len);
+
+	std::stringstream ss;
+	for (unsigned int i = 0; i < md_len; ++i) {
+		ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(md_value[i]);
+	}
+
+	EVP_MD_CTX_free(mdctx);
+
+	return ss.str();
+}
+
+bool AccountManager::isSubstring(const std::string& source, const std::string& target)
+{
+	return source.find(target) != std::string::npos;
+}
+
 void AccountManager::registerAccount(std::string id, std::string email, std::string pw, std::string name, int pwdQuestion, std::string pwdAnswer)
 {
 	Json::Value root;
@@ -47,7 +82,7 @@ void AccountManager::registerAccount(std::string id, std::string email, std::str
 	
 	payload["email"] = email;
 	payload["name"] = name;
-	payload["password"] = pw;
+	payload["password"] = md5(pw);
 	payload["password_question"] = pwdQuestion;
 	payload["password_answer"] = pwdAnswer;
 
@@ -67,7 +102,7 @@ void AccountManager::login(std::string email, std::string pw) {
 	Json::Value payload;
 
 	payload["email"] = email;
-	payload["password"] = pw;
+	payload["password"] = md5(pw);
 
 	root["payload"] = payload;
 
@@ -133,7 +168,7 @@ void AccountManager::resetPassword(std::string cid, std::string newPW, int pwdQ,
 	Json::Value payload;
 
 	payload["cid"] = cid;
-	payload["password"] = newPW;
+	payload["password"] = md5(newPW);
 	payload["password_question"] = pwdQ;
 	payload["password_answer"] = pwdA;
 
@@ -157,6 +192,66 @@ void AccountManager::getAllContact(std::string cid) {
 	sessionControl->sendData(jsonCString);
 }
 
+std::list<AccountManager::ContactData> AccountManager::getMyContactList()
+{
+	//Returns the contactdata list found in the allcontact list based on the cid of mylist
+	std::list<ContactData> reList;
+	for (auto& myContact : AccountManager::myContactDataList) {
+		for (auto& contact : AccountManager::allConatactDataList) {
+			if (myContact == contact.cid) {
+				reList.push_back(contact);
+				break;
+			}
+		}
+	}
+	return reList;
+}
+
+std::list<AccountManager::ContactData> AccountManager::searchContact(std::string key)
+{
+	//Find and return list in allContactlist
+	std::list<AccountManager::ContactData> reList;
+
+	for (auto& contact : AccountManager::allConatactDataList) {
+		if (isSubstring(contact.cid, key)) {
+			if (myCid == contact.cid) continue;
+			reList.push_back(contact);
+			continue;
+		}
+		if (isSubstring(contact.email, key)) {
+			reList.push_back(contact);
+			continue;
+		}
+		if (isSubstring(contact.name, key)) {
+			reList.push_back(contact);
+			continue;
+		}
+	}
+	
+	return reList;
+}
+
+void AccountManager::deleteContact(std::string cid)
+{
+	//Request updateMyContactList after remove cid contact info in myContactDataList
+	for (auto& contact : AccountManager::myContactDataList) {
+		//contact is cid
+		if (contact == cid) {
+			myContactDataList.remove(contact);
+			break;
+		}
+	}
+
+	updateMyContactList(myCid, myContactDataList);
+}
+
+void AccountManager::addContact(std::string cid)
+{
+	//Add cid in myContactDataList and request updateMyContactList
+	myContactDataList.push_back(cid);
+	updateMyContactList(myCid, myContactDataList);
+}
+
 
 // Implement listener
 void AccountManager::handleLogin(Json::Value msg) {
@@ -177,10 +272,14 @@ void AccountManager::handleLogin(Json::Value msg) {
 		for (const auto& contact : myContactList) {
 			//std::string contactCid = contact["cid"].asString();
 			//myContactListResult.push_back(contactCid);
+			//This contact value is cid
 			myContactListResult.push_back(contact.asString());
 		}
 	}
-	
+
+	AccountManager::myContactDataList = myContactListResult;
+	AccountManager::myCid = cid;
+
 	//TODO : SEND msg to UI
 	std::cout << "cid: " << cid << std::endl;
 	std::cout << "email: " << email << std::endl;
@@ -209,7 +308,6 @@ void AccountManager::handleRegisterContact(Json::Value msg) {
 	else {
 		std::cout << "Register Result : " << result << std::endl;
 		std::cout << "Register Reason : " << reason << std::endl;
-
 	}
 }
 
@@ -243,6 +341,7 @@ void AccountManager::handleGetAllContact(Json::Value msg) {
 		}
 	}
 
+	AccountManager::allConatactDataList = contactDataList;
 	//TODO : SEND msg to UI
 	for (const auto& element : contactDataList) {
 		std::cout << "cid : " << element.cid << " ";

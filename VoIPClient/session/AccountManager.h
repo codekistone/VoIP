@@ -13,6 +13,10 @@ private:
 
 	AccountManager();
 
+	// Util method
+	std::string md5(std::string& data);
+	bool isSubstring(const std::string& source, const std::string& target);
+
 public:
 	static AccountManager* getInstance();
 	static void releaseInstance();
@@ -23,6 +27,11 @@ public:
 		std::string name;
 	};
 	
+	std::list<std::string> myContactDataList;
+	std::list<ContactData> allConatactDataList;
+	std::string myCid;
+	
+	// Communication with server (Send Msg)
 	void login_();
 	void registerAccount(std::string id, std::string email, std::string pw, std::string name, int pwdQuestion, std::string pwdAnswer);
 	void login(std::string id, std::string pw);
@@ -31,7 +40,13 @@ public:
 	void resetPassword(std::string cid, std::string newPassword, int pwdQuestion, std::string pwdAnswer);
 	void getAllContact(std::string cid);
 
-	// Listener
+	// Communication with UI
+	std::list<ContactData> getMyContactList();
+	std::list<ContactData> searchContact(std::string key);
+	void deleteContact(std::string cid);
+	void addContact(std::string cid);
+
+	// Listener (Recieve Msg)
 	void setSessionControl(SessionControl* control) override;
 	void onLoginSuccess(std::string contactId) override;
 	void handleRegisterContact(Json::Value data) override;

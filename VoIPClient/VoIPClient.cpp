@@ -7,6 +7,7 @@
 #include "session/AccountManager.h"
 #include "session/SessionManager.h"
 
+void accountTest();
 void jsonCommandParser( std::string message ) {
 	try {
 		if (message != "j") {
@@ -105,45 +106,91 @@ int main() {
 }
 
 void accountTest() {
-	//**** Account Test ****
-	//Register
+	int i = 0;
 	std::string id, email, pw, name, pwdAnswer, pwdQuestion, newpw;
-	std::cout << "id : ";
-	getline(std::cin, id);
-	std::cout << "email : ";
-	getline(std::cin, email);
-	std::cout << "pw : ";
-	getline(std::cin, pw);
-	std::cout << "name : ";
-	getline(std::cin, name);
-	std::cout << "pwdQuestion : ";
-	getline(std::cin, pwdQuestion);
-	std::cout << "pwdAnswer : ";
-	getline(std::cin, pwdAnswer);
-	AccountManager::getInstance()->registerAccount(id, email, pw, name, std::stoi(pwdQuestion), pwdAnswer);
+	std::string inputID, inputPW, input;
+	std::list<AccountManager::ContactData> list;
 
-	//resetpw
-	std::cout << std::endl << "Processing reset pw test ..." << std::endl;
-	std::cout << "newPassword : " << std::endl;
-	getline(std::cin, newpw);
-	AccountManager::getInstance()->resetPassword(id, newpw, std::stoi(pwdQuestion), pwdAnswer);
+	while (true) {
+		std::cout << "Input int : ";
+		std::cin >> i;
+		if (i == 0) break;
+	
+		switch (i) {
 
-	//login
-	std::string inputID, inputPW;
-	std::cout << std::endl << "Processing login test ..." << std::endl;
-	std::cout << "id : " << std::endl;
-	getline(std::cin, inputID);
-	std::cout << "pw : " << std::endl;
-	getline(std::cin, inputPW);
-	AccountManager::getInstance()->login(inputID, inputPW);
+		case 1: //REGISTER
+			//Register
+			std::cout << "id : ";
+			getline(std::cin >> std::ws, id);
+			std::cout << "email : ";
+			getline(std::cin >> std::ws, email);
+			std::cout << "pw : ";
+			getline(std::cin >> std::ws, pw);
+			std::cout << "name : ";
+			getline(std::cin >> std::ws, name);
+			std::cout << "pwdQuestion : ";
+			getline(std::cin >> std::ws, pwdQuestion);
+			std::cout << "pwdAnswer : ";
+			getline(std::cin >> std::ws, pwdAnswer);
+			AccountManager::getInstance()->registerAccount(id, email, pw, name, std::stoi(pwdQuestion), pwdAnswer);
+			break;
 
-	//updateMyContactList
-	//std::cout << "Processing updateMyContactList test ..." << std::endl;
-	//AccountManager::getInstance()->updateMyContactList(nullptr);
+		case 2: //LOGIN
+			std::cout << std::endl << "Processing login test ..." << std::endl;
+			std::cout << "id : " << std::endl;
+			getline(std::cin >> std::ws, inputID);
+			std::cout << "pw : " << std::endl;
+			getline(std::cin >> std::ws, inputPW);
+			AccountManager::getInstance()->login(inputID, inputPW);
+			break;
 
-	//getAllContact
-	std::cout << std::endl << "Processing getAllContact test ..." << std::endl;
-	AccountManager::getInstance()->getAllContact(id);
+		case 3: //LOGOUT
+			break;
 
-	//**** Account TestEnd ****
+		case 4: //UPDATE MY CONTACTLIST
+			std::cout << "Processing updateMyContactList test ..." << std::endl;
+			//AccountManager::getInstance()->updateMyContactList(AccountManager::getInstance()->myCid, nullptr);
+			break;
+
+		case 5: //RESET PW
+			std::cout << std::endl << "Processing reset pw test ..." << std::endl;
+			std::cout << "newPassword : " << std::endl;
+			getline(std::cin >> std::ws, newpw);
+			AccountManager::getInstance()->resetPassword(id, newpw, std::stoi(pwdQuestion), pwdAnswer);
+			break;
+
+		case 6: //GET ALL CONTACTLIST FROM SERVER
+			std::cout << std::endl << "Processing getAllContact test ..." << std::endl;
+			AccountManager::getInstance()->getAllContact(id);
+			break;
+
+		case 7://GETMYCONTACTLIST FOR UI
+			list = AccountManager::getInstance()->getMyContactList();
+			for (auto& myContact : list) {
+				std::cout << "contact : " << myContact.cid << ", " << myContact.email << ", " << myContact.name << std::endl;
+			}
+			break;
+		case 8://SERCHCONTACT FOR UI
+			std::cout << std::endl << "Please input search text : " << std::endl;
+			getline(std::cin >> std::ws, input);
+			list = AccountManager::getInstance()->searchContact(input);
+			for (auto& myContact : list) {
+				std::cout << myContact.cid << ", " << myContact.email << ", " << myContact.name << std::endl;
+			}
+			break;
+		case 9://ADDCONTACT IN MYCONTACTLIST
+			std::cout << std::endl << "Please add contact cid : " << std::endl;
+			getline(std::cin >> std::ws, input);
+			AccountManager::getInstance()->addContact(input);
+			break;
+		case 10://DELETECONTACT IN MYCONTACTLIST
+			std::cout << std::endl << "Please delete contact cid : " << std::endl;
+			getline(std::cin >> std::ws, input);
+			AccountManager::getInstance()->deleteContact(input);
+			break;
+		default:
+			break;
+		}
+		
+	}
 }
