@@ -15,6 +15,5 @@ private:
 
 public:
 	static CommandLineInterface* getInstance();
-	void startJsonCli();
 	void startCommandCli();
 };

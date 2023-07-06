@@ -138,7 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandLineInterface.h" />
-    <ClInclude Include="dirent.h" />
     <ClInclude Include="session\AccountManager.h" />
     <ClInclude Include="session\IAccountManager.h" />
     <ClInclude Include="session\Call.h" />

@@ -1,43 +1,58 @@
 {
-    "contacts" : [
-        {
-            "cid":"tom.cruise@gmail.com",
-            "email":"tom.cruise@gmail.com", 
-            "name": "Tome Cruise", 
-            "password":"abcde", 
-            "passwordQuestion": 1, 
-            "passwordAnswer" : "we", 
-            "ipAddress" : "192.168.100.1", 
-            "myContactList" : [
-                "john.mayer@gmail.com",      
-                "jane.poster@gmail.com"
-            ]
-        },     
-        {
-            "cid":"john.mayer@gmail.com",
-            "email":"john.mayer@gmail.com", 
-            "name": "John Mayer", 
-            "password":"abcde", 
-            "passwordQuestion": 1, 
-            "passwordAnswer" : "work", 
-            "ipAddress" : "192.168.100.2", 
-            "myContactList" : [
-                "tom.cruise@gmail.com",      
-                "jane.poster@gmail.com"
-            ]
-        },
-        {
-            "cid":"jane.poster@gmail.com",
-            "email":"jane.poster@gmail.com", 
-            "name": "Jane Poster", 
-            "password":"abcde", 
-            "passwordQuestion": 1, 
-            "passwordAnswer" : "pen", 
-            "ipAddress" : "192.168.100.2", 
-            "myContactList" : [
-                "tom.cruise@gmail.com",      
-                "john.mayer@gmail.com"
-            ]
-        }
-    ]
+   "contacts" : [
+      {
+         "cid" : "bruno",
+         "email" : "bruno.yoo@gmail.com",
+         "ipAddress" : "127.0.0.1",
+         "login" : true,
+         "name" : "Bruno Yoo",
+         "password" : "c6f7c372641dd25e0fddf0215375561f",
+         "password_answer" : "hello",
+         "password_question" : 2
+      },
+      {
+         "cid" : "tom",
+         "email" : "tom.cruise@gmail.com",
+         "ipAddress" : "127.0.0.1",
+         "login" : true,
+         "name" : "Tom cruise",
+         "password" : "827ccb0eea8a706c4c34a16891f84e7b",
+         "password_answer" : "seoul",
+         "password_question" : 1
+      },
+      {
+         "cid" : "chris",
+         "email" : "chris@gmail.com",
+         "ipAddress" : "127.0.0.1",
+         "login" : true,
+         "name" : "Chris Pratt",
+         "password" : "827ccb0eea8a706c4c34a16891f84e7b",
+         "password_answer" : "seoul",
+         "password_question" : 1
+      },
+      {
+         "cid" : "joe",
+         "email" : "joe@gmail.com",
+         "name" : "Joe Passi",
+         "password" : "827ccb0eea8a706c4c34a16891f84e7b",
+         "password_answer" : "seoul",
+         "password_question" : 1
+      },
+      {
+         "cid" : "hdmi",
+         "email" : "hdmi@gmail.com",
+         "name" : "Hdmi screen",
+         "password" : "827ccb0eea8a706c4c34a16891f84e7b",
+         "password_answer" : "seoul",
+         "password_question" : 1
+      },
+      {
+         "cid" : "gogo",
+         "email" : "gogo@gmail.com",
+         "name" : "Power Ranger",
+         "password" : "827ccb0eea8a706c4c34a16891f84e7b",
+         "password_answer" : "seoul",
+         "password_question" : 1
+      }
+   ]
 }

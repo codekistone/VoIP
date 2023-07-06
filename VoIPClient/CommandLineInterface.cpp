@@ -6,58 +6,11 @@
 #include "CommandLineInterface.h"
 #include "session/SessionControl.h"
 #include "session/SessionManager.h"
-#include "dirent.h"
 #include "../json/json.h"
 
 using namespace std;
-#define MAX_JSON_FILE_SIZE		40960
-#define JSON_RELATIVE_DIR		"../json_files/"
 
 CommandLineInterface* CommandLineInterface::instance = nullptr;
-
-char readBuffer[MAX_JSON_FILE_SIZE] = { 0, };
-std::map<int, string> jsonFiles;
-
-bool openDirectory(string path) {
-	struct dirent* ent;
-	DIR* dir = opendir(path.c_str());
-	if (dir != NULL) {
-		int index = 0;
-		while ((ent = readdir(dir)) != NULL) {
-			string fileName = ent->d_name;
-			if (fileName.find("json") != std::string::npos) {
-				jsonFiles.insert({ index++, ent->d_name });
-			}
-		}
-	}
-	closedir(dir);
-	if (jsonFiles.size() > 0) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-
-Json::Value openJson(string path, string name) {
-	string fileName = path + name;
-	FILE* fp = nullptr;
-	fopen_s(&fp, &*fileName.begin(), "rb");
-	if (fp == nullptr) {
-		return NULL;
-	}
-	size_t fileSize = fread(readBuffer, 1, MAX_JSON_FILE_SIZE, fp);
-	fclose(fp);
-	std::string config_doc = readBuffer;
-	Json::Reader reader;
-	Json::Value root;
-	bool parsingSuccessful = reader.parse(config_doc, root);
-	if (parsingSuccessful == false) {
-		return NULL;
-	}
-	return root;
-}
 
 CommandLineInterface::CommandLineInterface() {
 	sessionManager = SessionManager::getInstance();
@@ -70,55 +23,6 @@ CommandLineInterface* CommandLineInterface::getInstance() {
 		instance = new CommandLineInterface();
 	}
 	return instance;
-}
-
-void CommandLineInterface::startJsonCli()
-{
-	cout << "======================================================" << endl;
-	cout << "COMMAND LINE INTERFACE " << std::endl;
-	cout << "======================================================" << endl;
-	std::string serverIp, serverPort;
-	std::cout << "Input serverIP(127.0.0.1): ";
-	getline(std::cin, serverIp);
-	std::cout << "Input serverPort(5555): ";
-	getline(std::cin, serverPort);
-
-	int port = serverPort.length() > 0 ? std::stoi(serverPort) : 0;
-	std::thread t(&SessionManager::init, sessionManager, serverIp.c_str(), port);
-	std::this_thread::sleep_for(std::chrono::milliseconds(300)); //TEST
-
-	string jsonFilesPath = JSON_RELATIVE_DIR;
-	if (!openDirectory(jsonFilesPath)) {
-		jsonFilesPath = "../" + jsonFilesPath;
-		openDirectory(jsonFilesPath);
-	}
-	while (true) {
-		Json::FastWriter fastWriter;
-		string input;		
-		cout << "======================================================" << endl;
-		cout << "JSON CLI" << endl;
-		cout << "======================================================" << endl;
-		for (int i = 0; i < jsonFiles.size(); i++) {
-			cout << i << ".  " << jsonFiles[i] << endl;
-		}
-		cout << "======================================================" << endl;
-		cout << "ENTER : ";		
-		getline(cin, input);
-		if (!input.empty()) {
-			int number = stoi(input);
-			string fileName = jsonFiles[number];
-			if (!fileName.empty()) {
-				Json::Value jsonData = openJson(jsonFilesPath, fileName);
-				cout << "--------------------------------------------------------" << endl;
-				cout << "SEND : " << jsonData << endl;
-				cout << "--------------------------------------------------------" << endl;
-				std::string jsonDataString = fastWriter.write(jsonData);
-				int retValue = sessionManager->sendData(jsonDataString.c_str());
-			}
-		}
-	}
-	t.join();
-	cout << "JOIN CALLED" << endl;
 }
 
 void CommandLineInterface::startCommandCli()
@@ -142,7 +46,7 @@ void CommandLineInterface::startCommandCli()
 	std::list<AccountManager::ContactData> list;
 
 	while (true) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(300)); 
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000)); 
 		cout << "======================================================" << endl;
 		cout << "------------------------------------------------------" << endl;
 		cout << " ACCOUNT" << endl;
