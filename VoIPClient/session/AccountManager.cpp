@@ -235,6 +235,9 @@ void AccountManager::addContact(std::string cid)
 	updateMyContactList(myCid, myContactDataList);
 }
 
+void AccountManager::setSessionControl(SessionControl* control) {
+	sessionControl = control;
+}
 
 void AccountManager::handleLogin(Json::Value msg) {
 	//std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;

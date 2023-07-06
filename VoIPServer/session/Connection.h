@@ -17,6 +17,7 @@ private:
 	std::list<std::string> conferenceList;
 
 public:
+	Connection();
 	Connection(std::string id);
 	Connection(std::string id, Json::Value conferenceInfo);
 

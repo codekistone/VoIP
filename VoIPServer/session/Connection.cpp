@@ -1,5 +1,6 @@
 #include "Connection.h"
 
+Connection::Connection() {};
 Connection::Connection(std::string connId) {
 	id = connId;
 };
