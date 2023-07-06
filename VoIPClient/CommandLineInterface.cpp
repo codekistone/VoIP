@@ -174,8 +174,14 @@ void CommandLineInterface::startCommandCli()
 		cout << "======================================================" << endl;
 		std::cout << "Input int : " ;
 		getline(cin, num);
-		int selected = stoi(num);
-		if (selected == 0) {
+		int selected = 0;
+		try {
+			selected = stoi(num);
+			if (selected == 0) {
+				continue;
+			}
+		}
+		catch (exception ex) {
 			continue;
 		}
 		switch (selected) {
@@ -197,7 +203,7 @@ void CommandLineInterface::startCommandCli()
 			break;
 
 		case 2: //LOGIN
-			std::cout << "cid : ";
+			std::cout << "email : ";
 			getline(std::cin >> std::ws, inputID);
 			std::cout << "password : ";
 			getline(std::cin >> std::ws, inputPW);

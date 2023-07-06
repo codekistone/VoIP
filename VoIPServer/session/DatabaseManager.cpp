@@ -81,7 +81,7 @@ string DatabaseManager::search(string key, string word)
 		for (int i = 0; i < (int)datas.size(); i++) {
 			if (datas[i][key].isArray()) {
 				for (int j = 0; j < datas[i][key].size(); j++) {
-					if (datas[i][key][j].asString().find(word) != std::string::npos) {
+					if ( datas[i][key][j].asString().compare(word) == 0 ){
 						#ifdef DEBUG
 						cout << "search()/OK/Key[" + key + "]/Word[" + word + "]/Id:" << datas[i][dbUid].asString() << endl;
 						#endif
@@ -91,7 +91,7 @@ string DatabaseManager::search(string key, string word)
 			}
 			else {
 				string source = datas[i][key].asString();
-				if (source.find(word) != std::string::npos) {
+				if ( source.compare(word) == 0 ) {
 					#ifdef DEBUG
 					cout << "search()/OK/Key[" + key + "]/Word[" + word + "]/Id:" << datas[i][dbUid].asString() << endl;
 					#endif

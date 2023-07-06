@@ -44,8 +44,15 @@ void AccountManager::handleRegisterContact(Json::Value data, string from)
 		// No CID from client, use email as CID
 		data["cid"] = data["email"];
 		cid = data["cid"].asString();
-	} 
-	if (contactDb->get(cid) == NULL) {
+	}
+	bool cidExists = (contactDb->get(cid) == NULL) ? false : true;
+	bool emailExists = false;
+	string searchCid = contactDb->search("email", data["email"].asString());
+	if (!searchCid.empty()) {
+		emailExists = true;
+	}
+
+	if (!emailExists && !cidExists) {
 		// No user exists : Add registration data to database
 		contactDb->update(cid, data);
 		if (!data["password"].empty() &&
@@ -62,10 +69,18 @@ void AccountManager::handleRegisterContact(Json::Value data, string from)
 			cout << "handleRegisterContact()/FAIL: Mandatory items are missing" << endl;
 		}
 	} else {
-		// User already exists return error 
+		// User already exists return error )
 		payload["result"] = 1; // Failed
-		payload["reason"] = "Contact Identifier Already exists";		
-		cout << "handleRegisterContact()/FAIL: Contact Identifier Already exists" << endl;
+		if (emailExists) {
+			payload["reason"] = "Same Email Already used by " + searchCid;
+			cout << "handleRegisterContact()/FAIL: Same Email Already used by" << searchCid << endl;
+		}
+		else {
+			payload["reason"] = "Contact Identifier Already exists";
+			cout << "handleRegisterContact()/FAIL: Contact Identifier Already exists" << endl;
+
+		}
+
 	}	
 	/*
 		result 0 : SUCCESS

@@ -7,7 +7,7 @@
 #include "ICallsManager.h"
 #include "IAccountManager.h"
 
-constexpr auto PACKET_SIZE = 1024;
+constexpr auto PACKET_SIZE = 10240;
 
 class SessionManager : public SessionControl {
 private:
