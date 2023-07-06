@@ -23,6 +23,7 @@ public:
 
 	void handleAnswer(Json::Value data);
 	void handleReject(Json::Value data);
+	bool joinableConference(Json::Value data);
 
 	// Listener
 	void setSessionControl(SessionControl* control) override;
@@ -31,4 +32,7 @@ public:
 	void handleIncomingCallResponse(Json::Value data) override;
 	void handleDisconnect(Json::Value data) override;
 	void releaseConnection(std::string cid) override;
+	void handleCreateConference(Json::Value data) override;
+	void handleJoinConference(Json::Value data) override;
+	void handleExitConference(Json::Value data) override;
 };

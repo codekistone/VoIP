@@ -2,7 +2,12 @@
     "msgId":208, 
     "payload" : 
         {
-            "result" : 1
+            "result" : 1,
+            "cause" : 1,
+
+
+            "__result" : "1:success, 2:fail",
+            "__cause" : "1:no room, 2: not started, 3:uninvited"
         }    
     
 }

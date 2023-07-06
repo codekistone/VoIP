@@ -31,13 +31,6 @@ void AccountManager::releaseInstance() {
 	}
 }
 
-void AccountManager::login_() {
-	// do login
-	std::cout << "ACCOUNT :: doLogin" << std::endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
-	sessionControl->sendData("Login");
-}
-
 std::string AccountManager::md5(std::string& data) {
 	EVP_MD_CTX* mdctx;
 	const EVP_MD* md;
@@ -128,16 +121,6 @@ void AccountManager::logout(std::string cid) {
 
 	const char* jsonCString = jsonString.c_str();
 	sessionControl->sendData(jsonCString);
-}
-
-
-// Implement interface
-void AccountManager::setSessionControl(SessionControl* control) {
-	sessionControl = control;
-}
-
-void AccountManager::onLoginSuccess(std::string contactId) {
-	std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;
 }
 
 void AccountManager::updateMyContactList(std::string cid, std::list<std::string>& list) {
@@ -253,7 +236,6 @@ void AccountManager::addContact(std::string cid)
 }
 
 
-// Implement listener
 void AccountManager::handleLogin(Json::Value msg) {
 	//std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;
 	Json::Value payload = msg;
@@ -349,4 +331,16 @@ void AccountManager::handleGetAllContact(Json::Value msg) {
 		std::cout << "name : " << element.name << " ";
 		std::cout << std::endl;
 	}
+}
+
+// TEMP
+void AccountManager::login_() {
+	// do login
+	std::cout << "ACCOUNT :: doLogin" << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
+	sessionControl->sendData("Login");
+}
+
+void AccountManager::onLoginSuccess(std::string contactId) {
+	std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;
 }

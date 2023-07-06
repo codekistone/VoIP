@@ -184,6 +184,20 @@ void SessionManager::HandleClient(int clientSocket) {
 				msgStr = "GET_ALL_CONTACT";
 				accountManager->handleGetAllContact(contactId);
 				break;
+			case 206: // 206 : CREATE_CONFERENCE
+				msgStr = "CREATE_CONFERENCE";
+				telephonyManager->handleCreateConference(payloads);
+				break;
+			case 208: // 208 : JOIN_CONFERENCE
+				msgStr = "JOIN_CONFERENCE";
+				payloads["from"] = contactId;
+				telephonyManager->handleJoinConference(payloads);
+				break;
+			case 209: // 209 : EXIT_CONFERENCE
+				msgStr = "EXIT_CONFERENCE";
+				payloads["from"] = contactId;
+				telephonyManager->handleExitConference(payloads);
+				break;
 			case 301: // 301 : OUTGOING_CALL
 				{
 					msgStr = "OUTGOING_CALL";

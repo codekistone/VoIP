@@ -83,7 +83,13 @@ void SessionManager::proc_recv() {
 		// listener test
 		
 		std::string msg(buf);
-	
+		std::string msgStr;
+		if (msg.find("onLoginSuccess") != std::string::npos) {
+			msgStr = "onLoginSuccess";
+			std::vector<std::string> tokens = split(msg, ',');
+			accountManager->onLoginSuccess(tokens.back());
+		}
+
 		//-------------------------------------------------------------
 		// JSON payload parser
 		Json::Value jsonData;
@@ -109,26 +115,15 @@ void SessionManager::proc_recv() {
 			case 106: // 106 : GET_ALL_CONTACT
 				accountManager->handleGetAllContact(payloads);
 				break;
-			default:
-				
+			case 205: // 205 : GET_ALL_CONFERENCE
+				// accountManager->handleGetAllConference(payloads);
 				break;
-			}
-		}
-
-		std::string msgStr;
-		if (msg.find("onLoginSuccess") != std::string::npos) {
-			msgStr = "onLoginSuccess";
-			std::vector<std::string> tokens = split(msg, ',');
-			accountManager->onLoginSuccess(tokens.back());
-		}
-
-		//-------------------------------------------------------------
-		// JSON payload parser
-		if (jsonReader.parse(msg, jsonData) == true) {
-			// received data parsed as JSON data			
-			int msgId = std::stoi(jsonData["msgId"].asString());
-			Json::Value payloads = jsonData["payload"];
-			switch (msgId) {
+			case 208: // 208 : JOIN_CONFERENCE
+				msgStr = "JOIN_CONFERENCE";
+				break;
+			case 209: // 209 : EXIT_CONFERENCE
+				msgStr = "EXIT_CONFERENCE";
+				break;
 			case 301: // 301 : OUTGOING_CALL_RESULT
 				msgStr = "OUTGOING_CALL_RESULT";
 				callsManager->onOutgoingCallResult(payloads);
