@@ -23,8 +23,9 @@ public:
 	static TelephonyManager* getInstance();
 	static void releaseInstance();
 
-	void handleAnswer(Json::Value data);
-	void handleReject(Json::Value data);
+	void release();
+	void onAnswer(Json::Value data);
+	void onReject(Json::Value data);
 	bool joinableConference(Json::Value data);
 
 	// Listener
