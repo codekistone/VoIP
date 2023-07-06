@@ -2,7 +2,7 @@
     "msgId":206, 
     "payload" : 
         {
-            "cid":"",
+            "rid":"",
             "dateAndTime":1688454555, 
             "duration" : 3600000, 
             "participants" : [

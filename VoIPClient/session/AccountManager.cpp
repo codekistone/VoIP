@@ -175,6 +175,35 @@ void AccountManager::getAllContact(std::string cid) {
 	sessionControl->sendData(jsonCString);
 }
 
+void AccountManager::createConference(long dateAndTime, long duration, std::list<std::string>& participants) {
+
+	Json::Value payload;
+	payload["dateAndTime"] = (Json::UInt64)dateAndTime;
+	payload["duration"] = (Json::UInt64)duration;
+	int index = 0;
+	for (const auto& element : participants) {
+		payload["participants"][index++] = element;
+	}
+	Json::Value root;
+	root["msgId"] = 206;
+	root["payload"] = payload;
+	Json::StreamWriterBuilder writerBuilder;
+	std::string jsonString = Json::writeString(writerBuilder, root);
+	sessionControl->sendData(jsonString.c_str());
+}
+
+void AccountManager::getAllConference(std::string cid)
+{
+	Json::Value root;
+	Json::Value payload;
+	payload["cid"] = cid;
+	root["msgId"] = 205;
+	root["payload"] = payload;
+	Json::StreamWriterBuilder writerBuilder;
+	std::string jsonString = Json::writeString(writerBuilder, root);
+	sessionControl->sendData(jsonString.c_str());
+}
+
 std::list<AccountManager::ContactData> AccountManager::getMyContactList()
 {
 	//Returns the contactdata list found in the allcontact list based on the cid of mylist

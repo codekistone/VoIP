@@ -146,6 +146,9 @@ void SessionManager::HandleClient(int clientSocket) {
 			// received data parsed as JSON data			
 			int msgId = std::stoi(jsonData["msgId"].asString());
 			Json::Value payloads = jsonData["payload"];
+			std::cout << "--------------------------------------------------------" << std::endl;
+			std::cout << "RECEIVE / " << msgId << " : " << payloads << std::endl;
+			std::cout << "--------------------------------------------------------" << std::endl;
 			switch (msgId) {
 			case 101: // 101 : REGISTER_CONTACT 		
 				msgStr = "REGISTER_CONTACT";
@@ -183,6 +186,10 @@ void SessionManager::HandleClient(int clientSocket) {
 			case 106: // 106 : GET_ALL_CONTACT
 				msgStr = "GET_ALL_CONTACT";
 				accountManager->handleGetAllContact(contactId);
+				break;
+			case 205: // 105: GET_ALL_CONFERENCE
+				msgStr = "GET_ALL_CONFERENCE";
+				accountManager->handleGetAllConference(payloads, contactId);
 				break;
 			case 206: // 206 : CREATE_CONFERENCE
 				msgStr = "CREATE_CONFERENCE";

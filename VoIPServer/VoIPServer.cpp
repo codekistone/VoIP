@@ -50,19 +50,14 @@ static void testDatabase() {
 }
 
 int main() {
-
-    //testDatabase();
-
-    // UI Thread
+    //testDatabase();   
     SessionManager* sessionManager = SessionManager::getInstance();
-    //sessionManager->init();
     std::thread t(&SessionManager::init, sessionManager);
 
     // TEST CODE
     while (true) {
         std::string message;
         getline(std::cin, message);
-
         if (message.empty()) {
             SessionManager::releaseInstance();
             break;
@@ -72,6 +67,7 @@ int main() {
 
     TelephonyManager::releaseInstance();
     AccountManager::releaseInstance();
+    SessionManager::releaseInstance();
     std::cout << "Exit Main Thread" << std::endl;
 
     return 0;

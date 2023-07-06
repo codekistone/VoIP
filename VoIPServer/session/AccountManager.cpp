@@ -7,6 +7,7 @@ AccountManager* AccountManager::instance = nullptr;
 AccountManager::AccountManager() {
 	sessionControl = nullptr;
 	contactDb = ContactDb::getInstance();
+	conferenceDb = ConferenceDb::getInstance();
 }
 
 AccountManager* AccountManager::getInstance() {
@@ -76,6 +77,7 @@ void AccountManager::handleRegisterContact(Json::Value data, string from)
 
 string AccountManager::handleLogin(Json::Value data, string ipAddress, string from)
 {	
+	bool result = false;
 	Json::Value payload;
 	// Get Unique contact id from Database using received email
 	string cid = contactDb->search("email", data["email"].asString());
@@ -84,17 +86,23 @@ string AccountManager::handleLogin(Json::Value data, string ipAddress, string fr
 		// Check password
 		string storedPassword = contactDb->get(cid, "password").asString();
 		if (data["password"] == storedPassword) {
+			if (contactDb->get(cid, "login") == true) {
+				// TODO : Do we have to check already logged in state?
+			}
 			// Password patch 
 			contactDb->update(cid, "login", true); // Update login status	
 			contactDb->update(cid, "ipAddress", ipAddress); // Update IP address
 			payload["result"] = 0; // Success
 			payload["myContactData"] = contactDb->get(cid);
-			payload["myContactData"].removeMember("ipAddress");
-			payload["myContactData"].removeMember("login");
-			payload["myContactData"].removeMember("password");
-			payload["myContactData"].removeMember("passwordAnswer");
-			payload["myContactData"].removeMember("passwordQuestion");
+			if (!payload["myContactData"].isNull()) {
+				payload["myContactData"].removeMember("ipAddress");
+				payload["myContactData"].removeMember("login");
+				payload["myContactData"].removeMember("password");
+				payload["myContactData"].removeMember("passwordAnswer");
+				payload["myContactData"].removeMember("passwordQuestion");
+			}
 			cout << "handleLogin()/OK:" << payload << endl;
+			result = true;
 		} else {
 			// Wrong password
 			payload["result"] = 2; // Fail 
@@ -112,6 +120,9 @@ string AccountManager::handleLogin(Json::Value data, string ipAddress, string fr
 		result 2 : FAILED (WRONG PASSWORD)
 	*/
 	sessionControl->sendData(102, payload, from);
+	if (result == true) {
+	    handleGetAllContact(from);
+	}
 	return cid;
 }
 
@@ -207,5 +218,21 @@ void AccountManager::handleGetAllContact( string from)
 		std::cout << "handleGetAllContact()/FAILED:" << payload << std::endl;
 	}
 	sessionControl->sendData(106, payload, from);
+}
+
+void AccountManager::handleGetAllConference(Json::Value data, string from)
+{
+	string cid = data["cid"].asString();
+	Json::Value payload;
+	Json::Value allConferences = conferenceDb->get();
+	for (int i = 0; i < allConferences.size(); i++) {		
+		for (int j = 0; j < allConferences[i]["participants"].size(); j++) {
+			if (allConferences[i]["participants"][j] == cid) {
+				payload.append(allConferences[i]);
+			}
+		}
+	}
+	std::cout << "handleGetAllConference()/From[" << from << "]OK:" << payload << std::endl;	
+	sessionControl->sendData(205, payload, from);
 }
 

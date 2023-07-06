@@ -8,6 +8,7 @@ int connNum = 0;
 
 TelephonyManager::TelephonyManager() {
 	sessionControl = nullptr;
+	conferenceDb = ConferenceDb::getInstance();
 }
 
 TelephonyManager* TelephonyManager::getInstance() {
@@ -199,6 +200,7 @@ void TelephonyManager::handleCreateConference(Json::Value data) {
 	Connection conn(connId, data);
 
 	connectionMap.insert({ connId, conn });
+	conferenceDb->update(connId, data); // Add data
 	std::cout << "Room Created " << connId << std::endl;
 
 	// TODO Media - SESSION_MEDIA_SERVER_CREATE

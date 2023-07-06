@@ -15,4 +15,5 @@ public:
 	virtual void handleUpdateMyContactList(Json::Value data, std::string from) = 0;
 	virtual void handleResetPassword(Json::Value data, std::string from) = 0;
 	virtual void handleGetAllContact(std::string from) = 0;
+	virtual void handleGetAllConference(Json::Value data, std::string from) = 0;
 };

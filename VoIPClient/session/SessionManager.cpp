@@ -97,7 +97,9 @@ void SessionManager::proc_recv() {
 			// received data parsed as JSON data			
 			int msgId = std::stoi(jsonData["msgId"].asString());
 			Json::Value payloads = jsonData["payload"];
-			std::cout << msgId << ":" << payloads << std::endl;
+			std::cout << "--------------------------------------------------------" << std::endl;
+			std::cout << "RECEIVE / " << msgId << " : " << payloads << std::endl;
+			std::cout << "--------------------------------------------------------" << std::endl;
 			switch (msgId) {
 			case 101: // 101 : REGISTER_CONTACT 
 				accountManager->handleRegisterContact(payloads);

@@ -60,6 +60,10 @@ void CallsManager::answerCall() {
 		std::cerr << "Not register sessionControl" << std::endl;
 		return;
 	}
+	if (call == NULL) {
+		std::cout << "No call instance" << std::endl;
+		return; 
+	}
 	if (call->getCallState() != CallState::STATE_RINGING) {
 		return;
 	}
@@ -73,6 +77,10 @@ void CallsManager::answerCall() {
 void CallsManager::rejectCall() {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
+	if (call == NULL) {
+		std::cout << "No call instance" << std::endl;
 		return;
 	}
 	if (call->getCallState() != CallState::STATE_RINGING) {
@@ -89,6 +97,10 @@ void CallsManager::rejectCall() {
 void CallsManager::disconnectCall() {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
+	if (call == NULL) {
+		std::cout << "No call instance" << std::endl;
 		return;
 	}
 	std::string callId = call->getCallId();

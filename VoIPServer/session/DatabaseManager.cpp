@@ -79,15 +79,31 @@ string DatabaseManager::search(string key, string word)
 		Json::Value database = readFromFile();
 		Json::Value datas = database[dbName];
 		for (int i = 0; i < (int)datas.size(); i++) {
-			string source = datas[i][key].asString();
-			if (source.find(word) != std::string::npos) {
-				cout << "search()/OK/Key[" + key + "]/Word[" + word + "]/Id:" << datas[i][dbUid].asString() << endl;
-				return datas[i][dbUid].asString();
+			if (datas[i][key].isArray()) {
+				for (int j = 0; j < datas[i][key].size(); j++) {
+					if (datas[i][key][j].asString().find(word) != std::string::npos) {
+						#ifdef DEBUG
+						cout << "search()/OK/Key[" + key + "]/Word[" + word + "]/Id:" << datas[i][dbUid].asString() << endl;
+						#endif
+						return datas[i][dbUid].asString();
+					}
+				}
+			}
+			else {
+				string source = datas[i][key].asString();
+				if (source.find(word) != std::string::npos) {
+					#ifdef DEBUG
+					cout << "search()/OK/Key[" + key + "]/Word[" + word + "]/Id:" << datas[i][dbUid].asString() << endl;
+					#endif
+					return datas[i][dbUid].asString();
+				}
 			}
 		}
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "search()/Exception/Key[" + key + "]/Word[" + word + "]:" << ex.what() << endl;
+		#endif
 		return "";
 	}
 	return "";
@@ -98,14 +114,20 @@ Json::Value DatabaseManager::get()
 	try {
 		Json::Value database = readFromFile();
 		Json::Value datas = database[dbName];
+		#ifdef DEBUG
 		cout << "get()/OK[" << datas << "]" << endl;
+		#endif
 		return datas;
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "get()/Exception : " << ex.what() << endl;
+		#endif
 		return NULL;
 	}
+	#ifdef DEBUG
 	cout << "get()/Not found" << endl;
+	#endif
 	return NULL;
 }
 
@@ -116,16 +138,22 @@ Json::Value DatabaseManager::get(string id)
 		Json::Value datas = database[dbName];
 		for (int i = 0; i < (int)datas.size(); i++) {
 			if (datas[i][dbUid] == id) {
+				#ifdef DEBUG
 				cout << "get()/OK/id[" << id << "]:" << datas[i] << endl;
+				#endif
 				return datas[i];
 			}
 		}
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "get()/Exception/id[" << id << "]:" << ex.what() << endl;
+		#endif
 		return NULL;
 	}
+	#ifdef DEBUG
 	cout << "get()/Not found/id[" << id << "]:" << endl;
+	#endif
 	return NULL;
 }
 
@@ -136,16 +164,22 @@ Json::Value DatabaseManager::get(string id, string key)
 		Json::Value datas = database[dbName];
 		for (int i = 0; i < (int)datas.size(); i++) {
 			if (datas[i][dbUid] == id) {
+				#ifdef DEBUG
 				cout << "get()/OK/id[" << id << "]/key[" + key + "] : " << datas[i][key] << endl;
+				#endif
 				return datas[i][key];
 			}
 		}
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "get()/Exception : " << ex.what() << endl;
+		#endif
 		return NULL;
 	}
+	#ifdef DEBUG
 	cout << "get()/Not found/id[" << id << "]" << endl;
+	#endif
 	return NULL;
 }
 
@@ -162,17 +196,23 @@ bool DatabaseManager::remove(string id)
 			}
 		}
 		if (index == -1) {
+			#ifdef DEBUG
 			cout << "remove()/Not found/id[" << id << "]" << endl;
+			#endif
 			return false;
 		}
+		#ifdef DEBUG
 		cout << "remove()/id[" << id << "]:" << datas[index] << endl;
+		#endif
 		datas.removeIndex(index, NULL);
 		database[dbName] = datas;
 		writeToFile(database);
 		return true;
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "remove()/Exception:" << ex.what() << endl;
+		#endif
 		return false;
 	}
 	return false;
@@ -191,7 +231,9 @@ bool DatabaseManager::remove(string id, string key)
 			}
 		}
 		if (index == -1) {
+			#ifdef DEBUG
 			cout << "remove()/Not found/Id[" << id << "]" << endl;
+			#endif
 			return false;
 		}
 		if (datas[index][key].isArray()) {
@@ -205,7 +247,9 @@ bool DatabaseManager::remove(string id, string key)
 		return true;
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "remove()/Exception : " << ex.what() << endl;
+		#endif
 	}
 	return false;
 }
@@ -223,7 +267,9 @@ bool DatabaseManager::remove(string id, string key, Json::Value value)
 			}
 		}
 		if (index == -1) {
+			#ifdef DEBUG
 			cout << "remove()/Not found/Id[" << id << "]/key[" << key << "]" << endl;
+			#endif
 			return false;
 		}
 		if (datas[index][key].isArray()) {
@@ -235,7 +281,9 @@ bool DatabaseManager::remove(string id, string key, Json::Value value)
 				}
 			}
 			if (removeIndex == -1) {
+				#ifdef DEBUG
 				cout << "remove()/Not found/Id[" << id << "]/key[" << key << "/Value[" << value << "]" << endl;
+				#endif
 				return false;
 			} 			
 			datas[index][key].removeIndex(removeIndex, NULL);
@@ -244,17 +292,23 @@ bool DatabaseManager::remove(string id, string key, Json::Value value)
 				datas[index].removeMember(key);
 			}
 			else {
+				#ifdef DEBUG
 				cout << "remove()/Not found/Id[" << id << "]/key[" << key << "/Value[" << value << "]" << endl;
+				#endif
 				return false;
 			}
 		}
+		#ifdef DEBUG
 		cout << "remove()/OK/Id[" << id << "]/Value[" << value << "]" << endl;
+		#endif
 		database[dbName] = datas;
 		writeToFile(database);
 		return true;
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "remove()/Exception : " << ex.what() << endl;
+		#endif
 	}
 	return false;
 }
@@ -273,11 +327,15 @@ bool DatabaseManager::update(string id, Json::Value data)
 		}
 		data[dbUid] = id;
 		if (searchIdx == -1) {
+			#ifdef DEBUG
 			cout << "update()/New/Id[" << id << "]/data:" << data << endl;
+			#endif
 			datas.append(data);
 		}
 		else {
+			#ifdef DEBUG
 			cout << "update()/Update/Id[" << id << "]/data:" << data << endl;
+			#endif
 			datas[searchIdx] = data;
 		}
 		database[dbName] = datas;
@@ -285,7 +343,9 @@ bool DatabaseManager::update(string id, Json::Value data)
 		return true;
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "update()/Exception : " << ex.what() << endl;
+		#endif
 	}
 	return false;
 }
@@ -303,7 +363,9 @@ bool DatabaseManager::update(string id, string key, Json::Value value)
 			}
 		}
 		if (index == -1) {
+			#ifdef DEBUG
 			cout << "update()/Not found/Id[" << id << "]" << endl;
+			#endif
 			return false; // Failed to find contact to update
 		}		
 		if (value.isArray()) {
@@ -321,14 +383,18 @@ bool DatabaseManager::update(string id, string key, Json::Value value)
 			datas[index][key].append(value);
 		} else {
 			datas[index][key] = value;
+			#ifdef DEBUG
 			cout << "update()/OK/Id[" << id << "]/Key[" << key << "]/Value[" << value << "]" << endl;
+			#endif
 		}
 		database[dbName] = datas;
 		writeToFile(database);
 		return true;
 	}
 	catch (std::exception ex) {
+		#ifdef DEBUG
 		cout << "update()/Exception : " << ex.what() << endl;
+		#endif
 	}
 	return false;
 }

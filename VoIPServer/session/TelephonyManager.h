@@ -5,6 +5,7 @@
 #include "SessionControl.h"
 #include "ITelephonyManager.h"
 #include "Connection.h"
+#include "ConferenceDb.h"
 #include "../../json/json.h"
 
 class TelephonyManager : public ITelephonyManager {
@@ -14,6 +15,7 @@ private:
 	std::map<std::string, Connection> connectionMap;
 
 	SessionControl* sessionControl;
+	ConferenceDb* conferenceDb; // Conference Database
 
 	TelephonyManager();
 

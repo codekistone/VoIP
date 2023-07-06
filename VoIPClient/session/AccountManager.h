@@ -39,7 +39,8 @@ public:
 	void updateMyContactList(std::string cid, std::list<std::string>& list);
 	void resetPassword(std::string cid, std::string newPassword, int pwdQuestion, std::string pwdAnswer);
 	void getAllContact(std::string cid);
-	void createConference();
+	void createConference(long time, long duration, std::list<std::string>& list);
+	void getAllConference(std::string cid);
 
 	// Communication with UI
 	std::list<ContactData> getMyContactList();
