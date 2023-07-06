@@ -150,7 +150,7 @@ void SessionManager::proc_recv() {
 			}
 		}
 
-		std::cout << "Received message from server: [" << msgStr << "] " << buf << std::endl;
+		// std::cout << "Received message from server: [" << msgStr << "] " << buf << std::endl;
 	}
 }
 
@@ -197,6 +197,16 @@ int SessionManager::sendData(const char* data) {
 		shutdown(clientSocket, SD_SEND);
 		return 0;
 	}
+	return send(clientSocket, data, strlen(data), 0);
+}
+
+int SessionManager::sendData(int msgId, Json::Value payload) {
+	Json::FastWriter fastWriter;
+	Json::Value root;
+	root["msgId"] = msgId;
+	root["payload"] = payload;
+	std::string jsonString = fastWriter.write(root);
+	const char* data = jsonString.c_str();
 	return send(clientSocket, data, strlen(data), 0);
 }
 

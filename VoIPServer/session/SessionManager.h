@@ -39,5 +39,6 @@ public:
 
 	// interface
 	void sendData(const char* message, std::string to) override;
+	void sendData(int msgId, Json::Value payload, std::string to) override;
 };
 

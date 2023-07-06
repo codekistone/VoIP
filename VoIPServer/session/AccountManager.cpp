@@ -4,16 +4,6 @@
 
 AccountManager* AccountManager::instance = nullptr;
 
-// TODO : Should move utility method to somewhere else
-std::string buildMessage(int msgId, Json::Value payload) {
-	Json::FastWriter fastWriter;
-	Json::Value root;
-	root["msgId"] = msgId;
-	root["payload"] = payload;
-	std::string jsonString = fastWriter.write(root);
-	return jsonString;
-}
-
 AccountManager::AccountManager() {
 	sessionControl = nullptr;
 	contactDb = ContactDb::getInstance();
@@ -81,7 +71,7 @@ void AccountManager::handleRegisterContact(Json::Value data, string from)
 		result 1 : FAILED (ALREADY REGISTERED)
 		result 2 : FAILED (MANDATORY ITEMS ARE MISSING)
 	*/
-	sessionControl->sendData(buildMessage(101, payload).c_str(), from);
+	sessionControl->sendData(101, payload, from);
 }
 
 string AccountManager::handleLogin(Json::Value data, string ipAddress, string from)
@@ -121,8 +111,7 @@ string AccountManager::handleLogin(Json::Value data, string ipAddress, string fr
 		result 1 : FAILED (NOT REGISTERED)
 		result 2 : FAILED (WRONG PASSWORD)
 	*/
-	sessionControl->sendData(buildMessage(102, payload).c_str(), from);
-	handleGetAllContact(from); // Send all contact data to client
+	sessionControl->sendData(102, payload, from);
 	return cid;
 }
 
@@ -197,7 +186,7 @@ void AccountManager::handleResetPassword(Json::Value data, string from)
 		result 1 : FAILED (NOT REGISTERED)
 		result 2 : FAILED (UNKNOWN)
 	*/
-	sessionControl->sendData(buildMessage(105, payload).c_str(), from);
+	sessionControl->sendData(105, payload, from);
 }
 
 void AccountManager::handleGetAllContact( string from)
@@ -217,6 +206,6 @@ void AccountManager::handleGetAllContact( string from)
 	} else {
 		std::cout << "handleGetAllContact()/FAILED:" << payload << std::endl;
 	}
-	sessionControl->sendData(buildMessage(106, payload).c_str(), from);
+	sessionControl->sendData(106, payload, from);
 }
 

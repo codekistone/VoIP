@@ -33,4 +33,5 @@ public:
 
 	// listener
 	int sendData(const char* message) override;
+	int sendData(int msgId, Json::Value payload) override;
 };

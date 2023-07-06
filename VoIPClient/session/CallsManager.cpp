@@ -29,15 +29,6 @@ void CallsManager::releaseInstance() {
 	}
 }
 
-std::string makeMessage(int msgId, Json::Value payload) {
-	Json::Value root;
-	root["msgId"] = msgId;
-	root["payload"] = payload;
-
-	std::string jsonString = fastWriter.write(root);
-	return jsonString;
-}
-
 void CallsManager::startOutgoingCall(std::string to) {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
@@ -61,7 +52,7 @@ void CallsManager::startOutgoingCall(std::string to) {
 	Json::Value payload;
 	payload["to"] = to;
 
-	sessionControl->sendData(makeMessage(301, payload).c_str());
+	sessionControl->sendData(301, payload);
 }
 
 void CallsManager::answerCall() {
@@ -76,7 +67,7 @@ void CallsManager::answerCall() {
 	Json::Value payload;
 	payload["rid"] = call->getCallId();
 	payload["result"] = 1;
-	sessionControl->sendData(makeMessage(302, payload).c_str());
+	sessionControl->sendData(302, payload);
 }
 
 void CallsManager::rejectCall() {
@@ -92,7 +83,7 @@ void CallsManager::rejectCall() {
 	payload["rid"] = call->getCallId();
 	payload["result"] = 2;
 	payload["cuase"] = 1;
-	sessionControl->sendData(makeMessage(302, payload).c_str());
+	sessionControl->sendData(302, payload);
 }
 
 void CallsManager::disconnectCall() {
@@ -106,7 +97,7 @@ void CallsManager::disconnectCall() {
 
 	Json::Value payload;
 	payload["rid"] = callId;
-	sessionControl->sendData(makeMessage(305, payload).c_str());
+	sessionControl->sendData(305, payload);
 }
 
 void CallsManager::onSuccessfulOutgoingCall(Json::Value data) {
@@ -150,7 +141,7 @@ void CallsManager::onIncomingCall(Json::Value data) {
 		payload["rid"] = connId;
 		payload["result"] = 2;
 		payload["cause"] = 2;
-		sessionControl->sendData(makeMessage(302, payload).c_str());
+		sessionControl->sendData(302, payload);
 		return;
 	}
 	if (call != NULL) {

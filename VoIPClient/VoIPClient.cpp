@@ -6,7 +6,6 @@
 #include "session/CallsManager.h"
 #include "session/AccountManager.h"
 #include "session/SessionManager.h"
-#pragma comment (lib, "../json/jsoncpp_static.lib")
 
 void jsonCommandParser( std::string message ) {
 	try {

@@ -31,15 +31,6 @@ void TelephonyManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
 }
 
-std::string makeMessage(int msgId, Json::Value payload) {
-	Json::Value root;
-	root["msgId"] = msgId;
-	root["payload"] = payload;
-
-	std::string jsonString = fastWriter.write(root);
-	return jsonString;
-}
-
 void TelephonyManager::handleOutgoingCall(Json::Value data) {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
@@ -59,7 +50,7 @@ void TelephonyManager::handleOutgoingCall(Json::Value data) {
 	payload["rid"] = connId;
 	payload["cid"] = from;
 
-	sessionControl->sendData(makeMessage(302, payload).c_str(), to);
+	sessionControl->sendData(302, payload, to);
 }
 
 void TelephonyManager::handleOutgoingCallNoUser(Json::Value data) {
@@ -68,7 +59,7 @@ void TelephonyManager::handleOutgoingCallNoUser(Json::Value data) {
 	payload["rid"] = "UNKNOWN";
 	payload["result"] = 2;
 	payload["cause"] = 3;
-	sessionControl->sendData(makeMessage(301, payload).c_str(), from);
+	sessionControl->sendData(301, payload, from);
 }
 
 void TelephonyManager::handleIncomingCallResponse(Json::Value data) {
@@ -98,10 +89,10 @@ void TelephonyManager::handleAnswer(Json::Value data) {
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
 		if (participant == from) {
-			sessionControl->sendData(makeMessage(303, payload).c_str(), from);
+			sessionControl->sendData(303, payload, from);
 			continue;
 		}
-		sessionControl->sendData(makeMessage(301, payload).c_str(), participant);
+		sessionControl->sendData(301, payload, participant);
 	}
 }
 
@@ -125,11 +116,11 @@ void TelephonyManager::handleReject(Json::Value data) {
 	for (const auto& participant : participants) {
 		if (participant == from) {
 			if (cause == 1) { /* reject */
-				sessionControl->sendData(makeMessage(303, payload).c_str(), from);
+				sessionControl->sendData(303, payload, from);
 			}
 			continue;
 		}
-		sessionControl->sendData(makeMessage(301, payload).c_str(), participant);
+		sessionControl->sendData(301, payload, participant);
 	}
 	connectionMap.erase(connId);
 }
@@ -147,7 +138,7 @@ void TelephonyManager::handleDisconnect(Json::Value data) {
 	Connection conn = connectionMap[connId];
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
-		sessionControl->sendData(makeMessage(305, payload).c_str(), participant);
+		sessionControl->sendData(305, payload, participant);
 	}
 	connectionMap.erase(connId);
 }

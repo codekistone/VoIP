@@ -6,7 +6,6 @@
 #include "session/DatabaseManager.h"
 #include "session/ContactDb.h"
 #include "session/ConferenceDb.h"
-#pragma comment (lib, "../json/jsoncpp_static.lib")
 
 static void testDatabase() {
     //------------------------------------------------

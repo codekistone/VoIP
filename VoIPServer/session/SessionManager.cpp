@@ -237,3 +237,13 @@ std::string SessionManager::GetClientName(int clientSocket)
 void SessionManager::sendData(const char* data, std::string to) {
 	send(clientMap[to], data, strlen(data), 0);
 }
+
+void SessionManager::sendData(int msgId, Json::Value payload, std::string to) {
+	Json::FastWriter fastWriter;
+	Json::Value root;
+	root["msgId"] = msgId;
+	root["payload"] = payload;
+	std::string jsonString = fastWriter.write(root);
+	const char* data = jsonString.c_str();
+	send(clientMap[to], data, strlen(data), 0);
+}
