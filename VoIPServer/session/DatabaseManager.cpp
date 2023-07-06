@@ -306,7 +306,13 @@ bool DatabaseManager::update(string id, string key, Json::Value value)
 			cout << "update()/Not found/Id[" << id << "]" << endl;
 			return false; // Failed to find contact to update
 		}		
-		if (datas[index][key].isArray()) {
+		if (value.isArray()) {
+			for (int i = 0; i < value.size(); i++) {
+				update(id, key, value[i]);
+			}
+			return true;
+		}
+		if (datas[index][key].isArray() && !value.isArray()) {
 			for (int j = 0; j < (int)datas[index][key].size(); j++) {
 				if (datas[index][key][j] == value) {
 					return false; // Same sub data exists

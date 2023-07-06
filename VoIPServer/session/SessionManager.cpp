@@ -148,10 +148,12 @@ void SessionManager::HandleClient(int clientSocket) {
 			Json::Value payloads = jsonData["payload"];
 			switch (msgId) {
 			case 101: // 101 : REGISTER_CONTACT 		
+				msgStr = "REGISTER_CONTACT";
 				accountManager->handleRegisterContact(payloads, contactId);
 				break;
 			case 102: // 102 : LOGIN		
 				{
+					msgStr = "LOGIN";
 					string ipAddress = GetClientName(clientSocket);
 					string cid = accountManager->handleLogin(payloads, ipAddress, contactId);
 					if (!cid.empty()) {		
@@ -163,18 +165,23 @@ void SessionManager::HandleClient(int clientSocket) {
 				}
 				break;
 			case 103: // 103 : LOGOUT
+				msgStr = "LOGOUT";
 				if (accountManager->handleLogout(payloads)) {
+					// Erase contactID -> socket map when logged out
 					clientMap.erase(contactId);
 					contactId = GetClientName(clientSocket);
 				}
 				break;
 			case 104: // 104 : UPDATE_MY_CONTACTLIST
+				msgStr = "UPDATE_MY_CONTACTLIST";
 				accountManager->handleUpdateMyContactList(payloads, contactId);
 				break;
 			case 105: // 105 : RESET_PASSWORD
+				msgStr = "RESET_PASSWORD";
 				accountManager->handleResetPassword(payloads, contactId);
 				break;
 			case 106: // 106 : GET_ALL_CONTACT
+				msgStr = "GET_ALL_CONTACT";
 				accountManager->handleGetAllContact(contactId);
 				break;
 			case 301: // 301 : OUTGOING_CALL
@@ -202,8 +209,7 @@ void SessionManager::HandleClient(int clientSocket) {
 				break;
 			}
 		}
-
-		std::cout << "Received message from client" << displayName << ": [" << msgStr << "] " << buffer << std::endl;
+		std::cout << "Received message from client [" << displayName << "][" << msgStr << "]" << std::endl << buffer << std::endl;
 	}
 	clientMap.erase(contactId);
 	closesocket(clientSocket);

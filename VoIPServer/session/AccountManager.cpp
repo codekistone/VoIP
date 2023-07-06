@@ -5,7 +5,7 @@
 AccountManager* AccountManager::instance = nullptr;
 
 // TODO : Should move utility method to somewhere else
-std::string makeMessage(int msgId, Json::Value payload) {
+std::string buildMessage(int msgId, Json::Value payload) {
 	Json::FastWriter fastWriter;
 	Json::Value root;
 	root["msgId"] = msgId;
@@ -81,7 +81,7 @@ void AccountManager::handleRegisterContact(Json::Value data, string from)
 		result 1 : FAILED (ALREADY REGISTERED)
 		result 2 : FAILED (MANDATORY ITEMS ARE MISSING)
 	*/
-	sessionControl->sendData(makeMessage(101, payload).c_str(), from);
+	sessionControl->sendData(buildMessage(101, payload).c_str(), from);
 }
 
 string AccountManager::handleLogin(Json::Value data, string ipAddress, string from)
@@ -121,7 +121,8 @@ string AccountManager::handleLogin(Json::Value data, string ipAddress, string fr
 		result 1 : FAILED (NOT REGISTERED)
 		result 2 : FAILED (WRONG PASSWORD)
 	*/
-	sessionControl->sendData(makeMessage(102, payload).c_str(), from);
+	sessionControl->sendData(buildMessage(102, payload).c_str(), from);
+	handleGetAllContact(from); // Send all contact data to client
 	return cid;
 }
 
@@ -149,7 +150,21 @@ bool AccountManager::handleLogout(Json::Value data)
 
 void AccountManager::handleUpdateMyContactList(Json::Value data, string from)
 {
-	std::cout << "handleUpdateMyContactList() " << data << std::endl;
+	// No response message for 104
+	string cid = data["cid"].asString();
+	Json::Value updateContactList = data["myContactList"];
+	if (!cid.empty() && !updateContactList.empty()) {
+		Json::Value myContactList = contactDb->get(cid, "myContactList");
+		if (contactDb->update(cid, "myContactList", updateContactList)) {			
+			std::cout << "handleUpdateMyContactList()/OK:" << contactDb->get(cid, "myContactList") << std::endl;
+		}
+		else {
+			std::cout << "handleUpdateMyContactList()/FAILED:" << updateContactList << std::endl;
+		}
+	}
+	else {
+		std::cout << "handleUpdateMyContactList()/FAIL:Payload not valid" << std::endl;
+	}	
 }
 
 void AccountManager::handleResetPassword(Json::Value data, string from)
@@ -182,11 +197,26 @@ void AccountManager::handleResetPassword(Json::Value data, string from)
 		result 1 : FAILED (NOT REGISTERED)
 		result 2 : FAILED (UNKNOWN)
 	*/
-	sessionControl->sendData(makeMessage(105, payload).c_str(), from);
+	sessionControl->sendData(buildMessage(105, payload).c_str(), from);
 }
 
 void AccountManager::handleGetAllContact( string from)
-{
-	std::cout << "handleGetAllContact() " << std::endl;
+{	
+	Json::Value payload;
+	Json::Value allContacts = contactDb->get();
+	if (!allContacts.empty()) {
+		payload = allContacts;
+		for (int i = 0; i < allContacts.size(); i++) {
+			payload[i]["cid"] = allContacts[i]["cid"];
+			payload[i]["email"] = allContacts[i]["email"];
+			payload[i]["name"] = allContacts[i]["name"];
+			payload[i]["ipAddress"] = allContacts[i]["ipAddress"];
+			payload[i]["myContactList"] = allContacts[i]["myContactList"];
+		}
+		std::cout << "handleGetAllContact()/OK:" << payload << std::endl;
+	} else {
+		std::cout << "handleGetAllContact()/FAILED:" << payload << std::endl;
+	}
+	sessionControl->sendData(buildMessage(106, payload).c_str(), from);
 }
 

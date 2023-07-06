@@ -124,7 +124,6 @@ void SessionManager::proc_recv() {
 
 		//-------------------------------------------------------------
 		// JSON payload parser
-		Json::Value jsonData;
 		if (jsonReader.parse(msg, jsonData) == true) {
 			// received data parsed as JSON data			
 			int msgId = std::stoi(jsonData["msgId"].asString());
