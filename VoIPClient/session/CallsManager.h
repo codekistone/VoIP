@@ -26,6 +26,10 @@ public:
 	void answerCall();
 	void rejectCall();
 	void disconnectCall();
+	void joinConference(std::string rid);
+	void onSuccessfulJoinConference(Json::Value data);
+	void onFailedJoinConference(Json::Value data);
+	void exitConference(std::string rid);
 
 	// Listener
 	void setSessionControl(SessionControl* control) override;
@@ -33,4 +37,6 @@ public:
 	void onIncomingCall(Json::Value data) override;
 	void onIncomingCallResult(Json::Value data) override;
 	void onDisconnected(Json::Value data) override;
+	void onJoinConferenceResult(Json::Value data) override;
+	void onExitConference(Json::Value data) override;
 };

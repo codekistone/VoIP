@@ -120,9 +120,11 @@ void SessionManager::proc_recv() {
 				break;
 			case 208: // 208 : JOIN_CONFERENCE
 				msgStr = "JOIN_CONFERENCE";
+				callsManager->onJoinConferenceResult(payloads);
 				break;
 			case 209: // 209 : EXIT_CONFERENCE
 				msgStr = "EXIT_CONFERENCE";
+				callsManager->onExitConference(payloads);
 				break;
 			case 301: // 301 : OUTGOING_CALL_RESULT
 				msgStr = "OUTGOING_CALL_RESULT";

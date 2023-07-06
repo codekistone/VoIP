@@ -101,10 +101,15 @@ void CallsManager::disconnectCall() {
 }
 
 void CallsManager::onSuccessfulOutgoingCall(Json::Value data) {
+	// TODO Media - Should receive MediaInfo
+
 	std::string connId(data["rid"].asString());
 	call->setCallId(connId);
 	call->setCallState(CallState::STATE_ACTIVE);
 	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulOutgoingCall " << std::endl;
+
+	// TODO Media - SESSION_MEDIA_CLIENT_ADD
+	Json::Value media = call->getMediaMessage();
 }
 
 void CallsManager::onFailedOutgoingCall(Json::Value data) {
@@ -114,13 +119,80 @@ void CallsManager::onFailedOutgoingCall(Json::Value data) {
 }
 
 void CallsManager::onSuccessfulIncomingCall() {
+	// TODO Media - Should receive MediaInfo
+
 	call->setCallState(CallState::STATE_ACTIVE);
 	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulIncomingCall" << std::endl;
+
+	// TODO Media - SESSION_MEDIA_CLIENT_ADD
+	Json::Value media = call->getMediaMessage();
+
+	//send media
 }
 
 void CallsManager::onRejectedIncomingCall() {
 	call->setCallState(CallState::STATE_IDLE);
 	std::cout << "[Received] -> (STATE_IDLE) onRejectedIncomingCall" << std::endl;
+}
+
+void CallsManager::joinConference(std::string callId) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
+	if (call != NULL && call->getCallState() != CallState::STATE_IDLE) {
+		std::cout << "cannot establish NewCall!!" << std::endl;
+		return;
+	}
+
+	if (call != NULL) {
+		delete call;
+	}
+	call = new Call();
+	call->setCallId(callId);
+	call->setCallState(CallState::STATE_DIALING);
+
+	std::cout << "(STATE_DIALING) joinConference... (" << callId << ")" << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
+
+	Json::Value payload;
+	payload["rid"] = callId;
+
+	sessionControl->sendData(208, payload);
+}
+
+void CallsManager::onSuccessfulJoinConference(Json::Value data) {
+	// TODO Media - Should receive MediaInfo
+
+	call->setCallState(CallState::STATE_ACTIVE);
+	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulJoinConference" << std::endl;
+
+	//TODO MEDIA
+	Json::Value media = call->getMediaMessage();
+
+	//send media
+}
+
+void CallsManager::onFailedJoinConference(Json::Value data) {
+	int cause = data["cause"].asInt();
+	call->setCallState(CallState::STATE_IDLE);
+	std::cout << "[Received] -> (STATE_IDLE) onFailedJoinConference cause: " << cause << std::endl;
+}
+
+void CallsManager::exitConference(std::string callId) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
+
+	std::cout << "exitConference... (" << callId << ")" << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
+
+	Json::Value payload;
+	payload["rid"] = callId;
+	sessionControl->sendData(209, payload);
+
+	// TODO Media - SESSION_MEDIA_CLIENT_REMOVE (use payload)
 }
 
 // Implement interface
@@ -181,4 +253,32 @@ void CallsManager::onDisconnected(Json::Value data) {
 	std::this_thread::sleep_for(std::chrono::milliseconds(300));
 	call->setCallState(CallState::STATE_IDLE);
 	std::cout << "[Received] -> (STATE_IDLE) Call CLEAR " << std::endl;
+
+	// TODO Media - SESSION_MEDIA_CLIENT_REMOVE
+	Json::Value media;
+	media["rid"] = call->getCallId();
+
+	// send media
+}
+
+void CallsManager::onJoinConferenceResult(Json::Value data) {
+	int result = data["result"].asInt();
+
+	if (result == 1) {
+		onSuccessfulJoinConference(data);
+	}
+	else if (result == 2) {
+		onFailedJoinConference(data);
+	}
+}
+
+void CallsManager::onExitConference(Json::Value data) {
+	call->setCallState(CallState::STATE_DISCONNECTED);
+	std::cout << "[Received] -> (STATE_DISCONNECTED) onExitConference" << std::endl;
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(300));
+	call->setCallState(CallState::STATE_IDLE);
+	std::cout << "[Received] -> (STATE_IDLE) ConferenceCall CLEAR " << std::endl;
+
+	// TODO Media - SESSION_MEDIA_CLIENT_REMOVE
 }
