@@ -10,9 +10,12 @@
 constexpr auto PACKET_SIZE = 10240;
 
 //For TLS
-#include <openssl/ssl.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
+//#include <openssl/ssl.h>
+//#include <openssl/bio.h>
+//#include <openssl/err.h>
+#include "../../openssl/ssl.h"
+#include "../../openssl/bio.h"
+#include "../../openssl/err.h"
 #define USE_TLS 1
 
 class SessionManager : public SessionControl {

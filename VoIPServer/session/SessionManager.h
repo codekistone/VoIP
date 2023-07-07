@@ -4,8 +4,11 @@
 #include <string>
 #include <vector>
 #include <thread>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+//#include <openssl/ssl.h>
+//#include <openssl/err.h>
+#include "../../openssl/ssl.h"
+#include "../../openssl/err.h"
+
 
 #include "SessionControl.h"
 #include "ITelephonyManager.h"
