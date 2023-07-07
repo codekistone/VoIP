@@ -26,7 +26,9 @@ public:
 	void release();
 	void onAnswer(Json::Value data);
 	void onReject(Json::Value data);
-	bool joinableConference(Json::Value data);
+	int joinableConference(Json::Value data);
+	void removeConference(std::string connId);
+	void manageConferenceLifetime(std::string connId);
 
 	// Listener
 	void setSessionControl(SessionControl* control) override;

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <thread>
+#include <chrono>
 #include <ctime>
 
 #include "TelephonyManager.h"
@@ -109,40 +111,56 @@ void TelephonyManager::onReject(Json::Value data) {
 	connectionMap.erase(connId);
 }
 
-bool TelephonyManager::joinableConference(Json::Value data) {
+int TelephonyManager::joinableConference(Json::Value data) {
 	std::string connId(data["rid"].asString());
 	std::string from(data["from"].asString());
 	Json::Value payload;
 
 	if (connectionMap.count(connId) == 0) {
-		std::cerr << "NO ROOM: " << connId << std::endl;
-		payload["result"] = 2;
-		payload["cause"] = 1;
-		sessionControl->sendData(208, payload, from);
-		return false;
+		return 1;
 	}
 
 	Connection conn = connectionMap[connId];
 	if (!conn.isOnTime()) {
-		std::cerr << "NO TIME: " << connId << std::endl;
-		payload["result"] = 2;
-		payload["cause"] = 2;
-		sessionControl->sendData(208, payload, from);
-		return false;
+		return 2;
 	}
 
 	std::list<std::string> conferenceList = conn.getConferenceList();
-	std::list<std::string>::iterator it;
-	it = std::find(conferenceList.begin(), conferenceList.end(), from);
+	std::list<std::string>::iterator it = std::find(conferenceList.begin(), conferenceList.end(), from);
 	if (it == conferenceList.end()) {
-		std::cerr << "UNINVITED: " << connId << std::endl;
-		payload["result"] = 2;
-		payload["cause"] = 3;
-		sessionControl->sendData(208, payload, from);
-		return false;
+		return 3;
 	}
 
-	return true;
+	return 0;
+}
+
+void TelephonyManager::manageConferenceLifetime(std::string connId) {
+	std::string displayConn = "[" + connId + "]";
+	Connection conn = connectionMap[connId];
+	std::chrono::system_clock::time_point startTime = std::chrono::system_clock::time_point(std::chrono::seconds(conn.getConferenceStartTime()));
+	std::chrono::seconds duration(conn.getDuration());
+
+	// TEST
+	std::chrono::system_clock::time_point cTime = std::chrono::system_clock::now();
+
+	while (true) {
+		std::time_t now;
+		std::time(&now);
+		char time[26];
+		ctime_s(time, 26, &now);
+		std::cout << displayConn << "현재 시간: " << time << endl;
+
+		// 1분 대기
+		std::this_thread::sleep_for(std::chrono::seconds(10));
+		std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
+
+		// timeover
+		if (currentTime >= cTime/*startTime*/ + duration) {
+			break;
+		}
+	}
+	std::cout << displayConn << "connection Closed" << endl;
+	removeConference(connId);
 }
 
 // Implement interface
@@ -198,34 +216,40 @@ void TelephonyManager::handleDisconnect(Json::Value data) {
 	}
 	std::string connId(data["rid"].asString());
 
-	Json::Value payload;
-	payload["rid"] = connId;
-
 	// TODO Media - SESSION_MEDIA_SERVER_REMOVE
 	Json::Value media;
 	media["rid"] = connId;
 
+	Json::Value payload;
+	payload["rid"] = connId;
 	Connection conn = connectionMap[connId];
+	int msgId;
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
 		media["cid"] = participant;
-		sessionControl->sendData(305, payload, participant);
+		msgId = conn.isConference() ? 209 : 305;
+		sessionControl->sendData(msgId, payload, participant);
+		// send media
 	}
-	connectionMap.erase(connId);
-	// send media
+	if (!conn.isConference()) {
+		connectionMap.erase(connId);
+	}
+
 }
 
 void TelephonyManager::releaseConnection(std::string cid) {
+	Connection conn;
 	std::string connId;
+	// find connection
 	for (const auto& iter : connectionMap) {
-		Connection conn = iter.second;
+		conn = iter.second;
 		std::list<std::string> participants = conn.getParticipants();
 		if (std::count(participants.begin(), participants.end(), cid) > 0) {
 			connId = iter.first;
 			break;
 		}
 	}
-	if (!connId.empty()) {
+	if (!connId.empty() && !conn.isConference()) {
 		Json::Value payload;
 		payload["rid"] = connId;
 		handleDisconnect(payload);
@@ -243,14 +267,23 @@ void TelephonyManager::handleCreateConference(Json::Value data) {
 
 	connectionMap.insert({ connId, conn });
 	conferenceDb->update(connId, data); // Add data
-	std::cout << "Room Created " << connId << std::endl;
+	std::cout << "Conference Room Created " << connId << std::endl;
+	std::thread room(&TelephonyManager::manageConferenceLifetime, instance, connId);
+	room.detach();
 
 	// TODO Media - SESSION_MEDIA_SERVER_CREATE
 	Json::Value media;
 	media["rid"] = connId;
 	media["conferenceSize"] = conn.getConferenceList().size();
-
 	// send media
+}
+
+void TelephonyManager::removeConference(std::string connId) {
+	Json::Value data;
+	data["rid"] = connId;
+	handleDisconnect(data);
+	conferenceDb->remove(connId);
+	connectionMap.erase(connId);
 }
 
 void TelephonyManager::handleJoinConference(Json::Value data) {
@@ -259,18 +292,35 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 		return;
 	}
 
-	if (!joinableConference(data)) {
-		return;
-	}
-
 	std::string connId(data["rid"].asString());
 	std::string from(data["from"].asString());
+
+	int joinable = joinableConference(data);
+	Json::Value payload;
+
+	if (joinable == 1) {
+		std::cerr << "NO ROOM: " << connId << std::endl;
+		payload["result"] = 2;
+		payload["cause"] = 1;
+		sessionControl->sendData(208, payload, from);
+		return;
+	}
+	else if (joinable == 2) {
+		std::cerr << "NO TIME: " << connId << std::endl;
+		payload["result"] = 2;
+		payload["cause"] = 2;
+		sessionControl->sendData(208, payload, from);
+	}
+	else if (joinable == 3) {
+		std::cerr << "UNINVITED: " << connId << std::endl;
+		payload["result"] = 2;
+		payload["cause"] = 3;
+		sessionControl->sendData(208, payload, from);
+	}
 
 	Connection conn = connectionMap[connId];
 	conn.setParticipant(from);
 
-	// TODO Media - SESSION_MEDIA_SERVER_ADD
-	Json::Value payload;
 	payload["rid"] = connId;
 	// TODO Media - Should receive MediaInfo
 	payload["videoCodec"] = "codec";
@@ -286,6 +336,7 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 	media["cid"] = from;
 	media["clientIp"] = "127.0.0.1";
 	media["name"] = "DooSan";
+	// send media
 }
 
 void TelephonyManager::handleExitConference(Json::Value data) {
@@ -309,4 +360,5 @@ void TelephonyManager::handleExitConference(Json::Value data) {
 	Json::Value media;
 	media["rid"] = connId;
 	media["cid"] = from;
+	// send media
 }
