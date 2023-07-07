@@ -19,11 +19,17 @@ AccountManager* AccountManager::getInstance() {
 
 void AccountManager::releaseInstance() {
 	if (instance != nullptr) {
-		instance->setSessionControl(nullptr);
+		instance->release();
 		delete instance;
 		instance = nullptr;
 		std::cout << "AccountManager::releaseInstance" << std::endl;
 	}
+}
+
+void AccountManager::release() {
+	sessionControl = nullptr;
+	contactDb = nullptr;
+	conferenceDb = nullptr;
 }
 
 // Implement interface

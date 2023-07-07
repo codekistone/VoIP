@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 
 #include "TelephonyManager.h"
 
@@ -20,60 +21,19 @@ TelephonyManager* TelephonyManager::getInstance() {
 
 void TelephonyManager::releaseInstance() {
 	if (instance != nullptr) {
-		instance->setSessionControl(nullptr);
+		instance->release();
 		delete instance;
 		instance = nullptr;
 		std::cout << "TelephonyManager::releaseInstance" << std::endl;
 	}
 }
 
-// Implement listener
-void TelephonyManager::setSessionControl(SessionControl* control) {
-	sessionControl = control;
+void TelephonyManager::release() {
+	sessionControl = nullptr;
+	conferenceDb = nullptr;
 }
 
-void TelephonyManager::handleOutgoingCall(Json::Value data) {
-	if (sessionControl == nullptr) {
-		std::cerr << "Not register sessionControl" << std::endl;
-		return;
-	}
-	std::string from = data["from"].asString();
-	std::string to = data["to"].asString();
-
-	std::string connId("CONNECTION_" + std::to_string(connNum++));
-	Connection conn(connId);
-	std::cout << "setParticipant: " << from << ", " << to << std::endl;
-	conn.setParticipant(from);
-	conn.setParticipant(to);
-	connectionMap.insert({ connId, conn });
-
-	Json::Value payload;
-	payload["rid"] = connId;
-	payload["cid"] = from;
-
-	sessionControl->sendData(302, payload, to);
-}
-
-void TelephonyManager::handleOutgoingCallNoUser(Json::Value data) {
-	std::string from = data["from"].asString();
-	Json::Value payload;
-	payload["rid"] = "UNKNOWN";
-	payload["result"] = 2;
-	payload["cause"] = 3;
-	sessionControl->sendData(301, payload, from);
-}
-
-void TelephonyManager::handleIncomingCallResponse(Json::Value data) {
-	int result = data["result"].asInt();
-	if (result == 1) { // 1:ANSWER
-		handleAnswer(data);
-	}
-	else if (result == 2) { // 2:REJECT
-		handleReject(data);
-	}
-}
-
-void TelephonyManager::handleAnswer(Json::Value data) {
+void TelephonyManager::onAnswer(Json::Value data) {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
 		return;
@@ -120,7 +80,7 @@ void TelephonyManager::handleAnswer(Json::Value data) {
 	// send media
 }
 
-void TelephonyManager::handleReject(Json::Value data) {
+void TelephonyManager::onReject(Json::Value data) {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
 		return;
@@ -147,6 +107,88 @@ void TelephonyManager::handleReject(Json::Value data) {
 		sessionControl->sendData(301, payload, participant);
 	}
 	connectionMap.erase(connId);
+}
+
+bool TelephonyManager::joinableConference(Json::Value data) {
+	std::string connId(data["rid"].asString());
+	std::string from(data["from"].asString());
+	Json::Value payload;
+
+	if (connectionMap.count(connId) == 0) {
+		std::cerr << "NO ROOM: " << connId << std::endl;
+		payload["result"] = 2;
+		payload["cause"] = 1;
+		sessionControl->sendData(208, payload, from);
+		return false;
+	}
+
+	Connection conn = connectionMap[connId];
+	if (!conn.isOnTime()) {
+		std::cerr << "NO TIME: " << connId << std::endl;
+		payload["result"] = 2;
+		payload["cause"] = 2;
+		sessionControl->sendData(208, payload, from);
+		return false;
+	}
+
+	std::list<std::string> conferenceList = conn.getConferenceList();
+	std::list<std::string>::iterator it;
+	it = std::find(conferenceList.begin(), conferenceList.end(), from);
+	if (it == conferenceList.end()) {
+		std::cerr << "UNINVITED: " << connId << std::endl;
+		payload["result"] = 2;
+		payload["cause"] = 3;
+		sessionControl->sendData(208, payload, from);
+		return false;
+	}
+
+	return true;
+}
+
+// Implement interface
+void TelephonyManager::setSessionControl(SessionControl* control) {
+	sessionControl = control;
+}
+
+void TelephonyManager::handleOutgoingCall(Json::Value data) {
+	if (sessionControl == nullptr) {
+		std::cerr << "Not register sessionControl" << std::endl;
+		return;
+	}
+	std::string from = data["from"].asString();
+	std::string to = data["to"].asString();
+
+	std::string connId("CONNECTION_" + std::to_string(connNum++));
+	Connection conn(connId);
+	std::cout << "setParticipant: " << from << ", " << to << std::endl;
+	conn.setParticipant(from);
+	conn.setParticipant(to);
+	connectionMap.insert({ connId, conn });
+
+	Json::Value payload;
+	payload["rid"] = connId;
+	payload["cid"] = from;
+
+	sessionControl->sendData(302, payload, to);
+}
+
+void TelephonyManager::handleOutgoingCallNoUser(Json::Value data) {
+	std::string from = data["from"].asString();
+	Json::Value payload;
+	payload["rid"] = "UNKNOWN";
+	payload["result"] = 2;
+	payload["cause"] = 3;
+	sessionControl->sendData(301, payload, from);
+}
+
+void TelephonyManager::handleIncomingCallResponse(Json::Value data) {
+	int result = data["result"].asInt();
+	if (result == 1) { // 1:ANSWER
+		onAnswer(data);
+	}
+	else if (result == 2) { // 2:REJECT
+		onReject(data);
+	}
 }
 
 void TelephonyManager::handleDisconnect(Json::Value data) {
@@ -209,42 +251,6 @@ void TelephonyManager::handleCreateConference(Json::Value data) {
 	media["conferenceSize"] = conn.getConferenceList().size();
 
 	// send media
-}
-
-bool TelephonyManager::joinableConference(Json::Value data) {
-	std::string connId(data["rid"].asString());
-	std::string from(data["from"].asString());
-	Json::Value payload;
-
-	if (connectionMap.count(connId) == 0) {
-		std::cerr << "NO ROOM: " << connId << std::endl;
-		payload["result"] = 2;
-		payload["cause"] = 1;
-		sessionControl->sendData(208, payload, from);
-		return false;
-	}
-
-	Connection conn = connectionMap[connId];
-	if (!conn.isOnTime()) {
-		std::cerr << "NO TIME: " << connId << std::endl;
-		payload["result"] = 2;
-		payload["cause"] = 2;
-		sessionControl->sendData(208, payload, from);
-		return false;
-	}
-
-	std::list<std::string> conferenceList = conn.getConferenceList();
-	std::list<std::string>::iterator it;
-	it = std::find(conferenceList.begin(), conferenceList.end(), from);
-	if (it == conferenceList.end()) {
-		std::cerr << "UNINVITED: " << connId << std::endl;
-		payload["result"] = 2;
-		payload["cause"] = 3;
-		sessionControl->sendData(208, payload, from);
-		return false;
-	}
-
-	return true;
 }
 
 void TelephonyManager::handleJoinConference(Json::Value data) {

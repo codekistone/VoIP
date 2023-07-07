@@ -21,7 +21,9 @@ public:
 	static AccountManager* getInstance();
 	static void releaseInstance();
 
-	// Listener
+	void release();
+
+	// interface
 	void setSessionControl(SessionControl* control) override;
 	void handleLogin_(std::string requester) override;
 
