@@ -140,9 +140,6 @@ void TelephonyManager::manageConferenceLifetime(std::string connId) {
 	std::chrono::system_clock::time_point startTime = std::chrono::system_clock::time_point(std::chrono::seconds(conn.getConferenceStartTime()));
 	std::chrono::seconds duration(conn.getDuration());
 
-	// TEST
-	std::chrono::system_clock::time_point cTime = std::chrono::system_clock::now();
-
 	while (true) {
 		std::time_t now;
 		std::time(&now);
@@ -151,11 +148,11 @@ void TelephonyManager::manageConferenceLifetime(std::string connId) {
 		std::cout << displayConn << "현재 시간: " << time << endl;
 
 		// 1분 대기
-		std::this_thread::sleep_for(std::chrono::seconds(10));
+		std::this_thread::sleep_for(std::chrono::minutes(1));
 		std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
 
 		// timeover
-		if (currentTime >= cTime/*startTime*/ + duration) {
+		if (currentTime >= startTime + duration) {
 			break;
 		}
 	}
