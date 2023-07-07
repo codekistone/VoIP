@@ -13,7 +13,7 @@ SOCKET clientSocket;
 
 SessionManager::SessionManager() {
 	strcpy_s(serverIP, sizeof(serverIP), "127.0.0.1");
-	serverPort = 5555;
+	serverPort = 443;
 
 	callsManager = CallsManager::getInstance();
 	accountManager = AccountManager::getInstance();
@@ -69,7 +69,11 @@ void SessionManager::proc_recv() {
 	Json::Reader jsonReader;
 	while (true) {
 		memset(buf, 0, sizeof(buf));
+#if USE_TLS
+		SSIZE_T bytesRead = BIO_read(bio, buf, PACKET_SIZE);
+#else
 		SSIZE_T bytesRead = recv(clientSocket, buf, PACKET_SIZE, 0);
+#endif
 		if (bytesRead == -1) {
 			std::cerr << "Failed to receive response." << std::endl;
 			//TODO FIX
@@ -154,6 +158,20 @@ void SessionManager::proc_recv() {
 	}
 }
 
+int verify_callback(int preverify_ok, X509_STORE_CTX* ctx)
+{
+	return 1; //for demo
+	if (preverify_ok == 0)
+	{
+		int depth = X509_STORE_CTX_get_error_depth(ctx);
+		int err = X509_STORE_CTX_get_error(ctx);
+		printf("Certificate verification error: depth=%d, err=%d\n", depth, err);
+		return 0;
+	}
+
+	return 1;
+}
+
 // socket Open function
 void SessionManager::openSocket() {
 	WSADATA wsa;
@@ -162,6 +180,71 @@ void SessionManager::openSocket() {
 		WSACleanup();
 		return;
 	}
+
+#if USE_TLS
+
+	SSL_library_init();
+	OpenSSL_add_all_algorithms();
+	SSL_load_error_strings();
+
+	const SSL_METHOD* method = TLS_client_method();
+	if (method == NULL)
+	{
+		printf("Failed to create TLS client method.\n");
+		WSACleanup();
+		return;
+	}
+
+	ctx = SSL_CTX_new(method);
+	if (ctx == NULL)
+	{
+		printf("Failed to create SSL context.\n");
+		WSACleanup();
+		return;
+	}
+
+	if (SSL_CTX_set_cipher_list(ctx, "AES128-SHA256") != 1) {
+		ERR_print_errors_fp(stderr);
+		exit(EXIT_FAILURE);
+	}
+
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
+	bio = BIO_new_ssl_connect(ctx);
+	if (bio == NULL)
+	{
+		printf("Failed to create BIO.\n");
+		SSL_CTX_free(ctx);
+		WSACleanup();
+		return;
+	}
+	std::string hostname = serverIP;
+	hostname += ":" + std::to_string(serverPort);
+	BIO_set_conn_hostname(bio, hostname.c_str());
+	//BIO_set_nbio(bio, 1);
+	if (BIO_do_connect(bio) <= 0)
+	{
+		if (!BIO_should_retry(bio))
+		{
+			printf("Failed to connect.\n");
+			BIO_free_all(bio);
+			SSL_CTX_free(ctx);
+			WSACleanup();
+			return;
+		}
+	}
+
+	if (BIO_do_handshake(bio) <= 0) {
+		ERR_print_errors_fp(stderr);
+		exit(EXIT_FAILURE);
+		return;
+	}
+	printf("Connected to the server.\n");
+
+	std::thread recvThread(&SessionManager::proc_recv, instance);
+	recvThread.join();
+	BIO_free_all(bio);
+	SSL_CTX_free(ctx);
+#else
 
 	clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket == INVALID_SOCKET) {
@@ -188,6 +271,7 @@ void SessionManager::openSocket() {
 	recvThread.join();
 
 	closesocket(clientSocket);
+#endif
 	WSACleanup();
 }
 
@@ -197,7 +281,11 @@ int SessionManager::sendData(const char* data) {
 		shutdown(clientSocket, SD_SEND);
 		return 0;
 	}
+#if USE_TLS
+	return BIO_write(bio, data, strlen(data));
+#else
 	return send(clientSocket, data, strlen(data), 0);
+#endif
 }
 
 int SessionManager::sendData(int msgId, Json::Value payload) {
@@ -207,7 +295,12 @@ int SessionManager::sendData(int msgId, Json::Value payload) {
 	root["payload"] = payload;
 	std::string jsonString = fastWriter.write(root);
 	const char* data = jsonString.c_str();
+
+#if USE_TLS
+	return BIO_write(bio, data, strlen(data));
+#else
 	return send(clientSocket, data, strlen(data), 0);
+#endif
 }
 
 std::vector<std::string> SessionManager::split(const std::string& str, char delimiter) {

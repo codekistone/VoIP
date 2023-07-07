@@ -60,17 +60,17 @@ bool AccountManager::isSubstring(const std::string& source, const std::string& t
 	return source.find(target) != std::string::npos;
 }
 
-void AccountManager::registerAccount(std::string id, std::string email, std::string pw, std::string name, int pwdQuestion, std::string pwdAnswer)
+void AccountManager::registerAccount(std::string cid, std::string email, std::string pw, std::string name, int pwdQuestion, std::string pwdAnswer)
 {
 	Json::Value root;
 	root["msgId"] = 101;
 	Json::Value payload;
 
-	if (id.empty()) {
+	if (cid.empty()) {
 		payload["cid"] = email;
 	}
 	else {
-		payload["cid"] = id;
+		payload["cid"] = cid;
 	}
 	
 	payload["email"] = email;
@@ -275,7 +275,11 @@ void AccountManager::setSessionControl(SessionControl* control) {
 }
 
 void AccountManager::handleLogin(Json::Value msg) {
-	//std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;
+	/*
+		result 0 : SUCCESS
+		result 1 : FAILED (NOT REGISTERED)
+		result 2 : FAILED (WRONG PASSWORD)
+	*/
 	Json::Value payload = msg;
 	std::string cid;
 	std::string email;
@@ -311,9 +315,14 @@ void AccountManager::handleLogin(Json::Value msg) {
 }
 
 void AccountManager::handleRegisterContact(Json::Value msg) {
-	//std::cout << "[Received] -> onLoginSuccess(): " << msg << std::endl;
+	/*
+		result 0 : SUCCESS
+		result 1 : FAILED (ALREADY REGISTERED)
+		result 2 : FAILED (MANDATORY ITEMS ARE MISSING)
+	*/
 
-	int result = 1; //(0:SUCCESS, 1:FAIL)
+	int result = 1; 
+	
 	std::string reason;
 
 	Json::Value payload = msg;
@@ -332,7 +341,12 @@ void AccountManager::handleRegisterContact(Json::Value msg) {
 }
 
 void AccountManager::handleResetPassword(Json::Value msg) {
-	int result = 1; //(0:SUCCESS, 1:FAIL)
+	/*
+		result 0 : SUCCESS
+		result 1 : FAILED (NOT REGISTERED)
+		result 2 : FAILED (UNKNOWN)
+	*/
+	int result = 1;
 
 	Json::Value payload = msg;
 	result = payload["result"].asInt();
@@ -347,7 +361,7 @@ void AccountManager::handleResetPassword(Json::Value msg) {
 }
 
 void AccountManager::handleGetAllContact(Json::Value msg) {
-	//Don't send myContactList
+	//Don't send all info of myContactList
 	std::list<ContactData> contactDataList;
 	Json::Value payload = msg;
 	if (payload.isArray()) {
