@@ -24,11 +24,6 @@ void DumpMediaManager::anyfunc() {
 	sessionCallback->requestVideoQualityChange(quality); // »£√‚
 }
 
-void DumpMediaManager::setVideoQuality(int quality) {
-
-};
-
-void DumpMediaManager::startCall(Json::Value client_info) {
-};
-void DumpMediaManager::endCall(Json::Value client_info) {
-};
+void DumpMediaManager::setVideoQuality(int quality) {}
+void DumpMediaManager::startCall(Json::Value client_info) {}
+void DumpMediaManager::endCall(Json::Value client_info) {}
