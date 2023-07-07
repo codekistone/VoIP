@@ -68,8 +68,10 @@ void SessionManager::openSocket() {
 #if USE_TLS
 	SSL_library_init();
 	ctx = SSL_CTX_new(TLS_server_method());
-	if (SSL_CTX_use_certificate_file(ctx, "D:\\projectcert\\certificate.crt", SSL_FILETYPE_PEM) != 1 ||
-		SSL_CTX_use_PrivateKey_file(ctx, "D:\\projectcert\\private.key", SSL_FILETYPE_PEM) != 1)
+
+	//Place the certificate and key in the same folder as the exe file.
+	if (SSL_CTX_use_certificate_file(ctx, "\\certificate.crt", SSL_FILETYPE_PEM) != 1 ||
+		SSL_CTX_use_PrivateKey_file(ctx, "\\private.key", SSL_FILETYPE_PEM) != 1)
 	{
 		std::cerr << "Failed load certification or private key" << std::endl;
 		ERR_print_errors_fp(stderr);
