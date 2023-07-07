@@ -351,6 +351,22 @@ void AccountManager::handleResetPassword(Json::Value msg) {
 	}
 }
 
+void AccountManager::updateMyContact(std::string cid, std::string email, std::string name)
+{
+	Json::Value root;
+	root["msgId"] = 107;
+
+	Json::Value payload;
+	payload["cid"] = cid;
+	payload["email"] = email;
+	payload["name"] = name;
+	root["payload"] = payload;
+	Json::StreamWriterBuilder writerBuilder;
+	std::string jsonString = Json::writeString(writerBuilder, root);
+	const char* jsonCString = jsonString.c_str();
+	sessionControl->sendData(jsonCString);
+}
+
 void AccountManager::handleGetAllContact(Json::Value msg) {
 	//Don't send myContactList
 	std::list<ContactData> contactDataList;

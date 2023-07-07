@@ -1,0 +1,9 @@
+{
+    "msgId":107,
+    "payload" : 
+        {
+            "cid" : "john", 
+            "email" : "john.mayer@gmail.com", 
+            "name" : "John Mayer"
+        }    
+}

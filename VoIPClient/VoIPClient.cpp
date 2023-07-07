@@ -8,15 +8,28 @@
 #include "session/SessionManager.h"
 #include "CommandLineInterface.h"
 
-int main() {
-	// TEST CODE	
+int main() {	
+	SessionManager* sessionManager = SessionManager::getInstance();
+	AccountManager* accountManager = AccountManager::getInstance();
+	CallsManager* callsManager = CallsManager::getInstance();
+
+	// Get server information
+	std::string serverIp; int serverPort;	
 	CommandLineInterface* cli = CommandLineInterface::getInstance();
-	CommandLineInterface::getInstance()->startCommandCli();
+	cli->getServerInfo(&serverIp, &serverPort);
 
-	SessionManager::releaseInstance();
-	CallsManager::releaseInstance();
-	AccountManager::releaseInstance();
+	// Start session thread
+	std::thread t(&SessionManager::init, sessionManager, serverIp.c_str(), serverPort);	
 
-	std::cout << "Exit Main Thread" << std::endl;
+	// Start CLI
+	cli->startCli(accountManager, callsManager);	
+	
+	// Join session thread
+	t.join();
+
+	sessionManager->releaseInstance();
+	callsManager->releaseInstance();
+	accountManager->releaseInstance();
+
 	return 0;
 }

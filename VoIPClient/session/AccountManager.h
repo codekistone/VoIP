@@ -55,13 +55,14 @@ public:
 	std::list<ContactData> searchContact(std::string key);
 	void deleteContact(std::string cid);
 	void addContact(std::string cid);
+	void updateMyContact(std::string cid, std::string email, std::string name);
 
 	// Listener (Recieve Msg)
 	void setSessionControl(SessionControl* control) override;
 	void onLoginSuccess(std::string contactId) override;
 	void handleRegisterContact(Json::Value data) override;
 	void handleLogin(Json::Value data) override;
-	void handleResetPassword(Json::Value data) override;
+	void handleResetPassword(Json::Value data) override;	
 	void handleGetAllContact(Json::Value data) override;
 	void handleGetAllMyConference(Json::Value data) override;
 };

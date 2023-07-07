@@ -193,8 +193,8 @@ void AccountManager::handleUpdateMyContactList(Json::Value data, string from)
 		}		
 		if (contactDb->update(cid, "myContactList", updateMyContactList)) {
 			std::cout << "handleUpdateMyContactList()/OK:" << contactDb->get(cid, "myContactList") << std::endl;
-		}
-		else {
+			handleGetAllContact(from);
+		} else {
 			std::cout << "handleUpdateMyContactList()/FAILED:" << updateMyContactList << std::endl;
 		}
 	}
@@ -234,6 +234,26 @@ void AccountManager::handleResetPassword(Json::Value data, string from)
 		result 2 : FAILED (UNKNOWN)
 	*/
 	sessionControl->sendData(105, payload, from);
+}
+
+void AccountManager::handleUpdateMyContact(Json::Value data, string from)
+{
+	Json::Value payload;
+	string cid = data["cid"].asString();
+	string newEmail = data["email"].asString();
+	string newName = data["name"].asString();
+	if (cid.empty() || contactDb->search("cid", cid).empty()) {
+		cout << "handleUpdateMyContact()/FAIL:No CID exists:" << data << endl;
+		return;
+	}	
+	if (contactDb->search("email", newEmail) == "") {
+		contactDb->update( cid, "email", newEmail);
+		contactDb->update( cid, "name", newName);
+		cout << "handleUpdateMyContact()/OK:" << data << endl;
+		handleGetAllContact(from);
+	} else {
+		cout << "handleUpdateMyContact()/FAIL:Same email exists:" << data << endl;
+	}		
 }
 
 void AccountManager::handleCreateConference(Json::Value data, string from)

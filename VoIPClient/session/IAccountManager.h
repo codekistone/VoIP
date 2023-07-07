@@ -12,7 +12,7 @@ public:
 	virtual void onLoginSuccess(std::string contactId) = 0;
 	virtual void handleRegisterContact(Json::Value data) = 0;
 	virtual void handleLogin(Json::Value data) = 0;
-	virtual void handleResetPassword(Json::Value data) = 0;
+	virtual void handleResetPassword(Json::Value data) = 0;	
 	virtual void handleGetAllContact(Json::Value data) = 0;
 	virtual void handleGetAllMyConference(Json::Value data) = 0;
 };

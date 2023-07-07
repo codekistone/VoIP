@@ -7,13 +7,8 @@
 class CommandLineInterface {
 private:
 	static CommandLineInterface* instance;
-	CommandLineInterface();
-
-	SessionManager* sessionManager;
-	AccountManager* accountManager;
-	CallsManager* callsManager;
-
 public:
 	static CommandLineInterface* getInstance();
-	void startCommandCli();
+	void getServerInfo( std::string *ip, int*port);
+	void startCli(AccountManager* am, CallsManager* cm);
 };

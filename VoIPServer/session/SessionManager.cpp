@@ -184,6 +184,10 @@ void SessionManager::HandleClient(int clientSocket) {
 				msgStr = "RESET_PASSWORD";
 				accountManager->handleResetPassword(payloads, contactId);
 				break;
+			case 107:
+				msgStr = "UPDATE_MY_CONTACT";
+				accountManager->handleUpdateMyContact(payloads, contactId);
+				break;
 			case 106: // 106 : GET_ALL_CONTACT
 				msgStr = "GET_ALL_CONTACT";
 				accountManager->handleGetAllContact(contactId);
@@ -234,6 +238,10 @@ void SessionManager::HandleClient(int clientSocket) {
 		}
 		//std::cout << "Received message from client [" << displayName << "][" << msgStr << "]" << std::endl << buffer << std::endl;
 	}
+	std::cout << "Connection terminated[" << contactId << "]" << endl;
+	Json::Value data;
+	data["cid"] = contactId;
+	accountManager->handleLogout(data);	// Handle logout when connection terminated
 	clientMap.erase(contactId);
 	closesocket(clientSocket);
 }
@@ -251,10 +259,9 @@ std::string SessionManager::GetClientName(int clientSocket)
 
 	std::string ip(clientIP);
 	std::string portStr = std::to_string(clientPort);
-	std::string displayName = "(" + ip + ":" + portStr + ")";
+	std::string displayName = ip + ":" + portStr;
 
-	//return displayName;
-	return ip;
+	return displayName;
 }
 
 void SessionManager::sendData(const char* data, std::string to) {
