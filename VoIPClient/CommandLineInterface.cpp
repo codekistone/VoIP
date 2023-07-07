@@ -7,10 +7,31 @@
 #include "session/SessionControl.h"
 #include "session/SessionManager.h"
 #include "../json/json.h"
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
 using namespace std;
 
 CommandLineInterface* CommandLineInterface::instance = nullptr;
+
+static string getMyIpAddress(void)
+{
+	struct addrinfo* _addrinfo;
+	struct addrinfo* _res;
+	char _address[INET6_ADDRSTRLEN];
+	char szHostName[255];
+	gethostname(szHostName, sizeof(szHostName));
+	getaddrinfo(szHostName, NULL, 0, &_addrinfo);
+	for (_res = _addrinfo; _res != NULL; _res = _res->ai_next){
+		if (_res->ai_family == AF_INET) {
+			if (NULL != inet_ntop(AF_INET, &((struct sockaddr_in*)_res->ai_addr)->sin_addr,_address, sizeof(_address)) ){
+				return _address;
+			}
+		}
+	}
+	return "";
+}
+
 
 CommandLineInterface::CommandLineInterface() {
 	sessionManager = SessionManager::getInstance();
@@ -71,7 +92,7 @@ void CommandLineInterface::startCommandCli()
 		cout << "17. JOIN CONFERENCE " << endl;
 		cout << "18. EXIT_CONFERENCE " << endl;
 		cout << endl;
-		cout << " << MY DATA >> " << endl;
+		cout << " << MY DATA (" << getMyIpAddress() << ") >> " << endl;
 		if (accountManager->myCid.empty()) {
 			cout << "My CID : (EMPTY)" << endl;
 		} else {
