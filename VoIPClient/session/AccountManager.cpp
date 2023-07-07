@@ -235,10 +235,12 @@ std::list<AccountManager::ContactData> AccountManager::searchContact(std::string
 			continue;
 		}
 		if (isSubstring(contact.email, key)) {
+			if (myCid == contact.cid) continue;
 			reList.push_back(contact);
 			continue;
 		}
 		if (isSubstring(contact.name, key)) {
+			if (myCid == contact.cid) continue;
 			reList.push_back(contact);
 			continue;
 		}
