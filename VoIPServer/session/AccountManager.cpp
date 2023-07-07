@@ -62,8 +62,8 @@ void AccountManager::handleRegisterContact(Json::Value data, string from)
 		// No user exists : Add registration data to database
 		contactDb->update(cid, data);
 		if (!data["password"].empty() &&
-			!data["password_question"].empty() &&
-			!data["password_answer"].empty()) {		
+			!data["passwordQuestion"].empty() &&
+			!data["passwordAnswer"].empty()) {		
 			payload["result"] = 0; // Success
 			payload["reason"] = "Success";
 			cout << "handleRegisterContact()/OK:" << payload << endl;
@@ -179,18 +179,23 @@ void AccountManager::handleUpdateMyContactList(Json::Value data, string from)
 {
 	// No response message for 104
 	string cid = data["cid"].asString();
-	Json::Value updateContactList = data["myContactList"];
-	if (updateContactList.empty()) {
+	Json::Value requestMyContactList = data["myContactList"];
+	Json::Value updateMyContactList;
+	if (requestMyContactList.empty()) {
 		contactDb->remove(cid, "myContactList");
 	}
-	if (!cid.empty() && !updateContactList.empty()) {
-		Json::Value myContactList = contactDb->get(cid, "myContactList");
+	if (!cid.empty() && !requestMyContactList.empty()) {
 		contactDb->remove(cid, "myContactList");
-		if (contactDb->update(cid, "myContactList", updateContactList)) {			
+		for (int i = 0; i < requestMyContactList.size(); i++) {
+			if (!contactDb->search("cid", requestMyContactList[i].asString()).empty() ) {
+				updateMyContactList.append(requestMyContactList[i]);
+			}
+		}		
+		if (contactDb->update(cid, "myContactList", updateMyContactList)) {
 			std::cout << "handleUpdateMyContactList()/OK:" << contactDb->get(cid, "myContactList") << std::endl;
 		}
 		else {
-			std::cout << "handleUpdateMyContactList()/FAILED:" << updateContactList << std::endl;
+			std::cout << "handleUpdateMyContactList()/FAILED:" << updateMyContactList << std::endl;
 		}
 	}
 	else {

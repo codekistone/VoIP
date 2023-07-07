@@ -76,8 +76,8 @@ void AccountManager::registerAccount(std::string id, std::string email, std::str
 	payload["email"] = email;
 	payload["name"] = name;
 	payload["password"] = md5(pw);
-	payload["password_question"] = pwdQuestion;
-	payload["password_answer"] = pwdAnswer;
+	payload["passwordQuestion"] = pwdQuestion;
+	payload["passwordAnswer"] = pwdAnswer;
 
 	root["payload"] = payload;
 
@@ -156,8 +156,8 @@ void AccountManager::resetPassword(std::string cid, std::string newPW, int pwdQ,
 
 	payload["cid"] = cid;
 	payload["password"] = md5(newPW);
-	payload["password_question"] = pwdQ;
-	payload["password_answer"] = pwdA;
+	payload["passwordQuestion"] = pwdQ;
+	payload["passwordAnswer"] = pwdA;
 
 	root["payload"] = payload;
 
@@ -266,7 +266,12 @@ void AccountManager::deleteContact(std::string cid)
 void AccountManager::addContact(std::string cid)
 {
 	//Add cid in myContactDataList and request updateMyContactList
-	myContactDataList.push_back(cid);
+	for (auto& contact : AccountManager::allConatactDataList) {
+		if (cid == contact.cid) {
+			myContactDataList.push_back(cid);
+			break;
+		}
+	}	
 	updateMyContactList(myCid, myContactDataList);
 }
 

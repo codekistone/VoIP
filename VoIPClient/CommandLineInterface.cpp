@@ -153,8 +153,15 @@ void CommandLineInterface::startCommandCli()
 
 		case 5: //RESET PW
 			std::cout << std::endl << "Processing reset pw test ..." << std::endl;
+			std::cout << "cid : ";
+			getline(std::cin >> std::ws, id);
 			std::cout << "newPassword : ";
 			getline(std::cin >> std::ws, newpw);
+			std::cout << "prev passwordQuestion : ";
+			getline(std::cin >> std::ws, pwdQuestion);
+			std::cout << "prev passwordAnswer : ";
+			getline(std::cin >> std::ws, pwdAnswer);
+
 			accountManager->resetPassword(id, newpw, std::stoi(pwdQuestion), pwdAnswer);
 			break;
 
