@@ -120,6 +120,10 @@ void AccountManager::logout(std::string cid) {
 	std::string jsonString = Json::writeString(writerBuilder, root);
 
 	const char* jsonCString = jsonString.c_str();
+    // Clear my local data
+	AccountManager::myCid = "";
+	AccountManager::myConferenceDataList.clear();
+	AccountManager::myContactDataList.clear();
 	sessionControl->sendData(jsonCString);
 }
 
@@ -363,6 +367,36 @@ void AccountManager::handleGetAllContact(Json::Value msg) {
 		std::cout << "name : " << element.name << " ";
 		std::cout << std::endl;
 	}
+}
+
+void AccountManager::handleGetAllMyConference(Json::Value data)
+{
+	std::list<ConferenceData> conferenceDataList;
+	Json::Value payload = data;
+	if (payload.isArray()) {
+		for (const auto& item : payload) {
+			ConferenceData conference;
+			conference.rid = item["rid"].asString();
+			conference.dataAndTime = item["dateAndTime"].asUInt64();
+			conference.duration = item["duration"].asUInt64();
+			for (int i = 0; i < item["participants"].size(); i++) {
+				conference.participants.push_back(item["participants"][i].asString());
+			}
+			conferenceDataList.push_back(conference);
+		}
+	}
+	AccountManager::myConferenceDataList = conferenceDataList;
+	//TODO : SEND msg to UI
+	for (const auto& element : conferenceDataList) {
+		std::cout << "rid : " << element.rid << " ";
+		std::cout << "dataAndTime : " << element.dataAndTime << " ";
+		std::cout << "duration : " << element.duration << " ";		
+		for (const auto& item : element.participants) {
+			std::cout << "participants : " << item << " ";
+		}		
+		std::cout << std::endl;
+	}
+
 }
 
 // TEMP

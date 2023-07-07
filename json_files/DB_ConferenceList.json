@@ -1,32 +1,29 @@
 {
-    "conferences": [
-        {
-            "rid":"C_00000001",
-            "dateAndTime":1688454555, 
-            "duration" : 3600000, 
-            "participants" : [
-                "tom.cruise@gmail.com",  
-                "john.mayer@gmail.com",      
-                "jane.poster@gmail.com"
-            ]
-        },
-        {
-            "rid":"C_00000002",
-            "dateAndTime":1688540955, 
-            "duration" : 3600000, 
-            "participants" : [
-                "tom.cruise@gmail.com",  
-                "john.mayer@gmail.com"
-            ]
-        },
-        {
-            "rid":"C_00000003",
-            "dateAndTime":1688627355, 
-            "duration" : 3600000, 
-            "participants" : [
-                "tom.cruise@gmail.com",   
-                "jane.poster@gmail.com"
-            ]
-        }
+    "conferences" : [
+       {
+          "dateAndTime" : 1688454555,
+          "duration" : 3600000,
+          "participants" : [ "chris", "gogo", "hdmi" ],
+          "rid" : "C_00000001"
+       },
+       {
+          "dateAndTime" : 1688540955,
+          "duration" : 3600000,
+          "participants" : [ "joe", "gogo", "hdmi" ],
+          "rid" : "C_00000002"
+       },
+       {
+          "dateAndTime" : 1688627355,
+          "duration" : 3600000,
+          "participants" : [ "joe", "gogo", "hdmi", "chris", "bruno" ],
+          "rid" : "C_00000003"
+       },
+       {
+          "dateAndTime" : 54325432,
+          "duration" : 543254325,
+          "participants" : [ "joe", "bruno" ],
+          "rid" : "CONNECTION_0"
+       }
     ]
-}
+ }
+ 

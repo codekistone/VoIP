@@ -31,6 +31,7 @@ public:
 	bool handleLogout(Json::Value data) override;
 	void handleUpdateMyContactList(Json::Value data, string from) override;
 	void handleResetPassword(Json::Value data, string from) override;
+	void handleCreateConference(Json::Value data, string from) override;
 	void handleGetAllContact(string from) override;
 	void handleGetAllConference(Json::Value data, string from) override;
 };

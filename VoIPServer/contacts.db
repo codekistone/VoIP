@@ -2,7 +2,7 @@
    "contacts" : [
       {
          "cid" : "bruno",
-         "email" : "bruno.yoo@gmail.com",
+         "email" : "bruno@gmail.com",
          "ipAddress" : "127.0.0.1",
          "login" : true,
          "name" : "Bruno Yoo",
@@ -12,7 +12,7 @@
       },
       {
          "cid" : "tom",
-         "email" : "tom.cruise@gmail.com",
+         "email" : "tom@gmail.com",
          "ipAddress" : "127.0.0.1",
          "login" : true,
          "name" : "Tom cruise",
@@ -25,6 +25,7 @@
          "email" : "chris@gmail.com",
          "ipAddress" : "127.0.0.1",
          "login" : true,
+         "myContactList" : [ "joe", "bruno", "tom" ],
          "name" : "Chris Pratt",
          "password" : "827ccb0eea8a706c4c34a16891f84e7b",
          "password_answer" : "seoul",

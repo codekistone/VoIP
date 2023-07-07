@@ -118,7 +118,8 @@ void SessionManager::proc_recv() {
 				accountManager->handleGetAllContact(payloads);
 				break;
 			case 205: // 205 : GET_ALL_CONFERENCE
-				// accountManager->handleGetAllConference(payloads);
+				msgStr = "GET_ALL_CONFERENCE";
+				accountManager->handleGetAllMyConference(payloads);
 				break;
 			case 208: // 208 : JOIN_CONFERENCE
 				msgStr = "JOIN_CONFERENCE";

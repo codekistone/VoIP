@@ -26,9 +26,17 @@ public:
 		std::string email;
 		std::string name;
 	};
+
+	struct ConferenceData {
+		std::string rid;
+		long dataAndTime;
+		long duration;
+		std::list<std::string> participants;
+	};
 	
 	std::list<std::string> myContactDataList;
-	std::list<ContactData> allConatactDataList;
+	std::list<ConferenceData> myConferenceDataList;
+	std::list<ContactData> allConatactDataList;	
 	std::string myCid;
 	
 	// Communication with server (Send Msg)
@@ -55,4 +63,5 @@ public:
 	void handleLogin(Json::Value data) override;
 	void handleResetPassword(Json::Value data) override;
 	void handleGetAllContact(Json::Value data) override;
+	void handleGetAllMyConference(Json::Value data) override;
 };

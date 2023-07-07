@@ -374,7 +374,11 @@ bool DatabaseManager::update(string id, string key, Json::Value value)
 			}
 			return true;
 		}
-		if (datas[index][key].isArray() && !value.isArray()) {
+		bool keyIsForArray = false;
+		if (key.compare("myContactList") == 0 || key.compare("participants") == 0) {
+			keyIsForArray = true;
+		}
+		if (keyIsForArray && !value.isArray()) {
 			for (int j = 0; j < (int)datas[index][key].size(); j++) {
 				if (datas[index][key][j] == value) {
 					return false; // Same sub data exists

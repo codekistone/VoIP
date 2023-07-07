@@ -173,6 +173,7 @@ void SessionManager::HandleClient(int clientSocket) {
 					// Erase contactID -> socket map when logged out
 					clientMap.erase(contactId);
 					contactId = GetClientName(clientSocket);
+					clientMap.insert({ contactId, clientSocket });
 				}
 				break;
 			case 104: // 104 : UPDATE_MY_CONTACTLIST
@@ -194,6 +195,7 @@ void SessionManager::HandleClient(int clientSocket) {
 			case 206: // 206 : CREATE_CONFERENCE
 				msgStr = "CREATE_CONFERENCE";
 				telephonyManager->handleCreateConference(payloads);
+				accountManager->handleCreateConference(payloads, contactId);
 				break;
 			case 208: // 208 : JOIN_CONFERENCE
 				msgStr = "JOIN_CONFERENCE";

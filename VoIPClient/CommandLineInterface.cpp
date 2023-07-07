@@ -48,33 +48,64 @@ void CommandLineInterface::startCommandCli()
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000)); 
 		cout << "======================================================" << endl;
-		cout << "------------------------------------------------------" << endl;
-		cout << " ACCOUNT" << endl;
-		cout << "------------------------------------------------------" << endl;
+		cout << " << ACCOUNT >> " << endl;
 		cout << " 1. REGISTER_CONTACT" << endl;
 		cout << " 2. LOGIN" << endl;
 		cout << " 3. LOGOUT" << endl;
-		cout << " 4. UPDATE_MY_CONTACTLIST" << endl;
 		cout << " 5. RESET_PWORD" << endl;
 		cout << " 6. GET_ALL_CONTACT" << endl;
 		cout << " 7. GETMYCONTACTLIST FOR UI" << endl;
 		cout << " 8. SERCHCONTACT FOR UI" << endl;
 		cout << " 9. ADDCONTACT IN MYCONTACTLIST" << endl;
 		cout << "10. DELETECONTACT IN MYCONTACTLIST" << endl;
-		cout << "------------------------------------------------------" << endl;
-		cout << " CALL" << endl;
-		cout << "------------------------------------------------------" << endl;
+		cout << endl;
+		cout << " << CALL >> " << endl;
 		cout << "11. ANSWER CALL " << endl;
 		cout << "12. OUTGOING CALL " << endl;
 		cout << "13. REJECT CALL " << endl;
 		cout << "14. DISCONNECT CALL " << endl;
-		cout << "------------------------------------------------------" << endl;
-		cout << " CONFERENCE" << endl;
-		cout << "------------------------------------------------------" << endl;
+		cout << endl;
+		cout << " << CONFERENCE >> " << endl;
 		cout << "15. GET ALL CONFERENCES " << endl;
 		cout << "16. CREATE CONFERENCE " << endl;
 		cout << "17. JOIN CONFERENCE " << endl;
 		cout << "18. EXIT_CONFERENCE " << endl;
+		cout << endl;
+		cout << " << MY DATA >> " << endl;
+		if (accountManager->myCid.empty()) {
+			cout << "My CID : (EMPTY)" << endl;
+		} else {
+			cout << "My CID : " << accountManager->myCid << endl;
+		}		
+		if (accountManager->myContactDataList.empty()) {
+			cout << "My ContactList : (EMPTY)";
+		} else {
+			cout << "My ContactList : ";
+			for (const auto& item : accountManager->myContactDataList) {
+				cout << item << " ";
+			}
+		}
+		cout << endl;
+		if ( accountManager->myConferenceDataList.empty() ) {
+			cout << "My ConferenceList : (EMPTY)" << endl;
+		}
+		else {
+			cout << "My ConferenceList : " << endl;
+			for (const auto& item : accountManager->myConferenceDataList) {
+				cout << "---------------------------" << endl;
+				cout << "-rid : " << item.rid << " " << endl;
+				cout << "-dataAndTime : " << item.dataAndTime << endl;
+				cout << "-duration : " << item.duration << endl;
+				std::list<std::string> li = item.participants;
+				std::list<std::string>::iterator it;
+				cout << "-participants : ";
+				for (it = li.begin(); it != li.end(); it++) {
+					cout << *it << " ";
+				}
+				cout << endl;
+				cout << "---------------------------" << endl;
+			}
+		}		
 		cout << "======================================================" << endl;
 		std::cout << "Input int : " ;
 		getline(cin, num);
@@ -115,14 +146,9 @@ void CommandLineInterface::startCommandCli()
 			break;
 
 		case 3: //LOGOUT
-			std::cout << "cid : ";
-			getline(std::cin >> std::ws, inputID);
-			accountManager->logout(inputID);
-			break;
-
-		case 4: //UPDATE MY CONTACTLIST
-			std::cout << "Processing updateMyContactList test ..." << std::endl;
-			//accountManager->updateMyContactList(accountManager->myCid, nullptr);
+			if (!accountManager->myCid.empty()) {
+				accountManager->logout(accountManager->myCid);
+			}
 			break;
 
 		case 5: //RESET PW
@@ -180,9 +206,7 @@ void CommandLineInterface::startCommandCli()
 			callsManager->disconnectCall();
 			break;
 		case 15: // GET ALL CONFERENCES 
-			std::cout << "cid : ";
-			getline(std::cin >> std::ws, inputID);
-			accountManager->getAllConference(inputID);
+			accountManager->getAllConference(accountManager->myCid);
 			break;
 		case 16: // CREATE CONFERENCE 
 			{

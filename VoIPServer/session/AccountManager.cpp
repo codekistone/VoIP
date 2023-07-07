@@ -116,18 +116,18 @@ string AccountManager::handleLogin(Json::Value data, string ipAddress, string fr
 				payload["myContactData"].removeMember("passwordAnswer");
 				payload["myContactData"].removeMember("passwordQuestion");
 			}
-			cout << "handleLogin()/OK:" << payload << endl;
+			cout << "handleLogin()/From[" << from << "]OK:" << payload << endl;
 			result = true;
 		} else {
 			// Wrong password
 			payload["result"] = 2; // Fail 
-			cout << "handleLogin()/FAIL: Wrong password" << endl;
+			cout << "handleLogin()/From[" << from << "]/FAIL: Wrong password" << endl;
 
 		}
 	} else {
 		// Not registered
 		payload["result"] = 1; // Fail 
-		cout << "handleLogin()/FAIL:No contact data to login" << endl;
+		cout << "handleLogin()/From[" << from << "]/FAIL:No contact data to login" << endl;
 	}
 	/*
 		result 0 : SUCCESS
@@ -137,8 +137,14 @@ string AccountManager::handleLogin(Json::Value data, string ipAddress, string fr
 	sessionControl->sendData(102, payload, from);
 	if (result == true) {
 	    handleGetAllContact(from);
+		Json::Value data;
+		data["cid"] = cid;
+		handleGetAllConference(data, from);
+		return cid;
+	} else {
+		return "";
 	}
-	return cid;
+	
 }
 
 bool AccountManager::handleLogout(Json::Value data)
@@ -168,8 +174,12 @@ void AccountManager::handleUpdateMyContactList(Json::Value data, string from)
 	// No response message for 104
 	string cid = data["cid"].asString();
 	Json::Value updateContactList = data["myContactList"];
+	if (updateContactList.empty()) {
+		contactDb->remove(cid, "myContactList");
+	}
 	if (!cid.empty() && !updateContactList.empty()) {
 		Json::Value myContactList = contactDb->get(cid, "myContactList");
+		contactDb->remove(cid, "myContactList");
 		if (contactDb->update(cid, "myContactList", updateContactList)) {			
 			std::cout << "handleUpdateMyContactList()/OK:" << contactDb->get(cid, "myContactList") << std::endl;
 		}
@@ -215,6 +225,14 @@ void AccountManager::handleResetPassword(Json::Value data, string from)
 	sessionControl->sendData(105, payload, from);
 }
 
+void AccountManager::handleCreateConference(Json::Value data, string from)
+{
+	Json::Value cidData;
+	cidData["cid"] = from;
+	string cid = cidData["cid"].asString();
+	handleGetAllConference(cidData, from);
+}
+
 void AccountManager::handleGetAllContact( string from)
 {	
 	Json::Value payload;
@@ -242,8 +260,9 @@ void AccountManager::handleGetAllConference(Json::Value data, string from)
 	Json::Value allConferences = conferenceDb->get();
 	for (int i = 0; i < allConferences.size(); i++) {		
 		for (int j = 0; j < allConferences[i]["participants"].size(); j++) {
-			if (allConferences[i]["participants"][j] == cid) {
+			if (allConferences[i]["participants"][j].asString().compare(cid) == 0) {
 				payload.append(allConferences[i]);
+				break;
 			}
 		}
 	}
