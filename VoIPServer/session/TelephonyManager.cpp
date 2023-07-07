@@ -36,6 +36,15 @@ void TelephonyManager::release() {
 	conferenceDb = nullptr;
 }
 
+void TelephonyManager::initializeConnections()
+{
+	// Create room from database
+	Json::Value dbConferences = conferenceDb->get();
+	for (Json::Value dbConference : dbConferences) {
+		handleCreateConference(dbConference);
+	}
+}
+
 void TelephonyManager::onAnswer(Json::Value data) {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
@@ -169,6 +178,9 @@ void TelephonyManager::manageConferenceLifetime(std::string connId) {
 // Implement interface
 void TelephonyManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
+
+	// Create room from database
+	initializeConnections();
 }
 
 void TelephonyManager::handleOutgoingCall(Json::Value data) {
@@ -263,10 +275,12 @@ void TelephonyManager::releaseConnection(std::string cid) {
 }
 
 void TelephonyManager::handleCreateConference(Json::Value data) {
+	/*
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
 		return;
 	}
+	*/
 
 	std::string connId("CONNECTION_" + std::to_string(connNum++));
 	Connection conn(connId, data);
@@ -318,16 +332,19 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 		payload["result"] = 2;
 		payload["cause"] = 2;
 		sessionControl->sendData(208, payload, from);
+		return;
 	}
 	else if (joinable == 3) {
 		std::cerr << "UNINVITED: " << connId << std::endl;
 		payload["result"] = 2;
 		payload["cause"] = 3;
 		sessionControl->sendData(208, payload, from);
+		return;
 	}
 
 	connectionMap[connId].setParticipant(from);
 
+	payload["result"] = 1;
 	payload["rid"] = connId;
 	// TODO Media - Should receive MediaInfo
 	payload["videoCodec"] = "codec";

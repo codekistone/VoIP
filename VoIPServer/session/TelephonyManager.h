@@ -25,6 +25,7 @@ public:
 	static void releaseInstance();
 
 	void release();
+	void initializeConnections();
 	void onAnswer(Json::Value data);
 	void onReject(Json::Value data);
 	int joinableConference(Json::Value data);

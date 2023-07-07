@@ -36,7 +36,7 @@ void SessionManager::releaseInstance() {
 }
 
 void SessionManager::init(const char* ip, int port) {
-	getMyIp();
+	
 	if (strlen(ip) > 0) {
 		strcpy_s(serverIP, sizeof(serverIP), ip); // dynamic ip
 	}
@@ -81,7 +81,7 @@ void SessionManager::proc_recv() {
 
 	Json::Value root;
 	Json::Reader reader;
-	
+	getMyIp();
 
 	char buf[PACKET_SIZE];
 	Json::Reader jsonReader;

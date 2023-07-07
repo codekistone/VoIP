@@ -31,4 +31,6 @@ public:
 	long getDuration();
 	bool isOnTime();
 	std::list<std::string> getConferenceList();
+
+	void logConnections();
 };

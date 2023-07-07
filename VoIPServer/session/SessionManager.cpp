@@ -32,8 +32,7 @@ void SessionManager::releaseInstance() {
 	}
 }
 
-void SessionManager::init() {
-	getMyIp();
+void SessionManager::init() {	
 	telephonyManager->setSessionControl(this);
 	accountManager->setSessionControl(this);
 
@@ -130,6 +129,7 @@ void SessionManager::HandleClient(int clientSocket) {
 
 	std::string contactId = GetClientName(clientSocket);
 	clientMap.insert({ contactId, clientSocket });
+	getMyIp();
 	char buffer[PACKET_SIZE];
 	Json::Reader jsonReader;
 	while (true) {
@@ -209,6 +209,10 @@ void SessionManager::HandleClient(int clientSocket) {
 			case 106: // 106 : GET_ALL_CONTACT
 				msgStr = "GET_ALL_CONTACT";
 				accountManager->handleGetAllContact(contactId);
+				break;
+			case 205: // 105: GET_MY_CONFERENCE
+				msgStr = "GET_MY_CONFERENCE";
+				accountManager->handleGetAllConference(payloads, contactId);
 				break;
 			case 206: // 206 : CREATE_CONFERENCE
 				msgStr = "CREATE_CONFERENCE";

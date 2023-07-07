@@ -241,7 +241,7 @@ void CallsManager::onIncomingCall(Json::Value data) {
 	call->setCallId(connId);
 	call->setContactId(from);
 	call->setCallState(CallState::STATE_RINGING);
-	std::cout << "[Received] -> (STATE_RINGING) Calling from " << from << " (Answer(5)/Reject(6))" << std::endl;
+	std::cout << "[Received] -> (STATE_RINGING) Calling from " << from << std::endl;
 }
 
 void CallsManager::onOutgoingCallResult(Json::Value data) {
