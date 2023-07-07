@@ -188,10 +188,6 @@ void SessionManager::HandleClient(int clientSocket) {
 				msgStr = "GET_ALL_CONTACT";
 				accountManager->handleGetAllContact(contactId);
 				break;
-			case 205: // 105: GET_ALL_CONFERENCE
-				msgStr = "GET_ALL_CONFERENCE";
-				accountManager->handleGetAllConference(payloads, contactId);
-				break;
 			case 206: // 206 : CREATE_CONFERENCE
 				msgStr = "CREATE_CONFERENCE";
 				telephonyManager->handleCreateConference(payloads);
