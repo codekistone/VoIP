@@ -146,17 +146,8 @@ void SessionManager::HandleClient(int clientSocket) {
 			telephonyManager->releaseConnection(contactId);
 			break;
 		}
-
-		// listener test
 		std::string msg(buffer);
 		std::string msgStr;
-		if (msg.find("Login") != std::string::npos) {
-			msgStr = "LOGIN";
-			contactId = ("CONTACT_" + std::to_string(contactNum++));
-			clientMap.insert({ contactId, clientSocket });
-			accountManager->handleLogin_(contactId.c_str());
-		}
-
 		//-------------------------------------------------------------
 		// JSON payload parser
 		Json::Value jsonData;

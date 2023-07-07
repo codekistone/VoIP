@@ -6,7 +6,6 @@
 class IAccountManager {
 public:
 	virtual void setSessionControl(SessionControl* control) = 0;
-	virtual void handleLogin_(std::string requester) = 0;
 
     // JSON based callback methods
 	virtual void handleRegisterContact(Json::Value data, std::string from) = 0;

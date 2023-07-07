@@ -25,7 +25,6 @@ public:
 
 	// interface
 	void setSessionControl(SessionControl* control) override;
-	void handleLogin_(std::string requester) override;
 
     // JSON based callback methods
 	void handleRegisterContact(Json::Value data, string from) override;

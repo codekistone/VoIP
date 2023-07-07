@@ -9,6 +9,7 @@
 TelephonyManager* TelephonyManager::instance = nullptr;
 Json::FastWriter fastWriter;
 int connNum = 0;
+int callNum = 0;
 
 TelephonyManager::TelephonyManager() {
 	sessionControl = nullptr;
@@ -41,7 +42,32 @@ void TelephonyManager::initializeConnections()
 	// Create room from database
 	Json::Value dbConferences = conferenceDb->get();
 	for (Json::Value dbConference : dbConferences) {
-		handleCreateConference(dbConference);
+		std::string connId = dbConference["rid"].asString();
+		Connection conn(connId, dbConference);
+		connectionMap.insert({ connId, conn });
+		std::cout << "---------------------------------------------------" << endl;
+		std::cout << "Initial Conference Room Created [" << connId << "]" << std::endl;
+		std::cout << dbConference << endl;
+		std::thread room(&TelephonyManager::manageConferenceLifetime, instance, connId);
+		room.detach();
+		std::cout << "---------------------------------------------------" << endl;
+	}
+}
+
+string TelephonyManager::generateConnectionId( bool isConference )
+{
+	if (isConference) {
+		while (true) {
+			std::string connId("CONNECTION_" + std::to_string(connNum++));
+			if (conferenceDb->search("rid", connId).empty()) {
+				return connId;
+				break;
+			}
+		}
+	}
+	else {
+		std::string connId("CALL_" + std::to_string(callNum++));
+		return connId;
 	}
 }
 
@@ -191,7 +217,7 @@ void TelephonyManager::handleOutgoingCall(Json::Value data) {
 	std::string from = data["from"].asString();
 	std::string to = data["to"].asString();
 
-	std::string connId("CONNECTION_" + std::to_string(connNum++));
+	std::string connId = generateConnectionId(false);
 	Connection conn(connId);
 	std::cout << "setParticipant: " << from << ", " << to << std::endl;
 	conn.setParticipant(from);
@@ -275,14 +301,12 @@ void TelephonyManager::releaseConnection(std::string cid) {
 }
 
 void TelephonyManager::handleCreateConference(Json::Value data) {
-	/*
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
 		return;
 	}
-	*/
 
-	std::string connId("CONNECTION_" + std::to_string(connNum++));
+	std::string connId = generateConnectionId(true);
 	Connection conn(connId, data);
 
 	connectionMap.insert({ connId, conn });

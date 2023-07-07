@@ -37,10 +37,6 @@ void AccountManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
 }
 
-void AccountManager::handleLogin_(std::string requester) {
-	sessionControl->sendData(("onLoginSuccess," + requester).c_str(), requester);
-}
-
 void AccountManager::handleRegisterContact(Json::Value data, string from)
 {	
 	Json::Value payload;
