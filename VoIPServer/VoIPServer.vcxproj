@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DumpMediaManager.cpp" />
     <ClCompile Include="session\AccountManager.cpp" />
     <ClCompile Include="session\ConferenceDb.cpp" />
     <ClCompile Include="session\Connection.cpp" />
@@ -139,12 +140,15 @@
     <ClCompile Include="VoIPServer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DumpMediaManager.h" />
+    <ClInclude Include="IServerMediaManager.h" />
     <ClInclude Include="session\AccountManager.h" />
     <ClInclude Include="session\IAccountManager.h" />
     <ClInclude Include="session\ConferenceDb.h" />
     <ClInclude Include="session\Connection.h" />
     <ClInclude Include="session\ContactDb.h" />
     <ClInclude Include="session\DatabaseManager.h" />
+    <ClInclude Include="session\ISessionMediaCallback.h" />
     <ClInclude Include="session\SessionControl.h" />
     <ClInclude Include="session\SessionManager.h" />
     <ClInclude Include="session\TelephonyManager.h" />
