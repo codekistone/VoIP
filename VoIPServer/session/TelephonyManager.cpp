@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 
 #include "TelephonyManager.h"
 
@@ -183,10 +184,10 @@ void TelephonyManager::handleOutgoingCallNoUser(Json::Value data) {
 void TelephonyManager::handleIncomingCallResponse(Json::Value data) {
 	int result = data["result"].asInt();
 	if (result == 1) { // 1:ANSWER
-		handleAnswer(data);
+		onAnswer(data);
 	}
 	else if (result == 2) { // 2:REJECT
-		handleReject(data);
+		onReject(data);
 	}
 }
 
