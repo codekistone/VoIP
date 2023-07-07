@@ -16,6 +16,8 @@ private:
 	char serverIP[20];
 	int serverPort;
 
+	std::string myIp;
+
 	ICallsManager* callsManager;
 	IAccountManager* accountManager;
 	
@@ -30,6 +32,7 @@ public:
 	void openSocket();
 	void proc_recv();
 	std::vector<std::string> split(const std::string&, char);
+	void getMyIp();
 
 	// listener
 	int sendData(const char* message) override;

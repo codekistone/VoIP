@@ -1,8 +1,12 @@
 #include "Connection.h"
+#include <iostream>
+#include <chrono>
 
 Connection::Connection() {};
 Connection::Connection(std::string connId) {
 	id = connId;
+	startTime = 0;
+	duration = 0;
 };
 
 Connection::Connection(std::string connId, Json::Value conferenceInfo) {
@@ -44,7 +48,9 @@ long Connection::getDuration() {
 }
 
 bool Connection::isOnTime() {
-	long currentTime = 999999; // TEMP
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+	std::chrono::system_clock::duration epoch = now.time_since_epoch();
+	long currentTime = std::chrono::duration_cast<std::chrono::seconds>(epoch).count();
 	return currentTime >= startTime && currentTime < (startTime + duration);
 }
 

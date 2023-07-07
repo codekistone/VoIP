@@ -13,6 +13,7 @@ private:
 	std::string audioCodec;
 	std::string encryption_alg;
 	std::string encryption_key;
+	int videoQuality;
 
 public:
 	Call();
@@ -33,4 +34,7 @@ public:
 	void setEncryptionKey(std::string key);
 	std::string getEncryptionKey();
 	Json::Value getMediaMessage();
+
+	int getVideoQuality();
+	void setVideoQuality(int quality);
 };

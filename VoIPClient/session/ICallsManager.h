@@ -14,4 +14,5 @@ public:
 	virtual void onDisconnected(Json::Value data) = 0;
 	virtual void onJoinConferenceResult(Json::Value data) = 0;
 	virtual void onExitConference(Json::Value data) = 0;
+	virtual void onVideoQualityChanged(Json::Value data) = 0;
 };

@@ -4,6 +4,7 @@
 #include <ctime>
 
 #include "TelephonyManager.h"
+#include "../DumpMediaManager.h"
 
 TelephonyManager* TelephonyManager::instance = nullptr;
 Json::FastWriter fastWriter;
@@ -57,29 +58,34 @@ void TelephonyManager::onAnswer(Json::Value data) {
 	Json::Value media;
 	media["rid"] = connId;
 	media["conferenceSize"] = 2;
+	media["myIp"] = payload["myIp"].asString();
 	// send media
+	DumpMediaManager::getInstance()->startCall(media);
 
 	// TODO Media - SESSION_MEDIA_SERVER_ADD
-	Json::Value media2;
-	media2["rid"] = connId;
+	Json::Value clientMedia;
+	clientMedia["rid"] = connId;
 
 	Connection conn = connectionMap[connId];
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
 		if (participant == from) {
-			media2["cid"] = from;
-			media2["clientIp"] = "127.0.0.1";
-			media2["name"] = "DooSan";
+			clientMedia["cid"] = from;
+			clientMedia["clientIp"] = "127.0.0.1";
+			clientMedia["name"] = "DooSan";
 			sessionControl->sendData(303, payload, from);
+			// send media
+			DumpMediaManager::getInstance()->addClient(clientMedia);
 			continue;
 		}
 
-		media2["cid"] = participant;
-		media2["clientIp"] = "127.0.0.1";
-		media2["name"] = "DooSanJJANG";
+		clientMedia["cid"] = participant;
+		clientMedia["clientIp"] = "127.0.0.1";
+		clientMedia["name"] = "DooSanJJANG";
 		sessionControl->sendData(301, payload, participant);
+		// send media
+		DumpMediaManager::getInstance()->addClient(clientMedia);
 	}
-	// send media
 }
 
 void TelephonyManager::onReject(Json::Value data) {
@@ -214,8 +220,8 @@ void TelephonyManager::handleDisconnect(Json::Value data) {
 	std::string connId(data["rid"].asString());
 
 	// TODO Media - SESSION_MEDIA_SERVER_REMOVE
-	Json::Value media;
-	media["rid"] = connId;
+	Json::Value clientMedia;
+	clientMedia["rid"] = connId;
 
 	Json::Value payload;
 	payload["rid"] = connId;
@@ -223,15 +229,18 @@ void TelephonyManager::handleDisconnect(Json::Value data) {
 	int msgId;
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
-		media["cid"] = participant;
+		clientMedia["cid"] = participant;
 		msgId = conn.isConference() ? 209 : 305;
 		sessionControl->sendData(msgId, payload, participant);
 		// send media
+		DumpMediaManager::getInstance()->removeClient(clientMedia);
 	}
 	if (!conn.isConference()) {
 		connectionMap.erase(connId);
 	}
-
+	Json::Value media;
+	media["rid"] = connId;
+	DumpMediaManager::getInstance()->endCall(media);
 }
 
 void TelephonyManager::releaseConnection(std::string cid) {
@@ -272,7 +281,9 @@ void TelephonyManager::handleCreateConference(Json::Value data) {
 	Json::Value media;
 	media["rid"] = connId;
 	media["conferenceSize"] = conn.getConferenceList().size();
+	media["myIp"] = data["myIp"].asString();
 	// send media
+	DumpMediaManager::getInstance()->startCall(media);
 }
 
 void TelephonyManager::removeConference(std::string connId) {
@@ -334,6 +345,7 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 	media["clientIp"] = "127.0.0.1";
 	media["name"] = "DooSan";
 	// send media
+	DumpMediaManager::getInstance()->addClient(media);
 }
 
 void TelephonyManager::handleExitConference(Json::Value data) {
@@ -358,4 +370,21 @@ void TelephonyManager::handleExitConference(Json::Value data) {
 	media["rid"] = connId;
 	media["cid"] = from;
 	// send media
+	DumpMediaManager::getInstance()->removeClient(media);
+}
+
+void TelephonyManager::handleRequestVideoQualityChange(Json::Value data) {
+	//DumpMediaManager::getInstance->updateClientVideoQuality(data);
+}
+
+void TelephonyManager::notifyVideoQualityChanged(std::string rid, int quality) {
+	// send to client (request quality change)
+	Connection conn = connectionMap[rid];
+
+	Json::Value payload;
+	payload["quality"] = quality;
+	std::list<std::string> participants = conn.getParticipants();
+	for (const auto& participant : participants) {
+		sessionControl->sendData(402, payload, participant);
+	}
 }

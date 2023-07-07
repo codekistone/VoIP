@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CommandLineInterface.cpp" />
+    <ClCompile Include="DumpMediaManager.cpp" />
     <ClCompile Include="session\AccountManager.cpp" />
     <ClCompile Include="session\Call.cpp" />
     <ClCompile Include="session\CallsManager.cpp" />
@@ -138,12 +139,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandLineInterface.h" />
+    <ClInclude Include="DumpMediaManager.h" />
+    <ClInclude Include="IClientMediaManager.h" />
     <ClInclude Include="session\AccountManager.h" />
     <ClInclude Include="session\IAccountManager.h" />
     <ClInclude Include="session\Call.h" />
     <ClInclude Include="session\CallsManager.h" />
     <ClInclude Include="session\ICallsManager.h" />
     <ClInclude Include="session\Constants.h" />
+    <ClInclude Include="session\ISessionMediaCallback.h" />
     <ClInclude Include="session\SessionManager.h" />
     <ClInclude Include="session\SessionControl.h" />
   </ItemGroup>

@@ -17,6 +17,7 @@ SessionManager::SessionManager() {
 
 	callsManager = CallsManager::getInstance();
 	accountManager = AccountManager::getInstance();
+	myIp = "";
 }
 
 SessionManager* SessionManager::getInstance() {
@@ -35,6 +36,7 @@ void SessionManager::releaseInstance() {
 }
 
 void SessionManager::init(const char* ip, int port) {
+	getMyIp();
 	if (strlen(ip) > 0) {
 		strcpy_s(serverIP, sizeof(serverIP), ip); // dynamic ip
 	}
@@ -58,6 +60,22 @@ void SessionManager::release() {
 	accountManager->setSessionControl(nullptr);
 }
 
+void SessionManager::getMyIp()
+{
+	struct addrinfo* _addrinfo;
+	struct addrinfo* _res;
+	char _address[INET6_ADDRSTRLEN];
+	char szHostName[255];
+	gethostname(szHostName, sizeof(szHostName));
+	getaddrinfo(szHostName, NULL, 0, &_addrinfo);
+	for (_res = _addrinfo; _res != NULL; _res = _res->ai_next) {
+		if (_res->ai_family == AF_INET) {
+			if (NULL != inet_ntop(AF_INET, &((struct sockaddr_in*)_res->ai_addr)->sin_addr, _address, sizeof(_address))) {
+				myIp = _address;
+			}
+		}
+	}
+}
 // socket Receive function
 void SessionManager::proc_recv() {
 
@@ -123,6 +141,7 @@ void SessionManager::proc_recv() {
 				break;
 			case 208: // 208 : JOIN_CONFERENCE
 				msgStr = "JOIN_CONFERENCE";
+				payloads["myIp"] = myIp;
 				callsManager->onJoinConferenceResult(payloads);
 				break;
 			case 209: // 209 : EXIT_CONFERENCE
@@ -131,6 +150,7 @@ void SessionManager::proc_recv() {
 				break;
 			case 301: // 301 : OUTGOING_CALL_RESULT
 				msgStr = "OUTGOING_CALL_RESULT";
+				payloads["myIp"] = myIp;
 				callsManager->onOutgoingCallResult(payloads);
 				break;
 			case 302: // 302 : INCOMING_CALL
@@ -139,11 +159,16 @@ void SessionManager::proc_recv() {
 				break;
 			case 303: // 303 : INCOMING_CALL_RESULT
 				msgStr = "INCOMING_CALL_RESULT";
+				payloads["myIp"] = myIp;
 				callsManager->onIncomingCallResult(payloads);
 				break;
 			case 305: // 305 : DISCONNECT_CALL
 				msgStr = "DISCONNECT_CALL";
 				callsManager->onDisconnected(payloads);
+				break;
+			case 402: // 402 : 
+				msgStr = "NOTIFY_VIDEO_QUALITY";
+				callsManager->onVideoQualityChanged(payloads);
 				break;
 			default:
 				break;

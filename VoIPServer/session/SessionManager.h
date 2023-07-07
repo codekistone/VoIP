@@ -19,6 +19,7 @@ private:
 	const int MAX_CLIENTS = 10;  // 최대참여자 수
 	std::map<std::string, int> clientMap;
 	std::vector<std::thread> clientThread;
+	std::string myIp;
 
 	int contactNum; // For TEST
 
@@ -36,6 +37,7 @@ public:
 	void openSocket();
 	void HandleClient(int clientSocket);
 	std::string GetClientName(int clientSocket);
+	void getMyIp();
 
 	// interface
 	void sendData(const char* message, std::string to) override;

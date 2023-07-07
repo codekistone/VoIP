@@ -4,11 +4,12 @@
 
 #include "SessionControl.h"
 #include "ITelephonyManager.h"
+#include "ISessionMediaCallback.h"
 #include "Connection.h"
 #include "ConferenceDb.h"
 #include "../../json/json.h"
 
-class TelephonyManager : public ITelephonyManager {
+class TelephonyManager : public ITelephonyManager, public ISessionMediaCallback {
 private:
 	static TelephonyManager* instance;
 
@@ -40,4 +41,8 @@ public:
 	void handleCreateConference(Json::Value data) override;
 	void handleJoinConference(Json::Value data) override;
 	void handleExitConference(Json::Value data) override;
+	void handleRequestVideoQualityChange(Json::Value data) override;
+
+	// Media Interface
+	void notifyVideoQualityChanged(std::string rid, int quality) override;
 };

@@ -4,5 +4,6 @@
   "videoCodec": "string",
   "audioCodec": "string",
   "encryption_alg": "string",
-  "encryption_key": "string"
+  "encryption_key": "string",
+  "myIp": "192.0.0.4"
 }

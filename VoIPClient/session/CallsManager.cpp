@@ -5,6 +5,8 @@
 #include "CallsManager.h"
 #include "Constants.h"
 
+#include "../DumpMediaManager.h";
+
 CallsManager* CallsManager::instance = nullptr;
 Json::FastWriter fastWriter;
 
@@ -122,6 +124,8 @@ void CallsManager::onSuccessfulOutgoingCall(Json::Value data) {
 
 	// TODO Media - SESSION_MEDIA_CLIENT_ADD
 	Json::Value media = call->getMediaMessage();
+	media["myIp"] = data["myIp"].asString();
+	DumpMediaManager::getInstance()->startCall(media); //TEMP
 }
 
 void CallsManager::onFailedOutgoingCall(Json::Value data) {
@@ -130,7 +134,7 @@ void CallsManager::onFailedOutgoingCall(Json::Value data) {
 	std::cout << "[Received] -> (STATE_IDLE) onFailedOutgoingCall cause: " << cause << std::endl;
 }
 
-void CallsManager::onSuccessfulIncomingCall() {
+void CallsManager::onSuccessfulIncomingCall(Json::Value data) {
 	// TODO Media - Should receive MediaInfo
 
 	call->setCallState(CallState::STATE_ACTIVE);
@@ -138,7 +142,8 @@ void CallsManager::onSuccessfulIncomingCall() {
 
 	// TODO Media - SESSION_MEDIA_CLIENT_ADD
 	Json::Value media = call->getMediaMessage();
-
+	media["myIp"] = data["myIp"].asString();
+	DumpMediaManager::getInstance()->startCall(media); //TEMP
 	//send media
 }
 
@@ -181,8 +186,9 @@ void CallsManager::onSuccessfulJoinConference(Json::Value data) {
 
 	//TODO MEDIA
 	Json::Value media = call->getMediaMessage();
-
+	media["myIp"] = data["myIp"].asString();
 	//send media
+	DumpMediaManager::getInstance()->startCall(media);
 }
 
 void CallsManager::onFailedJoinConference(Json::Value data) {
@@ -251,7 +257,7 @@ void CallsManager::onOutgoingCallResult(Json::Value data) {
 void CallsManager::onIncomingCallResult(Json::Value data) {
 	int result = data["result"].asInt();
 	if (result == 1) { // 1:success
-		onSuccessfulIncomingCall();
+		onSuccessfulIncomingCall(data);
 	}
 	else if (result == 2) { // 2:fail
 		onRejectedIncomingCall();
@@ -293,4 +299,20 @@ void CallsManager::onExitConference(Json::Value data) {
 	std::cout << "[Received] -> (STATE_IDLE) ConferenceCall CLEAR " << std::endl;
 
 	// TODO Media - SESSION_MEDIA_CLIENT_REMOVE
+}
+
+void CallsManager::onVideoQualityChanged(Json::Value data) {
+	int quality = data["quality"].asInt();
+	call->setVideoQuality(quality);
+	// setVideoQuality
+	DumpMediaManager::getInstance()->setVideoQuality(quality);
+}
+
+// Media Interface
+void CallsManager::requestVideoQualityChange(int quality) {
+	// send to server (request quality change)
+	Json::Value payload;
+	payload["rid"] = call->getCallId();
+	payload["quality"] = quality;
+	sessionControl->sendData(401, payload);
 }

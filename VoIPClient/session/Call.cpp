@@ -62,6 +62,12 @@ void Call::setEncryptionKey(std::string key) {
 std::string Call::getEncryptionKey() {
 	return encryption_key;
 }
+void Call::setVideoQuality(int quality) {
+	videoQuality = quality;
+}
+int Call::getVideoQuality() {
+	return videoQuality;
+}
 
 Json::Value Call::getMediaMessage() {
 	Json::Value media;

@@ -15,4 +15,5 @@ public:
 	virtual void handleCreateConference(Json::Value data) = 0;
 	virtual void handleJoinConference(Json::Value data) = 0;
 	virtual void handleExitConference(Json::Value data) = 0;
+	virtual void handleRequestVideoQualityChange(Json::Value data) = 0;
 };

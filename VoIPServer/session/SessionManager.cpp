@@ -33,6 +33,7 @@ void SessionManager::releaseInstance() {
 }
 
 void SessionManager::init() {
+	getMyIp();
 	telephonyManager->setSessionControl(this);
 	accountManager->setSessionControl(this);
 
@@ -50,6 +51,23 @@ void SessionManager::release() {
 
 	telephonyManager->setSessionControl(nullptr);
 	accountManager->setSessionControl(nullptr);
+}
+
+void SessionManager::getMyIp()
+{
+	struct addrinfo* _addrinfo;
+	struct addrinfo* _res;
+	char _address[INET6_ADDRSTRLEN];
+	char szHostName[255];
+	gethostname(szHostName, sizeof(szHostName));
+	getaddrinfo(szHostName, NULL, 0, &_addrinfo);
+	for (_res = _addrinfo; _res != NULL; _res = _res->ai_next) {
+		if (_res->ai_family == AF_INET) {
+			if (NULL != inet_ntop(AF_INET, &((struct sockaddr_in*)_res->ai_addr)->sin_addr, _address, sizeof(_address))) {
+				myIp = _address;
+			}
+		}
+	}
 }
 
 void SessionManager::openSocket() {
@@ -194,6 +212,7 @@ void SessionManager::HandleClient(int clientSocket) {
 				break;
 			case 206: // 206 : CREATE_CONFERENCE
 				msgStr = "CREATE_CONFERENCE";
+				payloads["myIp"] = myIp;
 				telephonyManager->handleCreateConference(payloads);
 				accountManager->handleCreateConference(payloads, contactId);
 				break;
@@ -222,11 +241,16 @@ void SessionManager::HandleClient(int clientSocket) {
 			case 302: // 302 : INCOMING_CALL_RESPONSE
 				msgStr = "INCOMING_CALL_RESPONSE";
 				payloads["from"] = contactId;
+				payloads["myIp"] = myIp;
 				telephonyManager->handleIncomingCallResponse(payloads);
 				break;
 			case 305: // 305 : DISCONNECT_CALL
 				msgStr = "DISCONNECT_CALL";
 				telephonyManager->handleDisconnect(payloads);
+				break;
+			case 401: // 401 : REQUEST_VIDEO_QUALITY
+				msgStr = "REQUEST_VIDEO_QUALITY";
+				telephonyManager->handleRequestVideoQualityChange(payloads);
 				break;
 			default:
 				break;
