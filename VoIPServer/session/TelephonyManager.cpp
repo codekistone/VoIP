@@ -151,9 +151,9 @@ void TelephonyManager::manageConferenceLifetime(std::string connId) {
 		std::time(&now);
 		char time[26];
 		ctime_s(time, 26, &now);
-		std::cout << displayConn << "ÇöÀç ½Ã°£: " << time << endl;
+		std::cout << displayConn << "ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½: " << time << endl;
 
-		// 1ºÐ ´ë±â
+		// 1ï¿½ï¿½ ï¿½ï¿½ï¿½
 		std::this_thread::sleep_for(std::chrono::minutes(1));
 		std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
 
@@ -326,8 +326,7 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 		sessionControl->sendData(208, payload, from);
 	}
 
-	Connection conn = connectionMap[connId];
-	conn.setParticipant(from);
+	connectionMap[connId].setParticipant(from);
 
 	payload["rid"] = connId;
 	// TODO Media - Should receive MediaInfo
@@ -357,8 +356,7 @@ void TelephonyManager::handleExitConference(Json::Value data) {
 	std::string connId(data["rid"].asString());
 	std::string from(data["from"].asString());
 
-	Connection conn = connectionMap[connId];
-	conn.removeParticipant(from);
+	connectionMap[connId].removeParticipant(from);
 
 	Json::Value payload;
 	payload["result"] = 1;
