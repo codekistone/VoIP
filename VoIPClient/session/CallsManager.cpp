@@ -31,6 +31,10 @@ void CallsManager::releaseInstance() {
 	}
 }
 
+Call* CallsManager::getCall() {
+	return call;
+}
+
 void CallsManager::startOutgoingCall(std::string to) {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;

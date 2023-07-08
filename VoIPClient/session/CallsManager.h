@@ -19,6 +19,7 @@ public:
 	static CallsManager* getInstance();
 	static void releaseInstance();
 
+	Call* getCall();
 	void startOutgoingCall(std::string to);
 	void onSuccessfulOutgoingCall(Json::Value data);
 	void onFailedOutgoingCall(Json::Value data);
