@@ -45,25 +45,27 @@ void TelephonyManager::initializeConnections()
 		std::string connId = dbConference["rid"].asString();
 		Connection conn(connId, dbConference);
 		connectionMap.insert({ connId, conn });		
-		std::thread room(&TelephonyManager::manageConferenceLifetime, instance, connId);
-		room.detach();
 	}
 	std::cout << "Initial Conference Room Created" << std::endl;
 	logConnections();
+	for (Json::Value dbConference : dbConferences) {
+		std::string connId = dbConference["rid"].asString();
+		std::thread room(&TelephonyManager::manageConferenceLifetime, instance, connId);
+		room.detach();
+	}
 }
 
 string TelephonyManager::generateConnectionId( bool isConference )
 {
 	if (isConference) {
 		while (true) {
-			std::string connId("CONNECTION_" + std::to_string(connNum++));
+			std::string connId("CONN_" + std::to_string(connNum++));
 			if (conferenceDb->search("rid", connId).empty()) {
 				return connId;
 				break;
 			}
 		}
-	}
-	else {
+	} else {
 		std::string connId("CALL_" + std::to_string(callNum++));
 		return connId;
 	}
@@ -71,12 +73,15 @@ string TelephonyManager::generateConnectionId( bool isConference )
 
 void TelephonyManager::onAnswer(Json::Value data) {
 	if (sessionControl == nullptr) {
-		std::cerr << "Not register sessionControl" << std::endl;
+		std::cerr << "onAnswer()/Not register sessionControl" << std::endl;
 		return;
 	}
 
 	std::string connId = data["rid"].asString();
 	std::string from = data["from"].asString();
+
+	std::cout << "onAnswer()/from[" << from << "/connId[" << connId << "]" << std::endl;
+	logConnections();
 
 	Json::Value payload;
 	payload["rid"] = connId;
@@ -101,8 +106,6 @@ void TelephonyManager::onAnswer(Json::Value data) {
 
 	Connection conn = connectionMap[connId];
 	std::list<std::string> participants = conn.getParticipants();
-	std::cout << "onAnswer()/from[" << from << "/connId[" << connId << "]" << std::endl;
-	logConnections();
 
 	for (const auto& participant : participants) {
 		if (participant == from) {
@@ -126,7 +129,7 @@ void TelephonyManager::onAnswer(Json::Value data) {
 
 void TelephonyManager::onReject(Json::Value data) {
 	if (sessionControl == nullptr) {
-		std::cerr << "Not register sessionControl" << std::endl;
+		std::cerr << "onReject()/Not register sessionControl" << std::endl;
 		return;
 	}
 
@@ -151,6 +154,7 @@ void TelephonyManager::onReject(Json::Value data) {
 		sessionControl->sendData(301, payload, participant);
 	}
 	connectionMap.erase(connId);
+
 	std::cout << "onReject()/from[" << from << "]connId[" << connId << "]" << endl;
 	logConnections();
 }
@@ -253,23 +257,29 @@ void TelephonyManager::handleOutgoingCall(Json::Value data) {
 	conn.setParticipant(from);
 	conn.setParticipant(to);
 	connectionMap.insert({ connId, conn });
-	std::cout << "handleOutgoingCall()/from[" << from << "]/to[" << to << "]/connId[" << connId << "]" << endl;
-	logConnections();
 
 	Json::Value payload;
 	payload["rid"] = connId;
 	payload["cid"] = from;
 
 	sessionControl->sendData(302, payload, to);
+
+	std::cout << "handleOutgoingCall()/from[" << from << "]/to[" << to << "]/connId[" << connId << "]" << endl;
+	logConnections();
 }
 
 void TelephonyManager::handleOutgoingCallNoUser(Json::Value data) {
 	std::string from = data["from"].asString();
+	std::string to = data["to"].asString();
 	Json::Value payload;
 	payload["rid"] = "UNKNOWN";
 	payload["result"] = 2;
 	payload["cause"] = 3;
+
 	sessionControl->sendData(301, payload, from);
+
+	std::cout << "handleOutgoingCallNoUser()/from[" << from << "]/to[" << to << "]" << endl;
+	logConnections();
 }
 
 void TelephonyManager::handleIncomingCallResponse(Json::Value data) {
@@ -307,9 +317,10 @@ void TelephonyManager::handleDisconnect(Json::Value data) {
 	}
 	if (!conn.isConference()) {
 		connectionMap.erase(connId);
-		std::cout << "handleDisconnect()/connId[" << connId << "]" << endl;
-		logConnections();
 	}
+	std::cout << "handleDisconnect()/connId[" << connId << "]" << endl;
+	logConnections();
+
 	Json::Value media;
 	media["rid"] = connId;
 	DumpMediaManager::getInstance()->endCall(media);
@@ -336,7 +347,7 @@ void TelephonyManager::releaseConnection(std::string cid) {
 
 void TelephonyManager::handleCreateConference(Json::Value data) {
 	if (sessionControl == nullptr) {
-		std::cerr << "Not register sessionControl" << std::endl;
+		std::cerr << "handleCreateConference()/Not register sessionControl" << std::endl;
 		return;
 	}
 
@@ -345,8 +356,6 @@ void TelephonyManager::handleCreateConference(Json::Value data) {
 
 	connectionMap.insert({ connId, conn });
 	conferenceDb->update(connId, data); // Add data
-	std::cout << "handleCreateConference()/connId[" << connId << "]" << std::endl;
-	logConnections();
 
 	std::thread room(&TelephonyManager::manageConferenceLifetime, instance, connId);
 	room.detach();
@@ -358,6 +367,9 @@ void TelephonyManager::handleCreateConference(Json::Value data) {
 	media["myIp"] = data["myIp"].asString();
 	// send media
 	DumpMediaManager::getInstance()->startCall(media);
+
+	std::cout << "handleCreateConference()/connId[" << connId << "]" << std::endl;
+	logConnections();
 }
 
 void TelephonyManager::removeConference(std::string connId) {
@@ -366,6 +378,7 @@ void TelephonyManager::removeConference(std::string connId) {
 	handleDisconnect(data);
 	conferenceDb->remove(connId);
 	connectionMap.erase(connId);
+
 	std::cout << "removeConference()/connId[" << connId << "]" << std::endl;
 	logConnections();
 }
@@ -383,21 +396,27 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 	Json::Value payload;
 
 	if (joinable == 1) {
-		std::cerr << "NO ROOM: " << connId << std::endl;
+		std::cout << "handleJoinConference()/NO_ROOM/from[" << from << "]/connId[" << connId << endl;
+		logConnections();
+
 		payload["result"] = 2;
 		payload["cause"] = 1;
 		sessionControl->sendData(208, payload, from);
 		return;
 	}
 	else if (joinable == 2) {
-		std::cerr << "NO TIME: " << connId << std::endl;
+		std::cout << "handleJoinConference()/NO_TIME/from[" << from << "]/connId[" << connId << endl;
+		logConnections();
+
 		payload["result"] = 2;
 		payload["cause"] = 2;
 		sessionControl->sendData(208, payload, from);
 		return;
 	}
 	else if (joinable == 3) {
-		std::cerr << "UNINVITED: " << connId << std::endl;
+		std::cout << "handleJoinConference()/UNINVITED/from[" << from << "]/connId[" << connId << endl;
+		logConnections();
+
 		payload["result"] = 2;
 		payload["cause"] = 3;
 		sessionControl->sendData(208, payload, from);
@@ -405,8 +424,6 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 	}
 
 	connectionMap[connId].setParticipant(from);
-	std::cout << "handleJoinConference()/from[" << from << "]/connId[" << connId << endl;
-	logConnections();
 
 	payload["result"] = 1;
 	payload["rid"] = connId;
@@ -426,11 +443,14 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 	media["name"] = "DooSan";
 	// send media
 	DumpMediaManager::getInstance()->addClient(media);
+
+	std::cout << "handleJoinConference()/OK/from[" << from << "]/connId[" << connId << endl;
+	logConnections();
 }
 
 void TelephonyManager::handleExitConference(Json::Value data) {
 	if (sessionControl == nullptr) {
-		std::cerr << "Not register sessionControl" << std::endl;
+		std::cerr << "handleExitConference()/Not register sessionControl" << std::endl;
 		return;
 	}
 
@@ -443,8 +463,6 @@ void TelephonyManager::handleExitConference(Json::Value data) {
 		return;
 	}
 	connectionMap[connId].removeParticipant(from);
-	std::cout << "handleExitConference()/from[" << from << "]/connId[" << connId << "]" << std::endl;
-	logConnections();
 
 	Json::Value payload;
 	payload["result"] = 1;
@@ -457,6 +475,9 @@ void TelephonyManager::handleExitConference(Json::Value data) {
 	media["cid"] = from;
 	// send media
 	DumpMediaManager::getInstance()->removeClient(media);
+
+	std::cout << "handleExitConference()/from[" << from << "]/connId[" << connId << "]" << std::endl;
+	logConnections();
 }
 
 void TelephonyManager::handleRequestVideoQualityChange(Json::Value data) {

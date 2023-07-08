@@ -62,25 +62,24 @@ void AccountManager::handleRegisterContact(Json::Value data, string from)
 			!data["passwordAnswer"].empty()) {		
 			payload["result"] = 0; // Success
 			payload["reason"] = "Success";
-			cout << "handleRegisterContact()/OK:" << payload << endl;
+			cout << "handleRegisterContact()[" << cid << "]OK/from[" << from << endl;
 		}
 		else {
 			// Mandatory items are missing
 			payload["result"] = 2; // Failed
 			payload["reason"] = "Mandatory items are missing";
-			cout << "handleRegisterContact()/FAIL: Mandatory items are missing" << endl;
+			cout << "handleRegisterContact()[" << cid << "]FAIL/Mandatory Missing/from[" << from << endl;
 		}
 	} else {
 		// User already exists return error )
 		payload["result"] = 1; // Failed
 		if (emailExists) {
-			payload["reason"] = "Same Email Already used by " + searchCid;
-			cout << "handleRegisterContact()/FAIL: Same Email Already used by" << searchCid << endl;
+			payload["reason"] = "Same Email Already used by " + searchCid;			
+			cout << "handleRegisterContact()[" << cid << "]FAIL/Email Exists/for[" << searchCid << "/Used by[" << from << endl;
 		}
 		else {
 			payload["reason"] = "Contact Identifier Already exists";
-			cout << "handleRegisterContact()/FAIL: Contact Identifier Already exists" << endl;
-
+			cout << "handleRegisterContact()[" << cid << "]FAIL/CID exists" << endl;
 		}
 
 	}	
@@ -118,18 +117,18 @@ string AccountManager::handleLogin(Json::Value data, string ipAddress, string fr
 				payload["myContactData"].removeMember("passwordAnswer");
 				payload["myContactData"].removeMember("passwordQuestion");
 			}
-			cout << "handleLogin()/From[" << from << "]OK:" << payload << endl;
+			cout << "handleLogin()[" << cid << "]OK/From[" << from << "]" << endl;
 			result = true;
 		} else {
 			// Wrong password
 			payload["result"] = 2; // Fail 
-			cout << "handleLogin()/From[" << from << "]/FAIL: Wrong password" << endl;
+			cout << "handleLogin()[" << cid << "]FAIL/Wrong password/From[" << from << "]" << endl;
 
 		}
 	} else {
 		// Not registered
 		payload["result"] = 1; // Fail 
-		cout << "handleLogin()/From[" << from << "]/FAIL:No contact data to login" << endl;
+		cout << "handleLogin()[" << data["cid"] << "]FAIL/Not registered/From[" << from << "]" << endl;
 	}
 	/*
 		result 0 : SUCCESS
@@ -146,7 +145,6 @@ string AccountManager::handleLogin(Json::Value data, string ipAddress, string fr
 	} else {
 		return "";
 	}
-	
 }
 
 bool AccountManager::handleLogout(Json::Value data)
@@ -158,16 +156,15 @@ bool AccountManager::handleLogout(Json::Value data)
 			contactDb->update(cid, "login", false); // Update login status
 			contactDb->remove(cid, "ipAddress");// Update IP address
 			retValue = true;
-			std::cout << "handleLogout()/OK:" << data << std::endl;
+			std::cout << "handleLogout()[" << cid << "]OK" << endl;
 		}
 		else {
-			std::cout << "handleLogout()/FAIL:Not logged in:" << data << std::endl;
+			std::cout << "handleLogout()[" << cid << "]FAIL/Not logged in" << std::endl;
 		}
 	}
 	else {
-		std::cout << "handleLogout()/FAIL:No CID:" << data << std::endl;
+		std::cout << "handleLogout()[" << cid << "]/FAIL/No CID" << std::endl;
 	}
-	
 	return retValue;
 }
 
@@ -188,14 +185,14 @@ void AccountManager::handleUpdateMyContactList(Json::Value data, string from)
 			}
 		}		
 		if (contactDb->update(cid, "myContactList", updateMyContactList)) {
-			std::cout << "handleUpdateMyContactList()/OK:" << contactDb->get(cid, "myContactList") << std::endl;
+			std::cout << "handleUpdateMyContactList()[" << cid << "]OK" << std::endl;
 			handleGetAllContact(from);
 		} else {
-			std::cout << "handleUpdateMyContactList()/FAILED:" << updateMyContactList << std::endl;
+			std::cout << "handleUpdateMyContactList()[" << cid << "]FAILED/Unknown" << std::endl;
 		}
 	}
 	else {
-		std::cout << "handleUpdateMyContactList()/FAIL:Payload not valid" << std::endl;
+		std::cout << "handleUpdateMyContactList()[" << cid << "]FAIL/Wrong Payload" << std::endl;
 	}	
 }
 
@@ -213,16 +210,16 @@ void AccountManager::handleResetPassword(Json::Value data, string from)
 			data["passwordAnswer"] == answer ) {
 			contactDb->update(cid, "password", newPassword);		
 			payload["result"] = 0;
-			cout << "handleResetPassword()/OK:" << data << endl;
+			cout << "handleResetPassword()[" << cid << "]OK/NewPasswd[" << newPassword << "]" << endl;
 		}
 		else {
 			payload["result"] = 2;
-			cout << "handleResetPassword()/FAIL:Incorrect Data:" << data << endl;
+			cout << "handleResetPassword()[" << cid << "]FAIL/Incorrect Data" << endl;
 		}
 	}
 	else {
 		payload["result"] = 1;
-		cout << "handleResetPassword()/FAIL:No CID found:" << data << endl;
+		cout << "handleResetPassword()[" << cid << "]FAIL/No CID found" << endl;
 	}
 	/*
 		result 0 : SUCCESS
@@ -239,16 +236,21 @@ void AccountManager::handleUpdateMyContact(Json::Value data, string from)
 	string newEmail = data["email"].asString();
 	string newName = data["name"].asString();
 	if (cid.empty() || contactDb->search("cid", cid).empty()) {
-		cout << "handleUpdateMyContact()/FAIL:No CID exists:" << data << endl;
+		cout << "handleUpdateMyContact()[" << cid << "]FAIL/No CID exists" << endl;
 		return;
 	}	
-	if (contactDb->search("email", newEmail) == "") {
+	if (newEmail.empty()) {
+		cout << "handleUpdateMyContact()[" << cid << "]FAIL/Email is mandatory" << endl;
+		return;
+	}
+	string emailSearchCid = contactDb->search("email", newEmail);
+	if (emailSearchCid == "" || emailSearchCid == cid) {
 		contactDb->update( cid, "email", newEmail);
 		contactDb->update( cid, "name", newName);
-		cout << "handleUpdateMyContact()/OK:" << data << endl;
+		cout << "handleUpdateMyContact()[" << cid << "]OK" << endl;
 		handleGetAllContact(from);
 	} else {
-		cout << "handleUpdateMyContact()/FAIL:Same email exists:" << data << endl;
+		cout << "handleUpdateMyContact()[" << cid << "]FAIL/Same email exists" << endl;
 	}		
 }
 
@@ -273,9 +275,9 @@ void AccountManager::handleGetAllContact( string from)
 			payload[i]["ipAddress"] = allContacts[i]["ipAddress"];
 			payload[i]["myContactList"] = allContacts[i]["myContactList"];
 		}
-		std::cout << "handleGetAllContact()/OK:" << payload << std::endl;
+		std::cout << "handleGetAllContact()OK/from[" << from << "]" << std::endl;
 	} else {
-		std::cout << "handleGetAllContact()/FAILED:" << payload << std::endl;
+		std::cout << "handleGetAllContact()FAILED/Contact Empty[" << from << "]" << std::endl;
 	}
 	sessionControl->sendData(106, payload, from);
 }
@@ -293,7 +295,7 @@ void AccountManager::handleGetAllConference(Json::Value data, string from)
 			}
 		}
 	}
-	std::cout << "handleGetAllConference()/From[" << from << "]OK:" << payload << std::endl;	
+	std::cout << "handleGetAllConference()[" << cid << "]OK/from[" << from << "]" << std::endl;	
 	sessionControl->sendData(205, payload, from);
 }
 

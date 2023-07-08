@@ -157,7 +157,7 @@ void SessionManager::HandleClient(int clientSocket) {
 			int msgId = std::stoi(jsonData["msgId"].asString());
 			Json::Value payloads = jsonData["payload"];
 			std::cout << "--------------------------------------------------------" << std::endl;
-			std::cout << "RECEIVE[" << msgId << "]IP[" << ipAddress << "]CID[" << contactId  << "]PAYLOAD:" << payloads << std::endl;
+			std::cout << "RECEIVE[" << msgId << "]CID[" << contactId  << "]IP[" << ipAddress << "]PAYLOAD:" << payloads << std::endl;
 			std::cout << "--------------------------------------------------------" << std::endl;
 			switch (msgId) {
 			case 101: // 101 : REGISTER_CONTACT 		

@@ -102,18 +102,17 @@ void CommandLineInterface::startCli(AccountManager* accountManager, CallsManager
 		else {
 			cout << "My ConferenceList : " << endl;
 			for (const auto& item : accountManager->myConferenceDataList) {
-				cout << "---------------------------" << endl;
-				cout << "- rid : " << item.rid << " " << endl;
-				cout << "- dataAndTime : " << item.dataAndTime << endl;
-				cout << "- duration : " << item.duration << endl;
+				cout << "- id[" << item.rid << "]/";
+				cout << "time[" << item.dataAndTime << "]/";
+				cout << "dur[" << item.duration << "]/";
 				std::list<std::string> li = item.participants;
 				std::list<std::string>::iterator it;
-				cout << "- participants : ";
+				cout << "part[";
 				for (it = li.begin(); it != li.end(); it++) {
 					cout << *it << " ";
 				}
+				cout << "]";
 				cout << endl;
-				cout << "---------------------------" << endl;
 			}
 		}		
 		cout << "======================================================" << endl;
