@@ -29,12 +29,10 @@ bool Connection::isConference() {
 
 void Connection::setParticipant(std::string participant) {
 	participants.push_back(participant);
-	logConnections();
 }
 
 void Connection::removeParticipant(std::string participant) {
 	participants.remove(participant);
-	logConnections();
 }
 
 std::list<std::string> Connection::getParticipants() {
@@ -60,18 +58,3 @@ std::list<std::string> Connection::getConferenceList() {
 	return conferenceList;
 }
 
-void Connection::logConnections()
-{
-	std::cout << "----------------------------------------------------" << std::endl;
-	std::cout << "[CID : " << id << "]" << std::endl;	
-	for (std::string conference : conferenceList) {
-		std::list<std::string>::iterator it = 
-			std::find(participants.begin(), participants.end(), conference);
-		if (it == participants.end()) {
-			std::cout << " " << conference << " : NA" << std::endl;
-		} else {
-			std::cout << " " << conference << " : JOINED" << std::endl;
-		}				
-	}
-	std::cout << "----------------------------------------------------" << std::endl;
-}

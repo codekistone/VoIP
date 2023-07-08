@@ -32,6 +32,7 @@ public:
 	int joinableConference(Json::Value data);
 	void removeConference(std::string connId);
 	void manageConferenceLifetime(std::string connId);
+	void logConnections();
 
 	// Listener
 	void setSessionControl(SessionControl* control) override;
