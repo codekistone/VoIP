@@ -190,7 +190,7 @@ void CommandLineInterface::startCli(AccountManager* accountManager, CallsManager
 			break;
 		case 6: //GET ALL CONTACTLIST FROM SERVER
 			std::cout << "GET ALL CONTACT" << std::endl;
-			accountManager->getAllContact(id);
+			accountManager->getAllContact();
 			break;
 
 		case 7://GETMYCONTACTLIST FOR UI

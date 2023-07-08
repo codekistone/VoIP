@@ -36,7 +36,7 @@ void SessionManager::init() {
 	telephonyManager->setSessionControl(this);
 	accountManager->setSessionControl(this);
 
-	std::thread sessionThread(&SessionManager::openSocket, instance);
+	std::thread sessionThread(&SessionManager::openSocket, this);
 	sessionThread.detach();
 }
 

@@ -47,7 +47,7 @@ void SessionManager::init(const char* ip, int port) {
 	callsManager->setSessionControl(this);
 	accountManager->setSessionControl(this);
 
-	std::thread sessionThread(&SessionManager::openSocket, instance);
+	std::thread sessionThread(&SessionManager::openSocket, this);
 	sessionThread.detach();
 }
 

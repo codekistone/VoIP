@@ -8,13 +8,14 @@
 #include "session/SessionManager.h"
 #include "CommandLineInterface.h"
 
-int main() {	
+int main() {
 	SessionManager* sessionManager = SessionManager::getInstance();
 	AccountManager* accountManager = AccountManager::getInstance();
 	CallsManager* callsManager = CallsManager::getInstance();
 
 	// Get server information
-	std::string serverIp; int serverPort;	
+	std::string serverIp;
+	int serverPort;	
 	CommandLineInterface* cli = CommandLineInterface::getInstance();
 	cli->getServerInfo(&serverIp, &serverPort);
 

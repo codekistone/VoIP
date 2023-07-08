@@ -168,7 +168,7 @@ void AccountManager::resetPassword(std::string cid, std::string newPW, int pwdQ,
 	sessionControl->sendData(jsonCString);
 }
 
-void AccountManager::getAllContact(std::string cid) {
+void AccountManager::getAllContact() {
 	Json::Value root;
 	root["msgId"] = 106;
 
