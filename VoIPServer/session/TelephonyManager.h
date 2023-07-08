@@ -26,7 +26,7 @@ public:
 
 	void release();
 	void initializeConnections();
-	string generateConnectionId(bool isConference);
+	string generateConnectionId();
 	void onAnswer(Json::Value data);
 	void onReject(Json::Value data);
 	int joinableConference(Json::Value data);

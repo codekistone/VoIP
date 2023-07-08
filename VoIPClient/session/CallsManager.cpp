@@ -5,7 +5,7 @@
 #include "CallsManager.h"
 #include "Constants.h"
 
-#include "../DumpMediaManager.h";
+#include "../ClientMediaManager.h";
 
 CallsManager* CallsManager::instance = nullptr;
 Json::FastWriter fastWriter;
@@ -122,10 +122,9 @@ void CallsManager::onSuccessfulOutgoingCall(Json::Value data) {
 	call->setCallState(CallState::STATE_ACTIVE);
 	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulOutgoingCall " << std::endl;
 
-	// TODO Media - SESSION_MEDIA_CLIENT_ADD
 	Json::Value media = call->getMediaMessage();
 	media["myIp"] = data["myIp"].asString();
-	DumpMediaManager::getInstance()->startCall(media); //TEMP
+	ClientMediaManager::getInstance()->startCall(media);
 }
 
 void CallsManager::onFailedOutgoingCall(Json::Value data) {
@@ -143,8 +142,7 @@ void CallsManager::onSuccessfulIncomingCall(Json::Value data) {
 	// TODO Media - SESSION_MEDIA_CLIENT_ADD
 	Json::Value media = call->getMediaMessage();
 	media["myIp"] = data["myIp"].asString();
-	DumpMediaManager::getInstance()->startCall(media); //TEMP
-	//send media
+	ClientMediaManager::getInstance()->startCall(media);
 }
 
 void CallsManager::onRejectedIncomingCall() {
@@ -184,11 +182,9 @@ void CallsManager::onSuccessfulJoinConference(Json::Value data) {
 	call->setCallState(CallState::STATE_ACTIVE);
 	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulJoinConference" << std::endl;
 
-	//TODO MEDIA
 	Json::Value media = call->getMediaMessage();
 	media["myIp"] = data["myIp"].asString();
-	//send media
-	DumpMediaManager::getInstance()->startCall(media);
+	ClientMediaManager::getInstance()->startCall(media);
 }
 
 void CallsManager::onFailedJoinConference(Json::Value data) {
@@ -210,7 +206,9 @@ void CallsManager::exitConference(std::string callId) {
 	payload["rid"] = callId;
 	sessionControl->sendData(209, payload);
 
-	// TODO Media - SESSION_MEDIA_CLIENT_REMOVE (use payload)
+	Json::Value media;
+	media["rid"] = callId;
+	ClientMediaManager::getInstance()->endCall(media);
 }
 
 // Implement interface
@@ -272,11 +270,9 @@ void CallsManager::onDisconnected(Json::Value data) {
 	call->setCallState(CallState::STATE_IDLE);
 	std::cout << "[Received] -> (STATE_IDLE) Call CLEAR " << std::endl;
 
-	// TODO Media - SESSION_MEDIA_CLIENT_REMOVE
 	Json::Value media;
 	media["rid"] = call->getCallId();
-
-	// send media
+	ClientMediaManager::getInstance()->endCall(media);
 }
 
 void CallsManager::onJoinConferenceResult(Json::Value data) {
@@ -304,8 +300,7 @@ void CallsManager::onExitConference(Json::Value data) {
 void CallsManager::onVideoQualityChanged(Json::Value data) {
 	int quality = data["quality"].asInt();
 	call->setVideoQuality(quality);
-	// setVideoQuality
-	DumpMediaManager::getInstance()->setVideoQuality(quality);
+	ClientMediaManager::getInstance()->setVideoQuality(quality);
 }
 
 // Media Interface

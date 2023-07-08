@@ -3,16 +3,16 @@
 #include "session/ISessionMediaCallback.h"
 #include "../json/json.h"
 
-class DumpMediaManager
+class ServerMediaManager
 {
 private:
-	static DumpMediaManager* instance;
+	static ServerMediaManager* instance;
 
 	ISessionMediaCallback* sessionCallback; //추가
 
-	DumpMediaManager();
+	ServerMediaManager();
 public:
-	static DumpMediaManager* getInstance();
+	static ServerMediaManager* getInstance();
 	void setSessionCallback(ISessionMediaCallback* callback); //추가
 	void anyfunc();
 	void updateClientVideoQuality(Json::Value data); //std::string rid, std::string cid, int level
@@ -20,4 +20,6 @@ public:
 	void endCall(Json::Value room_remove_info);
 	void addClient(Json::Value add_client_info);
 	void removeClient(Json::Value remove_client_info);
+
+	Json::Value getMediaProperty();
 };

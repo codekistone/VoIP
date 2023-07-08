@@ -57,4 +57,3 @@ bool Connection::isOnTime() {
 std::list<std::string> Connection::getConferenceList() {
 	return conferenceList;
 }
-

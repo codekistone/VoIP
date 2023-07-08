@@ -3,16 +3,16 @@
 #include "session/ISessionMediaCallback.h"
 #include "../json/json.h"
 
-class DumpMediaManager
+class ClientMediaManager
 {
 private:
-	static DumpMediaManager* instance;
+	static ClientMediaManager* instance;
 
 	ISessionMediaCallback* sessionCallback; //추가
 
-	DumpMediaManager();
+	ClientMediaManager();
 public:
-	static DumpMediaManager* getInstance();
+	static ClientMediaManager* getInstance();
 	void setSessionCallback(ISessionMediaCallback* callback); //추가
 	void setVideoQuality(int quality);
 	void anyfunc();
