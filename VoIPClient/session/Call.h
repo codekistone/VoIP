@@ -14,6 +14,7 @@ private:
 	std::string encryption_alg;
 	std::string encryption_key;
 	int videoQuality;
+	std::string serverIP;
 
 public:
 	Call();
@@ -33,7 +34,10 @@ public:
 	std::string getEncryptionAlg();
 	void setEncryptionKey(std::string key);
 	std::string getEncryptionKey();
-	Json::Value getMediaMessage();
+	void setMediaProperty(Json::Value property);
+	Json::Value getMediaProperty();
+	void setServerIP(std::string ip);
+	std::string getServerIP();
 
 	int getVideoQuality();
 	void setVideoQuality(int quality);

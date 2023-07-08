@@ -7,6 +7,7 @@
 #include "ISessionMediaCallback.h"
 #include "Connection.h"
 #include "ConferenceDb.h"
+#include "ContactDb.h"
 #include "../../json/json.h"
 
 class TelephonyManager : public ITelephonyManager, public ISessionMediaCallback {
@@ -17,6 +18,7 @@ private:
 
 	SessionControl* sessionControl;
 	ConferenceDb* conferenceDb; // Conference Database
+	ContactDb* contactDb;
 
 	TelephonyManager();
 

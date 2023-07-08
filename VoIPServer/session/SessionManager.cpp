@@ -37,7 +37,7 @@ void SessionManager::init() {
 	accountManager->setSessionControl(this);
 
 	std::thread sessionThread(&SessionManager::openSocket, instance);
-	sessionThread.join();
+	sessionThread.detach();
 }
 
 void SessionManager::release() {

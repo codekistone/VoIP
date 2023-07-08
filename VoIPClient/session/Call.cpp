@@ -4,6 +4,7 @@
 Call::Call() {
 	state = CallState::STATE_IDLE;
 	conference = false;
+	videoQuality = 0;
 }
 
 void Call::setCallId(std::string id) {
@@ -69,10 +70,23 @@ int Call::getVideoQuality() {
 	return videoQuality;
 }
 
-Json::Value Call::getMediaMessage() {
+void Call::setServerIP(std::string ip) {
+	serverIP = ip;
+}
+std::string Call::getServerIP() {
+	return serverIP;
+}
+
+void Call::setMediaProperty(Json::Value property) {
+	videoCodec = property["videoCodec"].asString();
+	audioCodec = property["audioCodec"].asString();
+	encryption_alg = property["encryption_alg"].asString();
+	encryption_key = property["encryption_key"].asString();
+}
+
+Json::Value Call::getMediaProperty() {
 	Json::Value media;
 	media["rid"] = callId;
-	media["serverIp"] = "127.0.0.1";
 	media["videoCodec"] = videoCodec;
 	media["audioCodec"] = audioCodec;
 	media["encryption_alg"] = encryption_alg;

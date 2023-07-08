@@ -13,6 +13,7 @@ int connNum = 0;
 TelephonyManager::TelephonyManager() {
 	sessionControl = nullptr;
 	conferenceDb = ConferenceDb::getInstance();
+	contactDb = ContactDb::getInstance();
 }
 
 TelephonyManager* TelephonyManager::getInstance() {
@@ -94,16 +95,16 @@ void TelephonyManager::onAnswer(Json::Value data) {
 	for (const auto& participant : participants) {
 		if (participant == from) {
 			clientMedia["cid"] = from;
-			clientMedia["clientIp"] = "127.0.0.1";
-			clientMedia["name"] = "DooSan";
+			clientMedia["clientIp"] = contactDb->get(participant, "ipAddress");
+			clientMedia["name"] = contactDb->get(participant, "name");
 			sessionControl->sendData(303, payload, from);
 			ServerMediaManager::getInstance()->addClient(clientMedia);
 			continue;
 		}
 
 		clientMedia["cid"] = participant;
-		clientMedia["clientIp"] = "127.0.0.1";
-		clientMedia["name"] = "DooSanJJANG";
+		clientMedia["clientIp"] = contactDb->get( participant, "ipAddress" );
+		clientMedia["name"] = contactDb->get(participant, "name");
 		sessionControl->sendData(301, payload, participant);
 		ServerMediaManager::getInstance()->addClient(clientMedia);
 	}
@@ -411,8 +412,8 @@ void TelephonyManager::handleJoinConference(Json::Value data) {
 	Json::Value media;
 	media["rid"] = connId;
 	media["cid"] = from;
-	media["clientIp"] = "127.0.0.1";
-	media["name"] = "DooSan";
+	media["clientIp"] = contactDb->get(from, "ipAddress");
+	media["name"] = contactDb->get(from, "name");
 	ServerMediaManager::getInstance()->addClient(media);
 
 	std::cout << "handleJoinConference()/OK/from[" << from << "]/connId[" << connId << endl;

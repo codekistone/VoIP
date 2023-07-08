@@ -115,14 +115,14 @@ void CallsManager::disconnectCall() {
 }
 
 void CallsManager::onSuccessfulOutgoingCall(Json::Value data) {
-	// TODO Media - Should receive MediaInfo
-
 	std::string connId(data["rid"].asString());
+	call->setServerIP(data["serverIp"].asString());
 	call->setCallId(connId);
 	call->setCallState(CallState::STATE_ACTIVE);
 	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulOutgoingCall " << std::endl;
 
-	Json::Value media = call->getMediaMessage();
+	Json::Value media = call->getMediaProperty();
+	media["serverIp"] = call->getServerIP();
 	media["myIp"] = data["myIp"].asString();
 	ClientMediaManager::getInstance()->startCall(media);
 }
@@ -134,13 +134,11 @@ void CallsManager::onFailedOutgoingCall(Json::Value data) {
 }
 
 void CallsManager::onSuccessfulIncomingCall(Json::Value data) {
-	// TODO Media - Should receive MediaInfo
-
 	call->setCallState(CallState::STATE_ACTIVE);
 	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulIncomingCall" << std::endl;
 
-	// TODO Media - SESSION_MEDIA_CLIENT_ADD
-	Json::Value media = call->getMediaMessage();
+	Json::Value media = call->getMediaProperty();
+	media["serverIp"] = call->getServerIP();
 	media["myIp"] = data["myIp"].asString();
 	ClientMediaManager::getInstance()->startCall(media);
 }
@@ -177,12 +175,11 @@ void CallsManager::joinConference(std::string callId) {
 }
 
 void CallsManager::onSuccessfulJoinConference(Json::Value data) {
-	// TODO Media - Should receive MediaInfo
-
 	call->setCallState(CallState::STATE_ACTIVE);
 	std::cout << "[Received] -> (STATE_ACTIVE) onSuccessfulJoinConference" << std::endl;
 
-	Json::Value media = call->getMediaMessage();
+	Json::Value media = call->getMediaProperty();
+	media["serverIp"] = data["serverIp"].asString();
 	media["myIp"] = data["myIp"].asString();
 	ClientMediaManager::getInstance()->startCall(media);
 }
@@ -199,9 +196,6 @@ void CallsManager::exitConference(std::string callId) {
 		return;
 	}
 
-	std::cout << "exitConference... (" << callId << ")" << std::endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
-
 	Json::Value payload;
 	payload["rid"] = callId;
 	sessionControl->sendData(209, payload);
@@ -209,6 +203,9 @@ void CallsManager::exitConference(std::string callId) {
 	Json::Value media;
 	media["rid"] = callId;
 	ClientMediaManager::getInstance()->endCall(media);
+
+	std::cout << "exitConference... (" << callId << ")" << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
 }
 
 // Implement interface
@@ -237,6 +234,7 @@ void CallsManager::onIncomingCall(Json::Value data) {
 	}
 	call = new Call();
 	call->setCallId(connId);
+	call->setServerIP(data["serverIp"].asString());
 	call->setContactId(from);
 	call->setCallState(CallState::STATE_RINGING);
 	std::cout << "[Received] -> (STATE_RINGING) Calling from " << from << std::endl;
@@ -294,7 +292,9 @@ void CallsManager::onExitConference(Json::Value data) {
 	call->setCallState(CallState::STATE_IDLE);
 	std::cout << "[Received] -> (STATE_IDLE) ConferenceCall CLEAR " << std::endl;
 
-	// TODO Media - SESSION_MEDIA_CLIENT_REMOVE
+	Json::Value media;
+	media["rid"] = call->getCallId();
+	ClientMediaManager::getInstance()->endCall(media);
 }
 
 void CallsManager::onVideoQualityChanged(Json::Value data) {
@@ -305,7 +305,6 @@ void CallsManager::onVideoQualityChanged(Json::Value data) {
 
 // Media Interface
 void CallsManager::requestVideoQualityChange(int quality) {
-	// send to server (request quality change)
 	Json::Value payload;
 	payload["rid"] = call->getCallId();
 	payload["quality"] = quality;
