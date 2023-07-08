@@ -52,7 +52,7 @@ void SessionManager::release() {
 	accountManager->setSessionControl(nullptr);
 }
 
-void SessionManager::getMyIp()
+std::string SessionManager::getMyIp()
 {
 	struct addrinfo* _addrinfo;
 	struct addrinfo* _res;
@@ -67,6 +67,7 @@ void SessionManager::getMyIp()
 			}
 		}
 	}
+	return myIp;
 }
 
 void SessionManager::openSocket() {

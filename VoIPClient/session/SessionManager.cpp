@@ -193,6 +193,7 @@ void SessionManager::openSocket() {
 
 	clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket == INVALID_SOCKET) {
+		std::cout << std::endl;
 		std::cout << "socket error";
 		closesocket(clientSocket);
 		WSACleanup();
@@ -205,6 +206,7 @@ void SessionManager::openSocket() {
 	inet_pton(AF_INET, serverIP, &(addr.sin_addr.s_addr));
 
 	if (connect(clientSocket, (SOCKADDR*)&addr, sizeof(addr)) == -1) {
+		std::cout << std::endl;
 		std::cerr << "Failed to connect server." << std::endl;
 		closesocket(clientSocket);
 		WSACleanup();

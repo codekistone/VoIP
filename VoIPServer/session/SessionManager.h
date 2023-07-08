@@ -37,10 +37,10 @@ public:
 	void openSocket();
 	void HandleClient(int clientSocket);
 	std::string GetClientName(int clientSocket);
-	void getMyIp();
 
 	// interface
 	void sendData(const char* message, std::string to) override;
 	void sendData(int msgId, Json::Value payload, std::string to) override;
+	std::string getMyIp() override;
 };
 

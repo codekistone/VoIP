@@ -197,12 +197,13 @@ void CallsManager::onFailedJoinConference(Json::Value data) {
 	std::cout << "[Received] -> (STATE_IDLE) onFailedJoinConference cause: " << cause << std::endl;
 }
 
-void CallsManager::exitConference(std::string callId) {
+void CallsManager::exitConference() {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
 		return;
 	}
 
+	std::string callId = call->getCallId();
 	Json::Value payload;
 	payload["rid"] = callId;
 	sessionControl->sendData(209, payload);
