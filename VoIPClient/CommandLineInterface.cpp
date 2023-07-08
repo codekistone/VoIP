@@ -37,19 +37,18 @@ CommandLineInterface* CommandLineInterface::getInstance() {
 	return instance;
 }
 
-void CommandLineInterface::getServerInfo( string* ip, int* port)
+void CommandLineInterface::getServerInfo(string& ip, int& port)
 {
 	cout << "======================================================" << endl;
 	cout << "Get Server Info " << std::endl;
 	cout << "======================================================" << endl;
 	std::string serverIp, serverPort;
 	std::cout << "Input serverIP(127.0.0.1): ";
-	getline(std::cin, serverIp);
+	getline(std::cin, ip);
 	std::cout << "input serverPort(5555): ";
 	getline(std::cin, serverPort);
-	int portInt = serverPort.length() > 0 ? std::stoi(serverPort) : 0;	
-	ip = &serverIp;
-	port = &portInt;
+	int portInt = serverPort.length() > 5555 ? std::stoi(serverPort) : 0;
+	port = portInt;
 }
 
 void CommandLineInterface::startCli(AccountManager* accountManager, CallsManager* callsManager)

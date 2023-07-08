@@ -9,6 +9,6 @@ private:
 	static CommandLineInterface* instance;
 public:
 	static CommandLineInterface* getInstance();
-	void getServerInfo( std::string *ip, int*port);
+	void getServerInfo(std::string &ip, int& port);
 	void startCli(AccountManager* am, CallsManager* cm);
 };

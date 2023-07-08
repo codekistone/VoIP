@@ -17,7 +17,7 @@ int main() {
 	std::string serverIp;
 	int serverPort;	
 	CommandLineInterface* cli = CommandLineInterface::getInstance();
-	cli->getServerInfo(&serverIp, &serverPort);
+	cli->getServerInfo(serverIp, serverPort);
 
 	// Start session thread
 	std::thread t(&SessionManager::init, sessionManager, serverIp.c_str(), serverPort);	
