@@ -227,21 +227,25 @@ void CommandLineInterface::startCli(AccountManager* accountManager, CallsManager
 		case 20: // GET CALL_STATE
 		{
 			Call* call = callsManager->getCall();
-			int state = call == nullptr ? 8 : call->getCallState();
+			if (call == nullptr) {
+				std::cout << "NO_CALL" << std::endl;
+				break;
+			}
+			int state = call->getCallState();
 			if (state == 1) {
-				std::cout << "STATE_DIALING" << std::endl;
+				std::cout << "[" << call->getCallId() << "]STATE_DIALING" << std::endl;
 			}
 			else if (state == 2) {
-				std::cout << "STATE_RINGING" << std::endl;
+				std::cout << "[" << call->getCallId() << "]STATE_RINGING" << std::endl;
 			}
 			else if (state == 4) {
-				std::cout << "STATE_ACTIVE" << std::endl;
+				std::cout << "[" << call->getCallId() << "]STATE_ACTIVE" << std::endl;
 			}
 			else if (state == 7) {
-				std::cout << "STATE_DISCONNECTED" << std::endl;
+				std::cout << "[" << call->getCallId() << "]STATE_DISCONNECTED" << std::endl;
 			}
 			else if (state == 8) {
-				std::cout << "STATE_IDLE" << std::endl;
+				std::cout << "[" << call->getCallId() << "]STATE_IDLE" << std::endl;
 			}
 			break;
 		}
