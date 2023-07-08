@@ -47,7 +47,7 @@ void CommandLineInterface::getServerInfo(string& ip, int& port)
 	getline(std::cin, ip);
 	std::cout << "input serverPort(5555): ";
 	getline(std::cin, serverPort);
-	int portInt = serverPort.length() > 5555 ? std::stoi(serverPort) : 0;
+	int portInt = serverPort.length() > 0 ? std::stoi(serverPort) : 5555;
 	port = portInt;
 }
 
@@ -64,21 +64,25 @@ void CommandLineInterface::startCli(AccountManager* accountManager, CallsManager
 		cout << " 1. REGISTER CONTACT" << endl;
 		cout << " 2. LOG IN" << endl;
 		cout << " 3. LOG OUT" << endl;
-		cout << " 5. RESET PWORD" << endl;
-		cout << "50. UPDATE MY CONTACT" << endl;
-		cout << " 6. GET ALL CONTACT" << endl;
-		cout << " 7. GET MY CONTACT LIST FOR UI" << endl;
-		cout << " 8. SERCH CONTACT FOR UI" << endl;
-		cout << " 9. ADD CONTACT IN MYCONTACTLIST" << endl;
-		cout << "10. DELETE CONTACT FROM MYCONTACTLIST" << endl << endl;
-		cout << "11. ANSWER CALL " << endl;
-		cout << "12. OUTGOING CALL " << endl;
-		cout << "13. REJECT CALL " << endl;
-		cout << "14. DISCONNECT CALL " << endl << endl;
-		cout << "15. GET MY CONFERENCES " << endl;
-		cout << "16. CREATE CONFERENCE " << endl;
-		cout << "17. JOIN CONFERENCE " << endl;
-		cout << "18. EXIT_CONFERENCE " << endl << endl;
+		cout << " 5. RESET PWORD" << endl << endl;
+
+		cout << " 10. UPDATE MY CONTACT" << endl;
+		cout << " 11. GET ALL CONTACT" << endl;
+		cout << " 12. GET MY CONTACT LIST FOR UI" << endl;
+		cout << " 13. SERCH CONTACT FOR UI" << endl;
+		cout << " 14. ADD CONTACT IN MYCONTACTLIST" << endl;
+		cout << "15. DELETE CONTACT FROM MYCONTACTLIST" << endl << endl;
+
+		cout << "20. GET CALL_STATE" << endl;
+		cout << "21. ANSWER CALL " << endl;
+		cout << "22. OUTGOING CALL " << endl;
+		cout << "23. REJECT CALL " << endl;
+		cout << "24. DISCONNECT CALL " << endl << endl;
+
+		cout << "30. GET MY CONFERENCES " << endl;
+		cout << "31. CREATE CONFERENCE " << endl;
+		cout << "32. JOIN CONFERENCE " << endl;
+		cout << "33. EXIT_CONFERENCE " << endl << endl;
 		cout << " << MY DATA (" << getMyIpAddress() << ") >> " << endl;
 		
 		if (accountManager->myCid.empty()) {
