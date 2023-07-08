@@ -115,7 +115,7 @@ void SessionManager::proc_recv() {
 			// received data parsed as JSON data			
 			int msgId = std::stoi(jsonData["msgId"].asString());
 			Json::Value payloads = jsonData["payload"];
-			std::cout << "--------------------------------------------------------" << std::endl;
+			std::cout << std::endl << "--------------------------------------------------------" << std::endl;
 			std::cout << "RECEIVE[" << msgId << "]PAYLOAD:" << payloads << std::endl;
 			std::cout << "--------------------------------------------------------" << std::endl;
 			switch (msgId) {

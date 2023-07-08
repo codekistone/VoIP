@@ -2,6 +2,7 @@
 #include "Constants.h"
 
 Call::Call() {
+	callId = "UNDEFINED";
 	state = CallState::STATE_IDLE;
 	conference = false;
 	videoQuality = 0;
