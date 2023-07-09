@@ -135,6 +135,7 @@
     <ClCompile Include="session\Call.cpp" />
     <ClCompile Include="session\CallsManager.cpp" />
     <ClCompile Include="session\SessionManager.cpp" />
+    <ClCompile Include="session\UiController.cpp" />
     <ClCompile Include="VoIPClient.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,8 +149,10 @@
     <ClInclude Include="session\ICallsManager.h" />
     <ClInclude Include="session\Constants.h" />
     <ClInclude Include="session\ISessionMediaCallback.h" />
+    <ClInclude Include="session\IUiController.h" />
     <ClInclude Include="session\SessionManager.h" />
     <ClInclude Include="session\SessionControl.h" />
+    <ClInclude Include="session\UiController.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

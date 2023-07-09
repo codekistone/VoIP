@@ -7,6 +7,7 @@
 #include "SessionManager.h"
 #include "CallsManager.h"
 #include "AccountManager.h"
+#include "IUiController.h"
 
 SessionManager* SessionManager::instance = nullptr;
 SOCKET clientSocket;
@@ -102,12 +103,6 @@ void SessionManager::proc_recv() {
 		
 		std::string msg(buf);
 		std::string msgStr;
-		if (msg.find("onLoginSuccess") != std::string::npos) {
-			msgStr = "onLoginSuccess";
-			std::vector<std::string> tokens = split(msg, ',');
-			accountManager->onLoginSuccess(tokens.back());
-		}
-
 		//-------------------------------------------------------------
 		// JSON payload parser
 		Json::Value jsonData;
@@ -188,6 +183,7 @@ void SessionManager::openSocket() {
 	if (WSAStartup(MAKEWORD(2, 2), &wsa)) {
 		std::cout << "WSA error";
 		WSACleanup();
+		accountManager->handleConnect(1); // Connection failed
 		return;
 	}
 
@@ -210,10 +206,11 @@ void SessionManager::openSocket() {
 		std::cerr << "Failed to connect server." << std::endl;
 		closesocket(clientSocket);
 		WSACleanup();
+		accountManager->handleConnect(1); // Connection failed
 		return;
 	}
 	std::cout << "Connected to server!" << std::endl;
-
+	accountManager->handleConnect(0); // Connected to server
 	std::thread recvThread(&SessionManager::proc_recv, instance);
 	recvThread.join();
 

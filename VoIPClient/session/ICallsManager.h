@@ -4,10 +4,12 @@
 
 #include "SessionControl.h"
 #include "../../json/json.h"
+#include "IUiController.h"
 
 class ICallsManager {
 public:
 	virtual void setSessionControl(SessionControl* control) = 0;
+	virtual void setUiControl(IUiController* control) = 0;
 	virtual void onOutgoingCallResult(Json::Value data) = 0;
 	virtual void onIncomingCall(Json::Value data) = 0;
 	virtual void onIncomingCallResult(Json::Value data) = 0;

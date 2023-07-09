@@ -3,13 +3,16 @@
 #include "IAccountManager.h"
 #include "SessionControl.h"
 #include <list>
+#include "Data.h"
 #include "../../json/json.h"
+#include "IUiController.h"
 
 class AccountManager : public IAccountManager {
 private:
 	static AccountManager* instance;
 
 	SessionControl* sessionControl;
+	IUiController* uiControl;
 
 	AccountManager();
 
@@ -20,19 +23,6 @@ private:
 public:
 	static AccountManager* getInstance();
 	static void releaseInstance();
-
-	struct ContactData {
-		std::string cid;
-		std::string email;
-		std::string name;
-	};
-
-	struct ConferenceData {
-		std::string rid;
-		long dataAndTime;
-		long duration;
-		std::list<std::string> participants;
-	};
 	
 	std::list<std::string> myContactDataList;
 	std::list<ConferenceData> myConferenceDataList;
@@ -40,7 +30,6 @@ public:
 	std::string myCid;
 	
 	// Communication with server (Send Msg)
-	void login_();
 	void registerAccount(std::string id, std::string email, std::string pw, std::string name, int pwdQuestion, std::string pwdAnswer);
 	void login(std::string id, std::string pw);
 	void logout(std::string cid);
@@ -59,7 +48,9 @@ public:
 
 	// Listener (Recieve Msg)
 	void setSessionControl(SessionControl* control) override;
-	void onLoginSuccess(std::string contactId) override;
+	void setUiControl(IUiController* control) override;
+
+	void handleConnect(int result) override;
 	void handleRegisterContact(Json::Value data) override;
 	void handleLogin(Json::Value data) override;
 	void handleResetPassword(Json::Value data) override;	

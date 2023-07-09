@@ -36,6 +36,9 @@
     <ClCompile Include="ClientMediaManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="session\UiController.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="session\SessionManager.h">
@@ -72,6 +75,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="session\ISessionMediaCallback.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="session\IUiController.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="session\UiController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

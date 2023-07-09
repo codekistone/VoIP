@@ -208,7 +208,7 @@ void AccountManager::getAllConference(std::string cid)
 	sessionControl->sendData(jsonString.c_str());
 }
 
-std::list<AccountManager::ContactData> AccountManager::getMyContactList()
+std::list<ContactData> AccountManager::getMyContactList()
 {
 	//Returns the contactdata list found in the allcontact list based on the cid of mylist
 	std::list<ContactData> reList;
@@ -223,10 +223,10 @@ std::list<AccountManager::ContactData> AccountManager::getMyContactList()
 	return reList;
 }
 
-std::list<AccountManager::ContactData> AccountManager::searchContact(std::string key)
+std::list<ContactData> AccountManager::searchContact(std::string key)
 {
 	//Find and return list in allContactlist
-	std::list<AccountManager::ContactData> reList;
+	std::list<ContactData> reList;
 
 	for (auto& contact : AccountManager::allConatactDataList) {
 		if (isSubstring(contact.cid, key)) {
@@ -279,6 +279,11 @@ void AccountManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
 }
 
+void AccountManager::setUiControl(IUiController* control)
+{
+	uiControl = control;
+}
+
 void AccountManager::handleLogin(Json::Value msg) {
 	//std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;
 	Json::Value payload = msg;
@@ -313,6 +318,16 @@ void AccountManager::handleLogin(Json::Value msg) {
 		std::cout << element << " ";
 	}
 	std::cout << std::endl;
+	if (uiControl != NULL) {
+		uiControl->notify(MSG_RESPONSE_LOGIN, result);
+	}
+}
+
+void AccountManager::handleConnect(int result)
+{
+	if (uiControl != NULL) {
+		uiControl->notify(MSG_RESPONSE_CONNECT, result);
+	}
 }
 
 void AccountManager::handleRegisterContact(Json::Value msg) {
@@ -334,6 +349,9 @@ void AccountManager::handleRegisterContact(Json::Value msg) {
 		std::cout << "Register Result : " << result << std::endl;
 		std::cout << "Register Reason : " << reason << std::endl;
 	}
+	if (uiControl != NULL) {
+		uiControl->notify(MSG_RESPONSE_REGISTER, result);
+	}
 }
 
 void AccountManager::handleResetPassword(Json::Value msg) {
@@ -348,6 +366,9 @@ void AccountManager::handleResetPassword(Json::Value msg) {
 	}
 	else {
 		std::cout << "Register Result : " << result << std::endl;
+	}
+	if (uiControl != NULL) {
+		uiControl->notify(MSG_RESPONSE_RESET_PW, result);
 	}
 }
 
@@ -390,6 +411,9 @@ void AccountManager::handleGetAllContact(Json::Value msg) {
 		std::cout << "name : " << element.name << " ";
 		std::cout << std::endl;
 	}
+	if (uiControl != NULL) {
+		uiControl->notify(MSG_RESPONSE_DATA, 0);
+	}
 }
 
 void AccountManager::handleGetAllMyConference(Json::Value data)
@@ -419,17 +443,7 @@ void AccountManager::handleGetAllMyConference(Json::Value data)
 		}		
 		std::cout << std::endl;
 	}
-
-}
-
-// TEMP
-void AccountManager::login_() {
-	// do login
-	std::cout << "ACCOUNT :: doLogin" << std::endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(500)); //TEST
-	sessionControl->sendData("Login");
-}
-
-void AccountManager::onLoginSuccess(std::string contactId) {
-	std::cout << "[Received] -> onLoginSuccess(): " << contactId << std::endl;
+	if (uiControl != NULL) {
+		uiControl->notify(MSG_RESPONSE_DATA, 0);
+	}
 }

@@ -6,6 +6,7 @@
 #include "SessionControl.h"
 #include "ICallsManager.h"
 #include "IAccountManager.h"
+#include "IUiController.h"
 
 constexpr auto PACKET_SIZE = 10240;
 

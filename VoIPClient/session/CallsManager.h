@@ -12,6 +12,7 @@ private:
 
 	Call* call;
 	SessionControl* sessionControl;
+	IUiController* uiControl;
 
 	CallsManager();
 
@@ -35,6 +36,7 @@ public:
 
 	// Session Interface
 	void setSessionControl(SessionControl* control) override;
+	void setUiControl(IUiController* control) override;
 	void onOutgoingCallResult(Json::Value data) override;
 	void onIncomingCall(Json::Value data) override;
 	void onIncomingCallResult(Json::Value data) override;

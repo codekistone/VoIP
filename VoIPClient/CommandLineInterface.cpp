@@ -54,7 +54,7 @@ void CommandLineInterface::startCli(AccountManager* accountManager, CallsManager
 	std::string num;
 	std::string id, email, pw, name, pwdAnswer, pwdQuestion, newpw;
 	std::string inputID, inputPW, input;
-	std::list<AccountManager::ContactData> list;
+	std::list<ContactData> list;
 
 	while (true) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
