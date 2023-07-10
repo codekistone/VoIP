@@ -1,0 +1,15 @@
+{
+    "msgId":304, 
+    "payload" : 
+        {
+            "rid" : "C_00000010",
+            "result" : 1,
+            "videoCodec": "string",
+            "audioCodec": "string",
+            "encryption_alg": "string",
+            "encryption_key": "string",
+
+            
+            "__result" : "1:success, 2:fail"
+        }
+}

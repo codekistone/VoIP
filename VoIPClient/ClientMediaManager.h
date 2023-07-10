@@ -10,7 +10,7 @@ class ClientMediaManager
 private:
 	static ClientMediaManager* instance;
 
-	ISessionMediaCallback* sessionCallback; //추가
+	ISessionMediaCallback* sessionCallback_; //추가
 
 	ClientMediaManager();
 public:

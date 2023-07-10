@@ -5,7 +5,7 @@ namespace media {
 ClientMediaManager* ClientMediaManager::instance = nullptr;
 
 ClientMediaManager::ClientMediaManager() {
-	sessionCallback = nullptr; // 추가
+	sessionCallback_ = nullptr; // 추가
 }
 
 ClientMediaManager* ClientMediaManager::getInstance() {
@@ -17,13 +17,13 @@ ClientMediaManager* ClientMediaManager::getInstance() {
 
 // 추가
 void ClientMediaManager::setSessionCallback(ISessionMediaCallback* callback) {
-	sessionCallback = callback;
+	sessionCallback_ = callback;
 }
 
 // 필요한곳
 void ClientMediaManager::anyfunc() {
 	int quality = 4; // should change 3 -> 4
-	sessionCallback->requestVideoQualityChange(quality); // 호출
+	sessionCallback_->requestVideoQualityChange(quality); // 호출
 }
 
 void ClientMediaManager::setVideoQuality(int quality) {}

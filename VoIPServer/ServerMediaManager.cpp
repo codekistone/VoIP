@@ -5,7 +5,7 @@ namespace media {
 ServerMediaManager* ServerMediaManager::instance = nullptr;
 
 ServerMediaManager::ServerMediaManager() {
-	sessionCallback = nullptr; // 추가
+	sessionCallback_ = nullptr; // 추가
 }
 
 ServerMediaManager* ServerMediaManager::getInstance() {
@@ -17,13 +17,13 @@ ServerMediaManager* ServerMediaManager::getInstance() {
 
 // 추가
 void ServerMediaManager::setSessionCallback(ISessionMediaCallback* callback) {
-	sessionCallback = callback;
+	sessionCallback_ = callback;
 }
 
 // 필요한곳
 void ServerMediaManager::anyfunc() {
 	int quality = 4; // should change 3 -> 4
-	sessionCallback->notifyVideoQualityChanged("rid", quality); // 호출
+	sessionCallback_->notifyVideoQualityChanged("rid", quality); // 호출
 }
 
 void ServerMediaManager::updateClientVideoQuality(Json::Value data) {}

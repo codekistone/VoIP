@@ -13,6 +13,7 @@ AccountManager* AccountManager::instance = nullptr;
 
 AccountManager::AccountManager() {
 	sessionControl = nullptr;
+	uiControl = nullptr;
 }
 
 AccountManager* AccountManager::getInstance() {

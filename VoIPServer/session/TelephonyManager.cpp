@@ -81,7 +81,7 @@ void TelephonyManager::onAnswer(Json::Value data) {
 			clientMedia["cid"] = from;
 			clientMedia["clientIp"] = contactDb->get(participant, "ipAddress");
 			clientMedia["name"] = contactDb->get(participant, "name");
-			sessionControl->sendData(303, payload, from);
+			sessionControl->sendData(304, payload, from);
 			ServerMediaManager::getInstance()->addClient(clientMedia);
 			continue;
 		}
@@ -89,7 +89,7 @@ void TelephonyManager::onAnswer(Json::Value data) {
 		clientMedia["cid"] = participant;
 		clientMedia["clientIp"] = contactDb->get( participant, "ipAddress" );
 		clientMedia["name"] = contactDb->get(participant, "name");
-		sessionControl->sendData(301, payload, participant);
+		sessionControl->sendData(302, payload, participant);
 		ServerMediaManager::getInstance()->addClient(clientMedia);
 	}
 }
@@ -116,11 +116,11 @@ void TelephonyManager::onReject(Json::Value data) {
 	for (const auto& participant : participants) {
 		if (participant == from) {
 			if (cause == 1) { /* reject */
-				sessionControl->sendData(303, payload, from);
+				sessionControl->sendData(304, payload, from);
 			}
 			continue;
 		}
-		sessionControl->sendData(301, payload, participant);
+		sessionControl->sendData(302, payload, participant);
 	}
 	connectionMap.erase(connId);
 
@@ -228,7 +228,8 @@ void TelephonyManager::handleOutgoingCall(Json::Value data) {
 	payload["rid"] = connId;
 	payload["cid"] = from;
 
-	sessionControl->sendData(302, payload, to);
+	sessionControl->sendData(301, payload, from);
+	sessionControl->sendData(303, payload, to);
 
 	std::cout << "handleOutgoingCall()/from[" << from << "]/to[" << to << "]/connId[" << connId << "]" << endl;
 	logConnections();
@@ -244,7 +245,7 @@ void TelephonyManager::handleOutgoingCallNoUser(Json::Value data) {
 	payload["cause"] = 3;
 	payload["cause_detail"] = "UNREACHABLE";
 
-	sessionControl->sendData(301, payload, from);
+	sessionControl->sendData(302, payload, from);
 
 	std::cout << "handleOutgoingCallNoUser()/from[" << from << "]/to[" << to << "]" << endl;
 	logConnections();

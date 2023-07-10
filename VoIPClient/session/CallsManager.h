@@ -37,10 +37,12 @@ public:
 	// Session Interface
 	void setSessionControl(SessionControl* control) override;
 	void setUiControl(IUiController* control) override;
+	void releaseCall() override;
+	void onOutgoingCall(Json::Value data) override;
 	void onOutgoingCallResult(Json::Value data) override;
 	void onIncomingCall(Json::Value data) override;
 	void onIncomingCallResult(Json::Value data) override;
-	void onDisconnected(Json::Value data) override;
+	void onDisconnected() override;
 	void onJoinConferenceResult(Json::Value data) override;
 	void onExitConference(Json::Value data) override;
 	void onVideoQualityChanged(Json::Value data) override;

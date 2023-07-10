@@ -91,11 +91,12 @@ void SessionManager::proc_recv() {
 		SSIZE_T bytesRead = recv(clientSocket, buf, PACKET_SIZE, 0);
 		if (bytesRead == -1) {
 			std::cerr << "Failed to receive response." << std::endl;
-			//TODO FIX
+			callsManager->releaseCall();
 			break;
 		}
 		if (bytesRead == 0) {
 			std::cout << "Disconnected to server." << std::endl;
+			callsManager->releaseCall();
 			break;
 		}
 
@@ -144,25 +145,29 @@ void SessionManager::proc_recv() {
 				msgStr = "EXIT_CONFERENCE";
 				callsManager->onExitConference(payloads);
 				break;
-			case 301: // 301 : OUTGOING_CALL_RESULT
+			case 301: // 301 : OUTGOING_CALL
+				msgStr = "OUTGOING_CALL";
+				callsManager->onOutgoingCall(payloads);
+				break;
+			case 302: // 302 : OUTGOING_CALL_RESULT
 				msgStr = "OUTGOING_CALL_RESULT";
 				payloads["serverIp"] = serverIP;
 				payloads["myIp"] = myIpAddr;
 				callsManager->onOutgoingCallResult(payloads);
 				break;
-			case 302: // 302 : INCOMING_CALL
+			case 303: // 303 : INCOMING_CALL
 				msgStr = "INCOMING_CALL";
 				payloads["serverIp"] = serverIP;
 				callsManager->onIncomingCall(payloads);
 				break;
-			case 303: // 303 : INCOMING_CALL_RESULT
+			case 304: // 304 : INCOMING_CALL_RESULT
 				msgStr = "INCOMING_CALL_RESULT";
 				payloads["myIp"] = myIpAddr;
 				callsManager->onIncomingCallResult(payloads);
 				break;
 			case 305: // 305 : DISCONNECT_CALL
 				msgStr = "DISCONNECT_CALL";
-				callsManager->onDisconnected(payloads);
+				callsManager->onDisconnected();
 				break;
 			case 402: // 402 : 
 				msgStr = "NOTIFY_VIDEO_QUALITY";
@@ -182,7 +187,8 @@ void SessionManager::openSocket() {
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa)) {
 		accountManager->handleConnect(1); // Connection failed
-		std::cout << "WSA error";
+		callsManager->releaseCall();
+		std::cout << std::endl << "WSA error";
 		WSACleanup();
 		return;
 	}
@@ -190,8 +196,8 @@ void SessionManager::openSocket() {
 	clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket == INVALID_SOCKET) {
 		accountManager->handleConnect(1); // Connection failed
-		std::cout << std::endl;
-		std::cout << "socket error";
+		callsManager->releaseCall();
+		std::cout << std::endl << "socket error";
 		closesocket(clientSocket);
 		WSACleanup();
 		return;

@@ -238,7 +238,7 @@ void SessionManager::HandleClient(int clientSocket) {
 					telephonyManager->handleOutgoingCall(payloads);
 					break;
 				}
-			case 302: // 302 : INCOMING_CALL_RESPONSE
+			case 303: // 303 : INCOMING_CALL_RESPONSE
 				msgStr = "INCOMING_CALL_RESPONSE";
 				payloads["from"] = contactId;
 				payloads["myIp"] = myIpAddr;

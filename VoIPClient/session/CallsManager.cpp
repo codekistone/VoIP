@@ -14,6 +14,7 @@ Json::FastWriter fastWriter;
 
 CallsManager::CallsManager() {
 	sessionControl = nullptr;
+	uiControl = nullptr;
 	call = NULL;
 }
 
@@ -81,7 +82,7 @@ void CallsManager::answerCall() {
 	payload["rid"] = call->getCallId();
 	payload["result"] = 1;
 	payload["result_detail"] = "ANSWER";
-	sessionControl->sendData(302, payload);
+	sessionControl->sendData(303, payload);
 }
 
 void CallsManager::rejectCall() {
@@ -103,7 +104,7 @@ void CallsManager::rejectCall() {
 	payload["result_detail"] = "REJECT";
 	payload["cause"] = 1;
 	payload["cause_detail"] = "REJECTED";
-	sessionControl->sendData(302, payload);
+	sessionControl->sendData(303, payload);
 }
 
 void CallsManager::disconnectCall() {
@@ -256,6 +257,10 @@ void CallsManager::setUiControl(IUiController* control)
 	uiControl = control;
 }
 
+void CallsManager::releaseCall() {
+	onDisconnected();
+}
+
 void CallsManager::onIncomingCall(Json::Value data) {
 	if (sessionControl == nullptr) {
 		std::cerr << "Not register sessionControl" << std::endl;
@@ -271,7 +276,7 @@ void CallsManager::onIncomingCall(Json::Value data) {
 		payload["result_detail"] = "REJECT";
 		payload["cause"] = 2;
 		payload["cause_detail"] = "BUSY";
-		sessionControl->sendData(302, payload);
+		sessionControl->sendData(303, payload);
 		return;
 	}
 	if (call != NULL) {
@@ -286,6 +291,17 @@ void CallsManager::onIncomingCall(Json::Value data) {
 	if (uiControl != NULL) {
 		uiControl->notify(MSG_RESPONSE_CALLSTATE, CallState::STATE_RINGING);
 	}
+}
+
+void CallsManager::onOutgoingCall(Json::Value data) {
+	if (call->getCallState() != CallState::STATE_DIALING) {
+		return;
+	}
+
+	std::string connId = data["rid"].asString();
+	call->setCallId(connId);
+
+	std::cout << "onOutgoingCall: " << call->getCallId() << std::endl;
 }
 
 void CallsManager::onOutgoingCallResult(Json::Value data) {
@@ -308,7 +324,11 @@ void CallsManager::onIncomingCallResult(Json::Value data) {
 	}
 }
 
-void CallsManager::onDisconnected(Json::Value data) {
+void CallsManager::onDisconnected() {
+	if (call == NULL) {
+		return;
+	}
+
 	call->setCallState(CallState::STATE_DISCONNECTED);
 	std::cout << "[Received] -> (STATE_DISCONNECTED) onDisconnected" << std::endl;
 
