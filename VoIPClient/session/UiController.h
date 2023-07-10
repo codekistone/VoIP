@@ -17,12 +17,10 @@ private:
 	UiController();
 	static UiController* instance;
 
-	// UI --> ManagersManagers 
 	AccountManager* accountManager;
 	CallsManager* callsManager;
 
-	// Managers --> UI
-	// MainFrame window to send response message
+	// MainFrame window to notify message
 	vector<CWnd*> callbackWnds;
 
 public:	
@@ -32,7 +30,8 @@ public:
 	void postMessage(WPARAM wPram, LPARAM lParam);
 	void startConnection( string serverIp );
 
-	// Interface method
+	//-----------------------------------------
+	// Post Message back to UI
 	void notify(int type, int result) override;
 
 	//-----------------------------------------

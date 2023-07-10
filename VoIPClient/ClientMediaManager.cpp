@@ -1,5 +1,7 @@
 #include "ClientMediaManager.h"
 
+namespace media {
+
 ClientMediaManager* ClientMediaManager::instance = nullptr;
 
 ClientMediaManager::ClientMediaManager() {
@@ -27,3 +29,4 @@ void ClientMediaManager::anyfunc() {
 void ClientMediaManager::setVideoQuality(int quality) {}
 void ClientMediaManager::startCall(Json::Value client_info) {}
 void ClientMediaManager::endCall(Json::Value client_info) {}
+} // namespace media

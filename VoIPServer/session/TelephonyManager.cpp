@@ -6,6 +6,8 @@
 #include "TelephonyManager.h"
 #include "../ServerMediaManager.h"
 
+using namespace media;
+
 TelephonyManager* TelephonyManager::instance = nullptr;
 Json::FastWriter fastWriter;
 int connNum = 0;

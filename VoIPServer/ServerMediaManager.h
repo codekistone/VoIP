@@ -3,12 +3,13 @@
 #include "session/ISessionMediaCallback.h"
 #include "../json/json.h"
 
+namespace media {
 class ServerMediaManager
 {
 private:
 	static ServerMediaManager* instance;
 
-	ISessionMediaCallback* sessionCallback; //Ãß°¡
+	ISessionMediaCallback* sessionCallback_;
 
 	ServerMediaManager();
 public:
@@ -23,3 +24,5 @@ public:
 
 	Json::Value getMediaProperty();
 };
+
+} // namespace media

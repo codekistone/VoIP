@@ -9,7 +9,7 @@
 #define MSG_RESPONSE_REGISTER		1004 // Register 
 #define MSG_RESPONSE_UPDATE_CONTACT	1005 // Update contact, reset password
 #define MSG_RESPONSE_DATA			1006 // Update contacts & conferences
-#define MSG_RESPONSE_CALL			1007 // Call and conference status
+#define MSG_RESPONSE_CALLSTATE		1007 // Call and conference status
 
 class IUiController {
 public:

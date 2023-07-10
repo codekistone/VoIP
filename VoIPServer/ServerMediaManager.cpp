@@ -1,5 +1,7 @@
 #include "ServerMediaManager.h"
 
+namespace media {
+
 ServerMediaManager* ServerMediaManager::instance = nullptr;
 
 ServerMediaManager::ServerMediaManager() {
@@ -37,3 +39,5 @@ Json::Value ServerMediaManager::getMediaProperty() {
 	payload["encryption_key"] = "key";
 	return payload;
 }
+
+} // namespace media

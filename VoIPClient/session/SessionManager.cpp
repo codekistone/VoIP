@@ -7,7 +7,6 @@
 #include "SessionManager.h"
 #include "CallsManager.h"
 #include "AccountManager.h"
-#include "IUiController.h"
 
 SessionManager* SessionManager::instance = nullptr;
 SOCKET clientSocket;
@@ -182,14 +181,15 @@ void SessionManager::proc_recv() {
 void SessionManager::openSocket() {
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa)) {
+		accountManager->handleConnect(1); // Connection failed
 		std::cout << "WSA error";
 		WSACleanup();
-		accountManager->handleConnect(1); // Connection failed
 		return;
 	}
 	getMyIp();
 	clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket == INVALID_SOCKET) {
+		accountManager->handleConnect(1); // Connection failed
 		std::cout << std::endl;
 		std::cout << "socket error";
 		closesocket(clientSocket);
@@ -203,11 +203,11 @@ void SessionManager::openSocket() {
 	inet_pton(AF_INET, serverIP, &(addr.sin_addr.s_addr));
 
 	if (connect(clientSocket, (SOCKADDR*)&addr, sizeof(addr)) == -1) {
+		accountManager->handleConnect(1); // Connection failed
 		std::cout << std::endl;
 		std::cerr << "Failed to connect server." << std::endl;
 		closesocket(clientSocket);
 		WSACleanup();
-		accountManager->handleConnect(1); // Connection failed
 		return;
 	}
 	std::cout << "Connected to server!" << std::endl;

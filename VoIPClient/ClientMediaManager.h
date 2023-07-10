@@ -3,6 +3,8 @@
 #include "session/ISessionMediaCallback.h"
 #include "../json/json.h"
 
+namespace media {
+
 class ClientMediaManager
 {
 private:
@@ -19,3 +21,5 @@ public:
 	void startCall(Json::Value client_info);
 	void endCall(Json::Value client_info);
 };
+
+} // namespace media

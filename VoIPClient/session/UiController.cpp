@@ -52,7 +52,6 @@ void UiController::startConnection( string serverIp )
 
 	// SessionManager init
 	SessionManager::getInstance()->init(ip.c_str(), serverPort);
-
 	// Start CLI
 	CommandLineInterface* cli = CommandLineInterface::getInstance();
 	cli->startCli(accountManager, callsManager);
