@@ -15,6 +15,7 @@ SessionManager::SessionManager() {
 
 	telephonyManager = TelephonyManager::getInstance();
 	accountManager = AccountManager::getInstance();
+	myIpAddr = "";
 }
 
 SessionManager* SessionManager::getInstance() {
@@ -52,22 +53,23 @@ void SessionManager::release() {
 	accountManager->setSessionControl(nullptr);
 }
 
-std::string SessionManager::getMyIp()
+void SessionManager::getMyIp()
 {
-	struct addrinfo* _addrinfo;
-	struct addrinfo* _res;
-	char _address[INET6_ADDRSTRLEN];
-	char szHostName[255];
-	gethostname(szHostName, sizeof(szHostName));
-	getaddrinfo(szHostName, NULL, 0, &_addrinfo);
-	for (_res = _addrinfo; _res != NULL; _res = _res->ai_next) {
-		if (_res->ai_family == AF_INET) {
-			if (NULL != inet_ntop(AF_INET, &((struct sockaddr_in*)_res->ai_addr)->sin_addr, _address, sizeof(_address))) {
-				myIp = _address;
+	if (myIpAddr.length() <= 0) {
+		struct addrinfo* _addrinfo;
+		struct addrinfo* _res;
+		char _address[INET6_ADDRSTRLEN];
+		char szHostName[255];
+		gethostname(szHostName, sizeof(szHostName));
+		getaddrinfo(szHostName, NULL, 0, &_addrinfo);
+		for (_res = _addrinfo; _res != NULL; _res = _res->ai_next) {
+			if (_res->ai_family == AF_INET) {
+				if (NULL != inet_ntop(AF_INET, &((struct sockaddr_in*)_res->ai_addr)->sin_addr, _address, sizeof(_address))) {
+					myIpAddr = _address;
+				}
 			}
 		}
 	}
-	return myIp;
 }
 
 void SessionManager::openSocket() {
@@ -76,7 +78,7 @@ void SessionManager::openSocket() {
 		std::cerr << "Failed to initialize Winsock." << std::endl;
 		return;
 	}
-
+	getMyIp();
 	serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (serverSocket == -1) {
 		std::cerr << "Failed to create socket." << std::endl;
@@ -99,6 +101,8 @@ void SessionManager::openSocket() {
 	if (listen(serverSocket, MAX_CLIENTS) == -1) {
 		std::cerr << "Failed to listen." << std::endl;
 	}
+
+	telephonyManager->initializeConference(myIpAddr);
 
 	std::cout << "Waiting for client..." << std::endl;
 	while (isRunning) {
@@ -208,7 +212,7 @@ void SessionManager::HandleClient(int clientSocket) {
 				break;
 			case 206: // 206 : CREATE_CONFERENCE
 				msgStr = "CREATE_CONFERENCE";
-				payloads["myIp"] = myIp;
+				payloads["myIp"] = myIpAddr;
 				telephonyManager->handleCreateConference(payloads);
 				accountManager->handleCreateConference(payloads, contactId);
 				break;
@@ -237,7 +241,7 @@ void SessionManager::HandleClient(int clientSocket) {
 			case 302: // 302 : INCOMING_CALL_RESPONSE
 				msgStr = "INCOMING_CALL_RESPONSE";
 				payloads["from"] = contactId;
-				payloads["myIp"] = myIp;
+				payloads["myIp"] = myIpAddr;
 				telephonyManager->handleIncomingCallResponse(payloads);
 				break;
 			case 305: // 305 : DISCONNECT_CALL

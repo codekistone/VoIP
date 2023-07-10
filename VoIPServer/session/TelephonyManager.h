@@ -27,10 +27,10 @@ public:
 	static void releaseInstance();
 
 	void release();
-	void initializeConnections();
 	string generateConnectionId();
 	void onAnswer(Json::Value data);
 	void onReject(Json::Value data);
+	void postConferenceCreated(std::string connId, std::string myIp);
 	int joinableConference(Json::Value data);
 	void removeConference(std::string connId);
 	void manageConferenceLifetime(std::string connId);
@@ -38,6 +38,7 @@ public:
 
 	// Listener
 	void setSessionControl(SessionControl* control) override;
+	void initializeConference(std::string myIp) override;
 	void handleOutgoingCall(Json::Value data) override;
 	void handleOutgoingCallNoUser(Json::Value data) override;
 	void handleIncomingCallResponse(Json::Value data) override;

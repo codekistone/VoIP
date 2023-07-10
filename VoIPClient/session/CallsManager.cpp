@@ -7,8 +7,6 @@
 
 #include "../ClientMediaManager.h";
 
-using namespace media;
-
 CallsManager* CallsManager::instance = nullptr;
 Json::FastWriter fastWriter;
 

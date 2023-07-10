@@ -17,7 +17,7 @@ private:
 	char serverIP[20];
 	int serverPort;
 
-	std::string myIp;
+	std::string myIpAddr;
 
 	ICallsManager* callsManager;
 	IAccountManager* accountManager;

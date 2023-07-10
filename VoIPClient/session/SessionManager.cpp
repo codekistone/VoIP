@@ -18,7 +18,7 @@ SessionManager::SessionManager() {
 
 	callsManager = CallsManager::getInstance();
 	accountManager = AccountManager::getInstance();
-	myIp = "";
+	myIpAddr = "";
 }
 
 SessionManager* SessionManager::getInstance() {
@@ -63,16 +63,18 @@ void SessionManager::release() {
 
 void SessionManager::getMyIp()
 {
-	struct addrinfo* _addrinfo;
-	struct addrinfo* _res;
-	char _address[INET6_ADDRSTRLEN];
-	char szHostName[255];
-	gethostname(szHostName, sizeof(szHostName));
-	getaddrinfo(szHostName, NULL, 0, &_addrinfo);
-	for (_res = _addrinfo; _res != NULL; _res = _res->ai_next) {
-		if (_res->ai_family == AF_INET) {
-			if (NULL != inet_ntop(AF_INET, &((struct sockaddr_in*)_res->ai_addr)->sin_addr, _address, sizeof(_address))) {
-				myIp = _address;
+	if (myIpAddr.length() <= 0) {
+		struct addrinfo* _addrinfo;
+		struct addrinfo* _res;
+		char _address[INET6_ADDRSTRLEN];
+		char szHostName[255];
+		gethostname(szHostName, sizeof(szHostName));
+		getaddrinfo(szHostName, NULL, 0, &_addrinfo);
+		for (_res = _addrinfo; _res != NULL; _res = _res->ai_next) {
+			if (_res->ai_family == AF_INET) {
+				if (NULL != inet_ntop(AF_INET, &((struct sockaddr_in*)_res->ai_addr)->sin_addr, _address, sizeof(_address))) {
+					myIpAddr = _address;
+				}
 			}
 		}
 	}
@@ -82,7 +84,6 @@ void SessionManager::proc_recv() {
 
 	Json::Value root;
 	Json::Reader reader;
-	getMyIp();
 
 	char buf[PACKET_SIZE];
 	Json::Reader jsonReader;
@@ -137,7 +138,7 @@ void SessionManager::proc_recv() {
 			case 208: // 208 : JOIN_CONFERENCE
 				msgStr = "JOIN_CONFERENCE";
 				payloads["serverIp"] = serverIP;
-				payloads["myIp"] = myIp;
+				payloads["myIp"] = myIpAddr;
 				callsManager->onJoinConferenceResult(payloads);
 				break;
 			case 209: // 209 : EXIT_CONFERENCE
@@ -147,7 +148,7 @@ void SessionManager::proc_recv() {
 			case 301: // 301 : OUTGOING_CALL_RESULT
 				msgStr = "OUTGOING_CALL_RESULT";
 				payloads["serverIp"] = serverIP;
-				payloads["myIp"] = myIp;
+				payloads["myIp"] = myIpAddr;
 				callsManager->onOutgoingCallResult(payloads);
 				break;
 			case 302: // 302 : INCOMING_CALL
@@ -157,7 +158,7 @@ void SessionManager::proc_recv() {
 				break;
 			case 303: // 303 : INCOMING_CALL_RESULT
 				msgStr = "INCOMING_CALL_RESULT";
-				payloads["myIp"] = myIp;
+				payloads["myIp"] = myIpAddr;
 				callsManager->onIncomingCallResult(payloads);
 				break;
 			case 305: // 305 : DISCONNECT_CALL
@@ -186,7 +187,7 @@ void SessionManager::openSocket() {
 		accountManager->handleConnect(1); // Connection failed
 		return;
 	}
-
+	getMyIp();
 	clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket == INVALID_SOCKET) {
 		std::cout << std::endl;

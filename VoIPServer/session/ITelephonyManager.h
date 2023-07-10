@@ -12,6 +12,7 @@ public:
 	virtual void handleDisconnect(Json::Value data) = 0;
 	virtual void releaseConnection(std::string cid) = 0;
 	// conference
+	virtual void initializeConference(std::string myIp) = 0;
 	virtual void handleCreateConference(Json::Value data) = 0;
 	virtual void handleJoinConference(Json::Value data) = 0;
 	virtual void handleExitConference(Json::Value data) = 0;

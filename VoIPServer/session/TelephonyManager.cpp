@@ -37,31 +37,6 @@ void TelephonyManager::release() {
 	conferenceDb = nullptr;
 }
 
-void TelephonyManager::initializeConnections()
-{
-	// Create room from database
-	Json::Value dbConferences = conferenceDb->get();
-	for (Json::Value dbConference : dbConferences) {
-		std::string connId = dbConference["rid"].asString();
-		Connection conn(connId, dbConference);
-		connectionMap.insert({ connId, conn });		
-	}
-	std::cout << "Initial Conference Room Created" << std::endl;
-	logConnections();
-	for (Json::Value dbConference : dbConferences) {
-		std::string connId = dbConference["rid"].asString();
-		std::thread room(&TelephonyManager::manageConferenceLifetime, instance, connId);
-		room.detach();
-
-		Connection conn = connectionMap[connId];
-		Json::Value media;
-		media["rid"] = connId;
-		media["conferenceSize"] = conn.getConferenceList().size();
-		media["myIp"] = sessionControl->getMyIp();
-		ServerMediaManager::getInstance()->startCall(media);
-	}
-}
-
 string TelephonyManager::generateConnectionId()
 {
 	while (true) {
@@ -97,7 +72,6 @@ void TelephonyManager::onAnswer(Json::Value data) {
 
 	Json::Value clientMedia;
 	clientMedia["rid"] = connId;
-
 	Connection conn = connectionMap[connId];
 	std::list<std::string> participants = conn.getParticipants();
 	for (const auto& participant : participants) {
@@ -231,9 +205,6 @@ void TelephonyManager::logConnections()
 // Implement interface
 void TelephonyManager::setSessionControl(SessionControl* control) {
 	sessionControl = control;
-
-	// Create room from database
-	initializeConnections();
 }
 
 void TelephonyManager::handleOutgoingCall(Json::Value data) {
@@ -338,29 +309,44 @@ void TelephonyManager::releaseConnection(std::string cid) {
 	}
 }
 
-void TelephonyManager::handleCreateConference(Json::Value data) {
-	if (sessionControl == nullptr) {
-		std::cerr << "handleCreateConference()/Not register sessionControl" << std::endl;
-		return;
-	}
+void TelephonyManager::initializeConference(std::string myIp)
+{
+	// Create room from database
+	Json::Value dbConferences = conferenceDb->get();
+	for (Json::Value dbConference : dbConferences) {
+		std::string connId = dbConference["rid"].asString();
+		Connection conn(connId, dbConference);
+		connectionMap.insert({ connId, conn });
 
+		postConferenceCreated(connId, myIp);
+	}
+	std::cout << "Initial Conference Room Created" << std::endl;
+	logConnections();
+}
+
+void TelephonyManager::handleCreateConference(Json::Value data) {
 	std::string connId = generateConnectionId();
 	Connection conn(connId, data);
-
 	connectionMap.insert({ connId, conn });
 	conferenceDb->update(connId, data); // Add data
 
+	postConferenceCreated(connId, data["myIp"].asString());
+
+	logConnections();
+}
+
+void TelephonyManager::postConferenceCreated(std::string connId, std::string myIp) {
+	Connection conn = connectionMap[connId];
 	std::thread room(&TelephonyManager::manageConferenceLifetime, instance, connId);
 	room.detach();
 
 	Json::Value media;
-	media["rid"] = connId;
+	media["rid"] = conn.getId();
 	media["conferenceSize"] = conn.getConferenceList().size();
-	media["myIp"] = data["myIp"].asString();
+	media["myIp"] = myIp;
 	ServerMediaManager::getInstance()->startCall(media);
 
 	std::cout << "handleCreateConference()/connId[" << connId << "]" << std::endl;
-	logConnections();
 }
 
 void TelephonyManager::removeConference(std::string connId) {
