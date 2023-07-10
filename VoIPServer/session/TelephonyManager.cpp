@@ -341,7 +341,7 @@ void TelephonyManager::postConferenceCreated(std::string connId, std::string myI
 	room.detach();
 
 	Json::Value media;
-	media["rid"] = conn.getId();
+	media["rid"] = connId;
 	media["conferenceSize"] = conn.getConferenceList().size();
 	media["myIp"] = myIp;
 	ServerMediaManager::getInstance()->startCall(media);
