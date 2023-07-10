@@ -53,12 +53,12 @@ void TelephonyManager::initializeConnections()
 		std::thread room(&TelephonyManager::manageConferenceLifetime, instance, connId);
 		room.detach();
 
-		Connection conn = connectionMap[connId];
+	/*	Connection conn = connectionMap[connId];
 		Json::Value media;
 		media["rid"] = connId;
 		media["conferenceSize"] = conn.getConferenceList().size();
 		media["myIp"] = sessionControl->getMyIp();
-		ServerMediaManager::getInstance()->startCall(media);
+		ServerMediaManager::getInstance()->startCall(media);*/
 	}
 }
 

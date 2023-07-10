@@ -45,6 +45,12 @@ void SessionManager::release() {
 	for (const auto& client : clientMap) {
 		shutdown(client.second, SD_SEND);
 	}
+#if USE_TLS
+	for (const auto& client : clientSSLMap) {
+		SSL_shutdown(client.second);
+		SSL_free(client.second);
+	}
+#endif
 	isRunning = false;
 	closesocket(serverSocket);
 
@@ -77,6 +83,18 @@ void SessionManager::openSocket() {
 		return;
 	}
 
+#if USE_TLS
+	SSL_library_init();
+	ctx = SSL_CTX_new(TLS_server_method());
+	if (SSL_CTX_use_certificate_file(ctx, "D:\\projectcert\\certificate.crt", SSL_FILETYPE_PEM) != 1 ||
+		SSL_CTX_use_PrivateKey_file(ctx, "D:\\projectcert\\private.key", SSL_FILETYPE_PEM) != 1)
+	{
+		std::cerr << "Failed load certification or private key" << std::endl;
+		ERR_print_errors_fp(stderr);
+		WSACleanup();
+		return;
+	}
+#endif
 	serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (serverSocket == -1) {
 		std::cerr << "Failed to create socket." << std::endl;
@@ -110,8 +128,52 @@ void SessionManager::openSocket() {
 			continue;
 		}
 
+#if USE_TLS
+		SSL* ssl = SSL_new(ctx);
+		SSL_set_fd(ssl, clientSocket);
+
+		if (SSL_accept(ssl) <= 0)
+		{
+			std::cerr << "TLS failed: ";
+			int ret = 0;
+			int errCode = SSL_get_error(ssl, ret);
+			switch (errCode)
+			{
+			case SSL_ERROR_ZERO_RETURN:
+				std::cerr << "Connection closed by peer." << std::endl;
+				break;
+
+			case SSL_ERROR_WANT_READ:
+				std::cerr << "WANT_READ." << std::endl;
+				break;
+
+			case SSL_ERROR_WANT_WRITE:
+				std::cerr << "WANT_WRITE." << std::endl;
+				break;
+
+			case SSL_ERROR_SYSCALL:
+				std::cerr << "System call error." << std::endl;
+				break;
+
+			case SSL_ERROR_SSL:
+				std::cerr << "SSL protocol error." << std::endl;
+				break;
+
+			default:
+				std::cerr << "Unknown error." << std::endl;
+				break;
+			}
+
+			closesocket(clientSocket);
+			SSL_free(ssl);
+			continue;
+		}
+
+		std::thread clientThread(&SessionManager::HandleClient, instance, ssl, clientSocket);
+#else
 		// 클라이언트와의 통신을 별도 스레드로 처리
-		std::thread clientThread(&SessionManager::HandleClient, instance, clientSocket);
+		std::thread clientThread(&SessionManager::HandleClient, instance, nullptr, clientSocket);
+#endif
 		clientThread.detach();
 	}
 
@@ -120,7 +182,7 @@ void SessionManager::openSocket() {
 	WSACleanup();
 }
 
-void SessionManager::HandleClient(int clientSocket) {
+void SessionManager::HandleClient(SSL* ssl, int clientSocket) {
 	// 클라이언트와의 통신 처리
 	// 예: 메시지 송수신, 데이터 처리 등
 
@@ -131,13 +193,20 @@ void SessionManager::HandleClient(int clientSocket) {
 	std::string contactId = GetClientName(clientSocket);
 	clientMap.insert({ contactId, clientSocket });
 	getMyIp();
+#if USE_TLS
+	clientSSLMap.insert({ contactId, ssl });
+#endif
 	char buffer[PACKET_SIZE];
 	Json::Reader jsonReader;
 	while (true) {
 		memset(buffer, 0, sizeof(buffer));
 
 		// 클라이언트로부터 메세지 수신
+#if USE_TLS
+		SSIZE_T bytesRead = SSL_read(ssl, buffer, sizeof(buffer));
+#else
 		SSIZE_T bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+#endif
 		if (bytesRead == -1) {
 			std::cerr << "Failed to receive message" << displayName << std::endl;
 			break;
@@ -172,8 +241,14 @@ void SessionManager::HandleClient(int clientSocket) {
 					if (!cid.empty()) {		
 					    // Replace client map(IP Address:Port) to valid contactId after logged in				
 						clientMap.erase(contactId);
+#if USE_TLS
+						clientSSLMap.erase(contactId);
+#endif
 						contactId = cid;
 						clientMap.insert({ cid, clientSocket });
+#if USE_TLS
+						clientSSLMap.insert({ contactId, ssl });
+#endif
 					}
 				}
 				break;
@@ -182,6 +257,9 @@ void SessionManager::HandleClient(int clientSocket) {
 				if (accountManager->handleLogout(payloads)) {
 					// Erase contactID -> socket map when logged out
 					clientMap.erase(contactId);
+#if USE_TLS
+					clientSSLMap.erase(contactId);
+#endif
 					contactId = GetClientName(clientSocket);
 					clientMap.insert({ contactId, clientSocket });
 				}
@@ -259,7 +337,13 @@ void SessionManager::HandleClient(int clientSocket) {
 	data["cid"] = contactId;
 	accountManager->handleLogout(data);	// Handle logout when connection terminated
 	clientMap.erase(contactId);
+#if USE_TLS
+	clientSSLMap.erase(contactId);
+	SSL_shutdown(ssl);
+	SSL_free(ssl);
+#endif
 	closesocket(clientSocket);
+
 }
 
 std::string SessionManager::GetClientName(int clientSocket)
@@ -281,7 +365,11 @@ std::string SessionManager::GetClientName(int clientSocket)
 }
 
 void SessionManager::sendData(const char* data, std::string to) {
+#if USE_TLS
+	SSL_write(clientSSLMap[to], data, strlen(data));
+#else
 	send(clientMap[to], data, strlen(data), 0);
+#endif
 }
 
 void SessionManager::sendData(int msgId, Json::Value payload, std::string to) {
@@ -291,5 +379,9 @@ void SessionManager::sendData(int msgId, Json::Value payload, std::string to) {
 	root["payload"] = payload;
 	std::string jsonString = fastWriter.write(root);
 	const char* data = jsonString.c_str();
+#if USE_TLS
+	SSL_write(clientSSLMap[to], data, strlen(data));
+#else
 	send(clientMap[to], data, strlen(data), 0);
+#endif
 }
