@@ -27,7 +27,7 @@ void CallsManager::releaseInstance() {
 		instance->setSessionControl(nullptr);
 		delete instance;
 		instance = nullptr;
-		std::cout << "CallsManager::releaseInstance" << std::endl;
+		std::cout << "CallsManager::releaseInstance " << std::endl;
 	}
 }
 
